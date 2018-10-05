@@ -1,0 +1,33 @@
+# This is the main config file for video_file_organizer
+
+# The directory it will search for the videos to sort
+# Example
+# input_dir: "path/to/input/dir"
+input_dir:
+
+# List of directories it will copy the series to
+# Example.
+# output_dirs:
+#   - path/to/dir/1
+series_dirs:
+
+# List of folders to ignore from input_dir
+# Example
+# ignore_folders:
+#   - ".stversions"
+ignore_folders:
+
+# List of files to ignore from input_dir
+# Example
+# ignore_folders:
+#   - "README.md"
+ignore_files:
+
+# Advanced Options
+
+# list of scripts to run before starting.
+# Especially useful if your folders are located on a network drive that you need to mount first
+# Example:
+# before_scripts:
+#   - "path/to/script"
+before_scripts:
