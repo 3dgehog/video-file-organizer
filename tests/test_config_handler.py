@@ -14,9 +14,10 @@ def test_new_folder_confighandler(new_temp_dir):
     tests:
     - Creation of new configs from templates
     - Opening and reading config.yaml"""
-    config_dir = new_temp_dir
+    config_dir = os.path.join(new_temp_dir, CONFIG_DIR)
     with pytest.raises(ValueError):
         ConfigHandler(config_dir=config_dir)
+    assert os.path.exists(config_dir)
 
 
 @pytest.fixture
