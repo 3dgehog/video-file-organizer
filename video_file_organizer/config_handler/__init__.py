@@ -18,7 +18,9 @@ class ConfigHandler:
 
         self._init_config_dir()
         self._config_yaml = self._get_config_yaml()
+        self._check_required_fields()
         self._run_before_scripts()
+        self.input_dir = self._get_input_dir()
         self.series_dirs = self._get_series_dirs()
         self.ignore_folders = self._config_yaml["ignore_folders"]
         self.ignore_files = self._config_yaml["ignore_files"]
@@ -47,30 +49,50 @@ class ConfigHandler:
         with open(os.path.join(self.config_dir, "config.yaml"), 'r') as yml:
             return yaml.load(yml)
 
+    def _check_required_fields(self):
+        """Checks that all the required fields are not empty"""
+        required_fields = [
+            "input_dir",
+            "series_dirs"
+        ]
+        for field in required_fields:
+            if not self._config_yaml[field]:
+                raise ValueError(
+                    "Value for '{}' empty on config.yaml".format(field))
+
     def _run_before_scripts(self):
         """Run all before_scripts in config.yaml"""
+        # Checks if there are scripts to run
         if not self._config_yaml['before_scripts']:
             logging.debug("no before scripts to run")
             return
+        # Run scripts
         for script in self._config_yaml['before_scripts']:
             logging.debug("running before script '{}'".format(script))
             subprocess.check_output([script], shell=True)
             logging.debug("script ran")
 
+    def _get_input_dir(self) -> str:
+        """Returns the input_dir path from the config.yaml"""
+        # Checks that the directory exists
+        if not os.path.exists(self._config_yaml["input_dir"]):
+            raise FileNotFoundError("{} doesn't exists".format(
+                self._config_yaml["input_dir"]))
+
+        logging.debug("got input dir {}".format(
+            self._config_yaml["input_dir"]))
+        return self._config_yaml["input_dir"]
+
     def _get_series_dirs(self) -> list:
         """Returns list of all directories from config.yaml 'series_dirs'"""
         dirs: list = []
-        if not self._config_yaml["series_dirs"]:
-            raise ValueError(
-                "You need to set at least one series_dirs in config.yaml")
         for dir_list in self._config_yaml["series_dirs"]:
-            if not dir_list:
-                raise ValueError(
-                    "Couldn't find series directories from config.yaml")
+            # Checks that the directory exists
             if not os.path.exists(dir_list):
-                raise ValueError(
+                raise FileNotFoundError(
                     "Series Directory '{}' doesn't exists".format(dirs))
             dirs.append(dir_list)
+
         logging.debug("got series dirs '{}'".format(dirs))
         return dirs
 

@@ -6,7 +6,7 @@ import shutil
 
 
 @pytest.fixture
-def new_temp_dir(scope="module"):
+def tmp_dir():
     """Creates a temp folder which is deleted after used"""
     tmpdir = tempfile.mkdtemp()
     yield tmpdir
