@@ -1,9 +1,8 @@
 # import logging
-import queue
 import argparse
 
-from video_file_organizer.config_handler import ConfigHandler
-from video_file_organizer.searcher import searcher
+from video_file_organizer.configs.config_handler import ConfigHandler
+# from video_file_organizer.scanners import scan_input_dir, scan_series_dirs
 
 
 def main():
@@ -15,11 +14,9 @@ def main():
     config = ConfigHandler()
     config.args = args
 
-    # Queues
-    # match_queue = queue.Queue()
-    search_queue = queue.Queue()
-
-    searcher(config, search_queue)
+    # Scanner results
+    # fse_queue = scan_input_dir(config)
+    # series_index = scan_series_dirs(config)
 
 
 if __name__ == "__main__":

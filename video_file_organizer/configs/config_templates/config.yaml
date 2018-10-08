@@ -13,17 +13,11 @@ input_dir:
 #   - path/to/dir/1
 series_dirs:
 
-# List of folders to ignore from input_dir
+# List of files and folders to ignore from input_dir
 # Example
-# ignore_folders:
+# ignore:
 #   - ".stversions"
-ignore_folders:
-
-# List of files to ignore from input_dir
-# Example
-# ignore_folders:
-#   - "README.md"
-ignore_files:
+ignore:
 
 # Advanced Options
 

@@ -3,9 +3,11 @@ import shutil
 import subprocess
 import logging
 import yaml
+import re
+from typing import Pattern
 
-CONFIG_DIR = os.path.join(os.environ['HOME'], '.config/video_file_organizer/')
-CONFIG_TEMPLATES = os.path.join(os.path.dirname(__file__), 'config_templates')
+from video_file_organizer.configs.config \
+    import CONFIG_DIR, CONFIG_TEMPLATES, VIDEO_EXTENSIONS
 
 
 class ConfigHandler:
@@ -22,8 +24,8 @@ class ConfigHandler:
         self._run_before_scripts()
         self.input_dir = self._get_input_dir()
         self.series_dirs = self._get_series_dirs()
-        self.ignore_folders = self._config_yaml["ignore_folders"]
-        self.ignore_files = self._config_yaml["ignore_files"]
+        self.ignore = self._config_yaml["ignore"]
+        self.re_file_ext_pattern = self._compile_video_file_ext_pattern()
         self._rule_book_yaml = self._get_rule_book_yaml()
 
     def _init_config_dir(self):
@@ -95,6 +97,15 @@ class ConfigHandler:
 
         logging.debug("got series dirs '{}'".format(dirs))
         return dirs
+
+    def _compile_video_file_ext_pattern(self) -> Pattern[str]:
+        """returns re.compile('^.*(\.mkv|\.mp4)$', re.IGNORECASE)"""
+        extensions = VIDEO_EXTENSIONS
+        output = '^.*('
+        for extension in extensions:
+            output = output + '\.' + extension + '|'
+        output = output[:-1] + ")$"
+        return re.compile("{}".format(output), re.IGNORECASE)
 
     def _get_rule_book_yaml(self):
         """Returns rule_book.yaml file"""
