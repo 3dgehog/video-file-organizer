@@ -3,7 +3,12 @@ class EventHandler:
         self.app = app
         self.event_before_match = Event()
         self.event_after_match = Event()
-        self.event_before_match = Event()
+        self.event_before_transfer = Event()
+        self.event_list = {
+            "before_match": self.event_before_match.add_listener,
+            "after_match": self.event_after_match.add_listener,
+            "before_transfer": self.event_before_transfer.add_listener
+        }
 
     def before_match(self, *args, **kwargs):
         self.event_before_match.notify(args, kwargs)

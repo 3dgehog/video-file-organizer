@@ -1,6 +1,7 @@
 import yaml
 import os
 import difflib
+import importlib
 from typing import Union
 
 VALID_CATEGORIES = ['Series']
@@ -14,6 +15,7 @@ class RuleBookHandler:
         self.rule_book_dict = self._get_rule_book_yaml()
         self._check_rule_book()
         self._validate_rules()
+        self._set_event_listeners()
 
     def _get_rule_book_yaml(self):
         """Returns rule_book.yaml file"""
@@ -48,3 +50,12 @@ class RuleBookHandler:
                                 "Rule '{}' is not valid in 'Series' category ",
                                 "from series titled '{}'".format(
                                     category, series_title))
+
+    def _set_event_listeners(self):
+        # Add event listeners for the series category
+        series = importlib.import_module('video_file_organizer.rules.series')
+        for rule in [x for x in dir(series) if 'rule_' in x]:
+            func = getattr(series, rule)
+            for event, listener in self.app.event.event_list.items():
+                if event in func.event:
+                    listener(func)
