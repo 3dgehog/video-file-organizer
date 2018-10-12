@@ -2,8 +2,8 @@ import pytest
 import os
 import subprocess
 
-from video_file_organizer.configs.config_handler import ConfigHandler
-from tests.fixtures.setup_config import CONFIG_DIR
+from video_file_organizer.configs import ConfigHandler
+from tests.fixtures.setup import CONFIG_DIR
 
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
@@ -22,10 +22,10 @@ def test_empty_config_folder(tmp_dir):
     assert os.path.exists(config_dir)
 
 
-def test_none_existing_series_and_input_dirs(tmp_config_editor, tmp_dir):
+def test_none_existing_series_and_input_dirs(tmp_config_editors, tmp_dir):
     """Test ValueError on missing series_dirs in config.yaml"""
-    editor, config_dir = tmp_config_editor
-    editor({
+    config_editor, _, config_dir = tmp_config_editors
+    config_editor({
         "series_dirs": [os.path.join(config_dir, "series_dirs")],
         "input_dir": os.path.join(tmp_dir, "input_dir")
     })
@@ -34,12 +34,12 @@ def test_none_existing_series_and_input_dirs(tmp_config_editor, tmp_dir):
         ConfigHandler(config_dir=config_dir)
 
 
-def test_failing_before_script(tmp_config_editor, tmp_dir):
+def test_failing_before_script(tmp_config_editors, tmp_dir):
     """Test if there is a fail before script"""
-    editor, config_dir = tmp_config_editor
+    config_editor, _, config_dir = tmp_config_editors
     os.mkdir(os.path.join(tmp_dir, "series_dirs"))
     os.mkdir(os.path.join(tmp_dir, "input_dir"))
-    editor({
+    config_editor({
         "series_dirs": [os.path.join(tmp_dir, "series_dirs")],
         "input_dir": os.path.join(tmp_dir, "input_dir"),
         "before_scripts": [os.path.join(ASSETS_DIR, "fail_script.sh")]
@@ -47,3 +47,20 @@ def test_failing_before_script(tmp_config_editor, tmp_dir):
     # CalledProcessError because the script failed
     with pytest.raises(subprocess.CalledProcessError):
         ConfigHandler(config_dir=config_dir)
+
+
+def test_creating_confighandler(tmp_config_editors, tmp_dir):
+    """Test creating config handler entirely"""
+    config_editor, rule_editor, config_dir = tmp_config_editors
+    os.mkdir(os.path.join(tmp_dir, "series_dirs"))
+    os.mkdir(os.path.join(tmp_dir, "input_dir"))
+    config_editor({
+        "series_dirs": [os.path.join(tmp_dir, "series_dirs")],
+        "input_dir": os.path.join(tmp_dir, "input_dir")
+    })
+    rule_editor({
+        "Series": {
+            "The Big Bang Theory": {}
+        }
+    })
+    ConfigHandler(config_dir=config_dir)

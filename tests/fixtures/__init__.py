@@ -1,2 +1,2 @@
-from tests.fixtures.setup_config import *
-from tests.fixtures.setup_dirs import *
+from tests.fixtures.setup_config import *  # noqa
+from tests.fixtures.setup import *  # noqa

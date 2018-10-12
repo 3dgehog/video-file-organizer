@@ -1,0 +1,17 @@
+#### Series
+### Series Options
+## type
+# season -> Sorts the file into its Season ## folder
+# parent-dir -> Sets the transfer_to the parent directory
+# sub-dir -> Sets the transfer_to to the value of option sub-dir
+## sub-dir (parameter for type: sub-dir)
+# <NameOfFolder>
+#
+#
+### Series Format
+# Series:
+#   <SeriesName>:
+#     - type: season / parent-dir / sub-dir
+#     - sub-dir: <FolderName>
+
+Series:
