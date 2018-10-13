@@ -13,10 +13,11 @@ from video_file_organizer.configs.config \
 class ConfigHandler:
     """Config Handler for the entire program"""
 
-    def __init__(
-            self, config_dir: str, config_templates=CONFIG_TEMPLATES) -> None:
-        self.config_dir = config_dir
-        self.config_templates = config_templates
+    def __init__(self, app) -> None:
+        app._requirements(['config_dir'])
+        self.app = app
+        self.config_dir = app.config_dir
+        self.config_templates = CONFIG_TEMPLATES
 
         self._init_config_dir()
         self._config_yaml = self._get_config_yaml()
@@ -26,6 +27,8 @@ class ConfigHandler:
         self.series_dirs = self._get_series_dirs()
         self.ignore = self._config_yaml["ignore"]
         self.re_file_ext_pattern = self._compile_video_file_ext_pattern()
+
+        self.args = None
 
     def _init_config_dir(self):
         """Checks if ~/.config/video_file_organizer directory exists.
