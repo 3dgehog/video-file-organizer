@@ -7,18 +7,38 @@ import zipfile
 
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "../assets")
 
-
-class App:
-    def _requirements(self, requirements: list):
-        for require in requirements:
-            if require not in dir(self):
-                raise AttributeError(
-                    "Missing attributes {} in app".format(require))
+SERIES_CONFIGPARSE = {
+    "Boruto": 'parent-dir',
+    "Gintama": 'parent-dir',
+    "Mahoutsukai no Yome": 'parent-dir',
+    "One Piece": 'parent-dir',
+    "American Dad": 'season',
+    "Arrow": 'season',
+    "Brooklyn Nine Nine": 'season',
+    "Fresh off the Boat": 'season',
+    "Homeland": 'season',
+    "Lucifer": 'season',
+    "Marvels Agents of S.H.I.E.L.D": 'season',
+    "Supernatural": 'season',
+    "The Big Bang Theory": 'season',
+    "The Flash": 'season',
+    "Vikings": 'season',
+    "That 70s Show": 'season'
+}
 
 
 @pytest.fixture
 def tmp_dir():
     """Creates a temp folder which is deleted after used"""
+    tmpdir = tempfile.mkdtemp()
+    yield tmpdir
+    shutil.rmtree(tmpdir)
+
+
+@pytest.fixture
+def tmp_config_dir():
+    """Creates a temp folder which is deleted after used... used specifically
+    for config_dir"""
     tmpdir = tempfile.mkdtemp()
     yield tmpdir
     shutil.rmtree(tmpdir)

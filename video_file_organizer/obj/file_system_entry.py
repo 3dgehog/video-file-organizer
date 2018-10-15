@@ -11,6 +11,7 @@ class FileSystemEntry:
     """
 
     def __init__(self, app, item: str) -> None:
+        app._requirements(['config', 'rule_book'])
         self.app = app
         self.config = app.config
         self.name = item

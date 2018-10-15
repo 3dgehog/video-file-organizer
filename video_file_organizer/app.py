@@ -12,8 +12,10 @@ CONFIG_DIR = os.path.join(os.environ['HOME'], '.config/video_file_organizer/')
 class App:
     def __init__(self, config_dir=CONFIG_DIR, args=None) -> None:
         self.config_dir = config_dir
+        self.args = args
+
+    def setup(self):
         self.config = ConfigHandler(self)
-        self.config.args = args
         self.event = EventHandler(self)
         self.rule_book = RuleBookHandler(self)
 

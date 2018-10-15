@@ -10,6 +10,7 @@ from video_file_organizer.obj.dir_index \
 
 def scan_input_dir(app) -> queue.Queue:
     """Returns a Queue with all the FSE"""
+    app._requirements(['config'])
 
     fse_queue: queue.Queue = queue.Queue()
 
@@ -36,4 +37,5 @@ def scan_input_dir(app) -> queue.Queue:
 def scan_series_dirs(app) -> DirIndex:
         """Returns a dir_index object for all the series_dirs from the
         configs"""
+        app._requirements(['config'])
         return DirIndex(app.config.series_dirs)

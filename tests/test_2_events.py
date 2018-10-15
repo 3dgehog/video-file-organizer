@@ -1,4 +1,4 @@
-from tests.fixtures.setup_assets import App
+from video_file_organizer.app import App
 
 from video_file_organizer.events import EventHandler
 

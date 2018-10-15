@@ -7,6 +7,7 @@ from video_file_organizer.obj.file_system_entry \
 
 
 def matcher(app) -> queue.Queue:
+    app._requirements(['scan_queue', 'event', 'series_index'])
 
     logging.debug("Running Matcher")
     match_queue: queue.Queue = queue.Queue()

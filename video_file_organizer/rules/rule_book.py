@@ -20,7 +20,7 @@ class RuleBookHandler:
     def _get_rule_book(self):
         """Returns configparser object for rule_book.ini"""
         config = configparser.ConfigParser(allow_no_value=True)
-        config.read(os.path.join(self.config_dir + 'rule_book.ini'))
+        config.read(os.path.join(self.config_dir, 'rule_book.ini'))
         return config
 
     def _check_rule_book(self):
