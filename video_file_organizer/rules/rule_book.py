@@ -46,7 +46,7 @@ class RuleBookHandler:
 
     def _validate_series_rules_values(self, rules: list):
         """Checks if all the rules from a specific entry has all valid options,
-        doesn't have invalid pairs and that rules with secondary values are 
+        doesn't have invalid pairs and that rules with secondary values are
         valid"""
         VALID_OPTIONS = ['season', 'parent-dir', 'sub-dir']
         INVALID_PAIRS = [['season', 'parent-dir', 'sub-dir']]
@@ -65,13 +65,23 @@ class RuleBookHandler:
                 raise KeyError("Invalid pair {}".format(found))
 
     def _set_event_listeners(self):
-        # Add event listeners for the series category
+        """ Add event listeners for the series category in order"""
         series = importlib.import_module('video_file_organizer.rules.series')
+        # Loops thru a list of all functions that start with 'rule_'
         for rule in [x for x in dir(series) if 'rule_' in x]:
-            func = getattr(series, rule)
-            for event, listener in self.app.event.event_list.items():
-                if event in func.event:
-                    listener(func)
+            # Gets the function using getattr()
+            rule_func = getattr(series, rule)
+            # Loops thru all the events and their listeners
+            for event, listener in self.app.event.event_listeners_list.items():
+                rule_list: list = []
+                # Loops thru all the events the rule_func has
+                for set_event, set_order in rule_func.events:
+                    if set_event == event:
+                        rule_list.append((set_event, set_order))
+                # Sorts by the order from the function attr
+                rule_list.sort(key=lambda x: x[1])
+                for set_event, set_order in rule_list:
+                    listener(rule_func)
 
     def get_series_rules_by_title(self, title: str) -> list:
         rules: list = []

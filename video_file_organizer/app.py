@@ -16,6 +16,7 @@ class App:
 
     def setup(self):
         self.config = ConfigHandler(self)
+        self.config.args = self.args
         self.event = EventHandler(self)
         self.rule_book = RuleBookHandler(self)
 

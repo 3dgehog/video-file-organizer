@@ -1,10 +1,13 @@
+VALID_EVENT = ['before_match', 'after_match', 'before_transfer']
+
+
 class EventHandler:
     def __init__(self, app):
         self.app = app
         self.event_before_match = Event()
         self.event_after_match = Event()
         self.event_before_transfer = Event()
-        self.event_list = {
+        self.event_listeners_list = {
             "before_match": self.event_before_match.add_listener,
             "after_match": self.event_after_match.add_listener,
             "before_transfer": self.event_before_transfer.add_listener
