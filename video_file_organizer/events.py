@@ -1,8 +1,14 @@
+import logging
+
+
 VALID_EVENT = ['before_match', 'after_match', 'before_transfer']
+
+logger = logging.getLogger('app.events')
 
 
 class EventHandler:
     def __init__(self, app):
+        logger.debug("Initializing EventHandler")
         self.app = app
         self.event_before_match = Event()
         self.event_after_match = Event()

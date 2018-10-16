@@ -9,11 +9,14 @@ from typing import Pattern
 from video_file_organizer.configs.config \
     import CONFIG_TEMPLATES, VIDEO_EXTENSIONS
 
+logger = logging.getLogger('app.config')
+
 
 class ConfigHandler:
     """Config Handler for the entire program"""
 
     def __init__(self, app) -> None:
+        logger.debug("Initializing ConfigHandler")
         app._requirements(['config_dir'])
         self.app = app
         self.config_dir = app.config_dir
@@ -35,13 +38,13 @@ class ConfigHandler:
         If it doesn't it creates the directory and adds template config
         files inside"""
         if not os.path.exists(self.config_dir):
-            logging.debug(
+            logger.debug(
                 "Config folder doesn't exists, therefore its created")
             os.makedirs(self.config_dir)
 
         for file in os.listdir(self.config_templates):
             if not os.path.exists(os.path.join(self.config_dir, file)):
-                logging.debug(
+                logger.debug(
                     "File '{}' wasn't in config directory \
                     therefore it was created".format(file))
                 shutil.copyfile(
@@ -63,18 +66,19 @@ class ConfigHandler:
             if not self._config_yaml[field]:
                 raise ValueError(
                     "Value for '{}' empty on config.yaml".format(field))
+        logger.debug("all required fields are entered")
 
     def _run_before_scripts(self):
         """Run all before_scripts in config.yaml"""
         # Checks if there are scripts to run
         if not self._config_yaml['before_scripts']:
-            logging.debug("no before scripts to run")
+            logger.debug("no before scripts to run")
             return
         # Run scripts
         for script in self._config_yaml['before_scripts']:
-            logging.debug("running before script '{}'".format(script))
+            logger.debug("running before script '{}'".format(script))
             subprocess.check_output([script], shell=True)
-            logging.debug("script ran")
+            logger.debug("script ran")
 
     def _get_input_dir(self) -> str:
         """Returns the input_dir path from the config.yaml"""
@@ -83,7 +87,7 @@ class ConfigHandler:
             raise FileNotFoundError("{} doesn't exists".format(
                 self._config_yaml["input_dir"]))
 
-        logging.debug("got input dir {}".format(
+        logger.debug("got input dir {}".format(
             self._config_yaml["input_dir"]))
         return self._config_yaml["input_dir"]
 
@@ -97,7 +101,7 @@ class ConfigHandler:
                     "Series Directory '{}' doesn't exists".format(dirs))
             dirs.append(dir_list)
 
-        logging.debug("got series dirs '{}'".format(dirs))
+        logger.debug("got series dirs '{}'".format(dirs))
         return dirs
 
     def _compile_video_file_ext_pattern(self) -> Pattern[str]:

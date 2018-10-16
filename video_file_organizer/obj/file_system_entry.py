@@ -3,6 +3,8 @@ import os
 import logging
 from typing import Union
 
+logger = logging.getLogger('fse')
+
 
 class FileSystemEntry:
     """
@@ -73,7 +75,7 @@ class FileSystemEntry:
             # keep the better guess from the filename or the foldername
             if len(guessitmatch_foldername) > len(guessitmatch):
                 guessitmatch = guessitmatch_foldername
-                logging.debug(
+                logger.debug(
                     "used foldername instead of filename for guessit match.")
         self.details = guessitmatch
 
@@ -82,10 +84,10 @@ class FileSystemEntry:
             self.title = guessitmatch['title']
             self.type = guessitmatch['type']
         except KeyError:
-            logging.warning(
+            logger.warning(
                 "error trying to find title or type for '{}'".format(
                     self.vfile.filename))
-            logging.debug(
+            logger.debug(
                 "error guessit match dict '{}'".format(self.details))
             self.valid = False
 

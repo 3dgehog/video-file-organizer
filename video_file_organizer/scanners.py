@@ -8,6 +8,9 @@ from video_file_organizer.obj.dir_index \
     import DirIndex
 
 
+logger = logging.getLogger('app.scanner')
+
+
 def scan_input_dir(app) -> queue.Queue:
     """Returns a Queue with all the FSE"""
     app._requirements(['config'])
@@ -19,17 +22,17 @@ def scan_input_dir(app) -> queue.Queue:
         # Ignore config ignore files
         if app.config.ignore:
             if item in app.config.ignore:
-                logging.debug("fse '{}' ignored".format(item))
+                logger.debug("fse '{}' ignored".format(item))
                 continue
 
         fse = FileSystemEntry(app, item)
 
         # Add FSE to queue is its valid
         if fse.valid:
-            logging.debug("fse '{}' added".format(item))
+            logger.debug("fse '{}' added".format(item))
             fse_queue.put(fse)
         else:
-            logging.debug("invalid fse {}".format(fse.name))
+            logger.debug("invalid fse {}".format(fse.name))
 
     return fse_queue
 
