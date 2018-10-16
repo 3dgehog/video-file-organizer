@@ -1,5 +1,7 @@
 import os
 import logging
+import tempfile
+import yg.lockfile
 
 from video_file_organizer.configs import ConfigHandler
 from video_file_organizer.events import EventHandler
@@ -48,10 +50,12 @@ class App:
 
     def run(self):
         logger.debug("running app")
-        self.series_index = scan_series_dirs(self)
-        self.scan_queue = scan_input_dir(self)
-        self.matched_queue = matcher(self)
-        transferer(self)
+        with yg.lockfile.FileLock(
+                os.path.join(tempfile.gettempdir(), 'vfo_lock'), timeout=10):
+            self.series_index = scan_series_dirs(self)
+            self.scan_queue = scan_input_dir(self)
+            self.matched_queue = matcher(self)
+            transferer(self)
 
     def _requirements(self, requirements: list):
         for require in requirements:
