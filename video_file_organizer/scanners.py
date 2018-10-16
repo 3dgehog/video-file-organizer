@@ -14,6 +14,7 @@ logger = logging.getLogger('app.scanner')
 def scan_input_dir(app) -> queue.Queue:
     """Returns a Queue with all the FSE"""
     app._requirements(['config'])
+    logger.debug("scanning input dir")
 
     fse_queue: queue.Queue = queue.Queue()
 
@@ -41,4 +42,5 @@ def scan_series_dirs(app) -> DirIndex:
         """Returns a dir_index object for all the series_dirs from the
         configs"""
         app._requirements(['config'])
+        logger.debug("scanning series dirs")
         return DirIndex(app.config.series_dirs)

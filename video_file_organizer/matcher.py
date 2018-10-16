@@ -6,10 +6,13 @@ from video_file_organizer.obj.file_system_entry \
     import FileSystemEntry
 
 
+logger = logging.getLogger('app.matcher')
+
+
 def matcher(app) -> queue.Queue:
     app._requirements(['scan_queue', 'event', 'series_index'])
 
-    logging.debug("Running Matcher")
+    logger.debug("Running Matcher")
     match_queue: queue.Queue = queue.Queue()
 
     scan_queue = app.scan_queue
@@ -17,7 +20,7 @@ def matcher(app) -> queue.Queue:
     while True:
         # scan_queue is empty, break
         if scan_queue.qsize() == 0:
-            logging.debug("end of fse queue")
+            logger.debug("end of scan queue")
             break
 
         # Get FSE object from scan_queue
@@ -43,19 +46,19 @@ def _match_fse(app, fse: FileSystemEntry) -> None:
         'episode': app.series_index
     }
     index = INDEX.get(fse.type)
-    if index:
-        return index
-    else:
+    if not index:
+        logger.warning("NO INDEX:{}".format(fse.vfile.filename))
         fse.valid = False
         return None
 
     index_match = difflib.get_close_matches(
-        fse.title, index.keys(), n=1, cutoff=0.6)
+        fse.title, index.keys, n=1, cutoff=0.6)
 
     if not index_match:
-        logging.warning("NO MATCH")
+        logger.warning("NO MATCH:{}".format(fse.vfile.filename))
         fse.valid = False
-    else:
-        fse.matched_dir_path = index.dict[index_match[0]].path
-        fse.matched_dir_name = index_match[0]
-        fse.matched_dir_entry = index.dict[index_match[0]]
+        return
+
+    fse.matched_dir_path = index.dict[index_match[0]].path
+    fse.matched_dir_name = index_match[0]
+    fse.matched_dir_entry = index.dict[index_match[0]]

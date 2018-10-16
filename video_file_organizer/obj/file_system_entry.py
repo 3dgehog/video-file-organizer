@@ -80,16 +80,19 @@ class FileSystemEntry:
         self.details = guessitmatch
 
         # Try to set the title from the guessitmatch
+        if 'title' not in guessitmatch:
+            logger.warning("NO TITLE MATCH:{}".format(self.vfile.filename))
+            self.valid = False
+
+        if 'type' not in guessitmatch:
+            logger.warning("NO TYPE MATCH:{}".format(self.vfile.filename))
+            self.valid = False
+
         try:
             self.title = guessitmatch['title']
             self.type = guessitmatch['type']
         except KeyError:
-            logger.warning(
-                "error trying to find title or type for '{}'".format(
-                    self.vfile.filename))
-            logger.debug(
-                "error guessit match dict '{}'".format(self.details))
-            self.valid = False
+            pass
 
     def _get_fse_rules(self) -> Union[dict, None]:
         rules = None
