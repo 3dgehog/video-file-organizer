@@ -11,7 +11,7 @@ SERIES_CONFIGPARSE = {
     "Boruto": 'parent-dir',
     "Gintama": 'parent-dir',
     "Mahoutsukai no Yome": 'parent-dir',
-    "One Piece": 'parent-dir',
+    "One Piece": 'sub-dir "One Piece Episodes"',
     "American Dad": 'season',
     "Arrow": 'season',
     "Brooklyn Nine Nine": 'season',

@@ -16,29 +16,29 @@ class EventHandler:
         self.event_before_match = Event()
         self.event_after_match = Event()
         self.event_before_transfer = Event()
-        self.even_after_transfer = Event()
+        self.event_after_transfer = Event()
         self.event_listeners_list = {
             "before_match": self.event_before_match.add_listener,
             "after_match": self.event_after_match.add_listener,
             "before_transfer": self.event_before_transfer.add_listener,
-            "after_transfer": self.even_after_transfer.add_listener
+            "after_transfer": self.event_after_transfer.add_listener
         }
 
     def before_match(self, *args, **kwargs):
         logger.debug("running before match event")
-        self.event_before_match.notify(args, kwargs)
+        self.event_before_match.notify(*args, **kwargs)
 
     def after_match(self, *args, **kwargs):
         logger.debug("running after match event")
-        self.event_after_match.notify(args, kwargs)
+        self.event_after_match.notify(*args, **kwargs)
 
     def before_transfer(self, *args, **kwargs):
         logger.debug("running before transfer event")
-        self.event_before_transfer.notify(args, kwargs)
+        self.event_before_transfer.notify(*args, **kwargs)
 
     def after_transfer(self, *args, **kwargs):
         logger.debug("running after transfer event")
-        self.event_after_transfer.notify(args, kwargs)
+        self.event_after_transfer.notify(*args, **kwargs)
 
 
 class Event:
@@ -50,4 +50,4 @@ class Event:
 
     def notify(self, *args, **kwargs):
         for func in self._listeners:
-            func(args, kwargs)
+            func(*args, **kwargs)

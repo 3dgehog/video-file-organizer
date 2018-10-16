@@ -4,16 +4,18 @@ import os
 
 from video_file_organizer.obj.file_system_entry import FileSystemEntry
 
-logger = logging.getLogger('transferer')
+logger = logging.getLogger('app.transferer')
 
 
 def transferer(app):
     app._requirements(['matched_queue', 'event'])
+    logger.debug("Running Transferer")
+
     matched_queue = app.matched_queue
 
     while True:
         if matched_queue.qsize() == 0:
-            logger.debug("end of match queue")
+            logger.debug("end of matched queue")
             break
 
         fse = matched_queue.get()
@@ -30,6 +32,8 @@ def transfer_fse(app, fse: FileSystemEntry):
 
 
 def _transfer_fse(app, fse: FileSystemEntry):
+    if not fse.valid:
+        return
     _copy_fse(fse)
     _delete_fse(fse)
 

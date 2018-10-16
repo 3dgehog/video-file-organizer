@@ -39,6 +39,8 @@ class FileSystemEntry:
         self.matched_dir_name = None
         self.matched_dir_entry = None
 
+        self.transfer_to = None
+
     def _scan_fse_files(self):
         """Scans FSE and validates it. If its a valid object, self.valid will
         be set to true"""
