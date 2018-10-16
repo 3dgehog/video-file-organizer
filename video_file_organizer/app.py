@@ -24,7 +24,7 @@ ch = logging.StreamHandler()
 ch.setLevel(logging.WARNING)
 
 formatter = logging.Formatter(
-    '%(asctime)s:%(levelname)s:%(message)s')
+    '%(asctime)s - %(levelname)s:%(message)s')
 fh_debug.setFormatter(formatter)
 fh_warning.setFormatter(formatter)
 ch.setFormatter(formatter)
@@ -40,14 +40,14 @@ class App:
         self.args = args
 
     def setup(self):
-        logger.info("Setting up App")
+        logger.debug("setting up app")
         self.config = ConfigHandler(self)
         self.config.args = self.args
         self.event = EventHandler(self)
         self.rule_book = RuleBookHandler(self)
 
     def run(self):
-        logger.info("Running App")
+        logger.debug("running app")
         self.series_index = scan_series_dirs(self)
         self.scan_queue = scan_input_dir(self)
         self.matched_queue = matcher(self)

@@ -16,7 +16,7 @@ def scan_input_dir(app) -> queue.Queue:
     app._requirements(['config'])
     logger.debug("scanning input dir")
 
-    fse_queue: queue.Queue = queue.Queue()
+    scan_queue: queue.Queue = queue.Queue()
 
     for item in os.listdir(app.config.input_dir):
 
@@ -30,12 +30,12 @@ def scan_input_dir(app) -> queue.Queue:
 
         # Add FSE to queue is its valid
         if fse.valid:
-            logger.debug("fse '{}' added".format(item))
-            fse_queue.put(fse)
+            logger.debug("fse '{}' added to scan_queue".format(item))
+            scan_queue.put(fse)
         else:
             logger.debug("invalid fse {}".format(fse.name))
 
-    return fse_queue
+    return scan_queue
 
 
 def scan_series_dirs(app) -> DirIndex:

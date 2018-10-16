@@ -27,38 +27,45 @@ def matcher(app) -> queue.Queue:
         fse = scan_queue.get()
 
         match_fse(app, fse)
-        if not fse.valid:
+        if not fse.valid or not fse.transfer_to:
             continue
 
+        logger.debug("{} added to match queue".format(fse.vfile.filename))
         match_queue.put(fse)
 
     return match_queue
 
 
-def match_fse(app, fse: FileSystemEntry) -> None:
+def match_fse(app, fse: FileSystemEntry):
     app.event.before_match(fse)
     _match_fse(app, fse)
-    app.event.after_match(fse)
+    if fse.valid:
+        app.event.after_match(fse)
 
 
-def _match_fse(app, fse: FileSystemEntry) -> None:
+def _match_fse(app, fse: FileSystemEntry):
     INDEX = {
         'episode': app.series_index
     }
     index = INDEX.get(fse.type)
     if not index:
-        logger.warning("NO INDEX:{}".format(fse.vfile.filename))
+        logger.warning("FAILED INDEX: " +
+                       "Unable to find index for type {}: ".format(fse.type) +
+                       "{}".format(fse.vfile.filename))
         fse.valid = False
-        return None
+        return
 
     index_match = difflib.get_close_matches(
         fse.title, index.keys, n=1, cutoff=0.6)
 
     if not index_match:
-        logger.warning("NO MATCH:{}".format(fse.vfile.filename))
+        logger.warning("FAILED MATCH: " +
+                       "Unable to find a match: " +
+                       "{}".format(fse.vfile.filename))
         fse.valid = False
         return
 
     fse.matched_dir_path = index.dict[index_match[0]].path
     fse.matched_dir_name = index_match[0]
     fse.matched_dir_entry = index.dict[index_match[0]]
+    logger.debug("match successful for {}".format(fse.vfile.filename))

@@ -6,7 +6,7 @@ VALID_EVENT = [
 ]
 
 logger = logging.getLogger('app.events')
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 
 class EventHandler:
@@ -25,19 +25,15 @@ class EventHandler:
         }
 
     def before_match(self, *args, **kwargs):
-        logger.debug("running before match event")
         self.event_before_match.notify(*args, **kwargs)
 
     def after_match(self, *args, **kwargs):
-        logger.debug("running after match event")
         self.event_after_match.notify(*args, **kwargs)
 
     def before_transfer(self, *args, **kwargs):
-        logger.debug("running before transfer event")
         self.event_before_transfer.notify(*args, **kwargs)
 
     def after_transfer(self, *args, **kwargs):
-        logger.debug("running after transfer event")
         self.event_after_transfer.notify(*args, **kwargs)
 
 

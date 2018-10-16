@@ -8,10 +8,10 @@ import zipfile
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "../assets")
 
 SERIES_CONFIGPARSE = {
-    "Boruto": 'parent-dir',
-    "Gintama": 'parent-dir',
+    "Boruto": 'parent-dir episode-only',
+    "Gintama": 'parent-dir episode-only',
     "Mahoutsukai no Yome": 'parent-dir',
-    "One Piece": 'sub-dir "One Piece Episodes"',
+    "One Piece": 'sub-dir "One Piece Episodes" episode-only',
     "American Dad": 'season',
     "Arrow": 'season',
     "Brooklyn Nine Nine": 'season',

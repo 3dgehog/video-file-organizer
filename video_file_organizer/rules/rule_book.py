@@ -54,7 +54,7 @@ class RuleBookHandler:
         """Checks if all the rules from a specific entry has all valid options,
         doesn't have invalid pairs and that rules with secondary values are
         valid"""
-        VALID_OPTIONS = ['season', 'parent-dir', 'sub-dir']
+        VALID_OPTIONS = ['season', 'parent-dir', 'sub-dir', 'episode-only']
         INVALID_PAIRS = [['season', 'parent-dir', 'sub-dir']]
         RULES_WITH_SECONDARY = ['sub-dir']
         for rule in rules:

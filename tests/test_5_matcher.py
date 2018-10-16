@@ -45,9 +45,42 @@ def test_matcher_warnings(
     app.matched_queue = matcher(app)
 
     # Check if warning for missing Supernatural folder
-    assert 'NO MATCH:Supernatural.S13E15.HDTV.x264-KILLERS.mkv' in caplog.text
+    assert "FAILED MATCH: Unable to find a match: \
+Supernatural.S13E15.HDTV.x264-KILLERS.mkv" \
+        in caplog.text
     # Check if warning for unknown fse.type
-    assert 'NO INDEX:Arrow.S06E10.PROPER.HDTV.x264-CRAVERS.mkv' in caplog.text
+    assert "FAILED INDEX: Unable to find index for type random: \
+Arrow.S06E10.PROPER.HDTV.x264-CRAVERS.mkv" \
+        in caplog.text
+
+
+def test_match_event_rules_warning(tmp_config_dir,
+                                   extract_input_dir,
+                                   extract_series_dirs,
+                                   caplog):
+    app, config_injector, rule_book_injector = setup_app_with_injectors(
+        tmp_config_dir)
+    # Home NO SEASON FOLDER
+    rule_book_injector.configparse['series'] = {
+        "Homeland": 'season',
+        "One Piece": 'sub-dir "null" episode-only'
+    }
+    rule_book_injector.save()
+    config_injector.append({
+        "input_dir": extract_input_dir,
+        "series_dirs": extract_series_dirs
+    })
+    app.setup()
+    app.series_index = scan_series_dirs(app)
+    app.scan_queue = scan_input_dir(app)
+    app.matched_queue = matcher(app)
+
+    # Homeland doesn't have a Season 7 folder
+    assert "FAILED SEASON RULE: Cannot locate season folder: \
+Homeland.S07E06.WEB.H264-DEFLATE.mkv" in caplog.text
+    # One Piece doesn't have sub-dir 'null'
+    assert "FAILED SUB-DIR RULE: Cannot locate sub-dir 'null': \
+[HorribleSubs] One Piece - 829 [720p].mkv"
 
 
 def test_success_matcher(
