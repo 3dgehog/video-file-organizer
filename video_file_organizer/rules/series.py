@@ -1,6 +1,7 @@
 import os
 import re
 import logging
+import jinja2
 
 from video_file_organizer.obj.file_system_entry \
     import FileSystemEntry
@@ -92,3 +93,24 @@ def rule_episode_only(*args, **kwargs):
         pass
     fse.details.pop('season', None)
     logger.debug("episode-only rule OK {}".format(fse.vfile.filename))
+
+
+@set_on_event('before_transfer')
+def rule_format_title(*args, **kwargs):
+    fse = _get_fse(args)
+    if 'format-title' not in fse.rules:
+        return
+    # Apply Rule
+    if not fse.details.get('container') or not fse.transfer_to:
+        logger.warning("FAILED FORMAT-TITLE RULE: " +
+                       "Missing container or transfer_to value: " +
+                       "{}".format(fse.vfile.filename))
+        fse.valid = False
+        return
+
+    format_index = fse.rules.index('format-title') + 1
+    template = jinja2.Template(
+        str(fse.rules[format_index]) + "." + str(fse.details['container']))
+    new_name = template.render(fse.details)
+    fse.transfer_to = os.path.join(fse.transfer_to, new_name)
+    logger.debug("format-title rule OK {}".format(fse.vfile.filename))

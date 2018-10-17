@@ -54,15 +54,16 @@ class RuleBookHandler:
         """Checks if all the rules from a specific entry has all valid options,
         doesn't have invalid pairs and that rules with secondary values are
         valid"""
-        VALID_OPTIONS = ['season', 'parent-dir', 'sub-dir', 'episode-only']
+        VALID_OPTIONS = [
+            'season', 'parent-dir', 'sub-dir', 'episode-only', 'format-title'
+        ]
         INVALID_PAIRS = [['season', 'parent-dir', 'sub-dir']]
-        RULES_WITH_SECONDARY = ['sub-dir']
+        RULES_WITH_SECONDARY = ['sub-dir', 'format-title']
         for rule in rules:
             if rule not in VALID_OPTIONS:
-                # Check wether its a value of a secondary rule
-                for secondary_rule in RULES_WITH_SECONDARY:
-                    if not rules[rules.index(rule) - 1] != secondary_rule:
-                        continue
+                # Check wether its a value of a secondary value
+                if rules[rules.index(rule) - 1] not in RULES_WITH_SECONDARY:
+                    logger.critical("{}".format(rules))
                     raise KeyError("Invalid series rule: '{}'".format(rule))
         # Check invalid pairs
         for invalid_pair in INVALID_PAIRS:

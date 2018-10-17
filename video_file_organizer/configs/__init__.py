@@ -38,15 +38,13 @@ class ConfigHandler:
         If it doesn't it creates the directory and adds template config
         files inside"""
         if not os.path.exists(self.config_dir):
-            logger.debug(
-                "Config folder doesn't exists, therefore its created")
+            logger.debug("Config folder doesn't exists, therefore its created")
             os.makedirs(self.config_dir)
 
         for file in os.listdir(self.config_templates):
             if not os.path.exists(os.path.join(self.config_dir, file)):
-                logger.debug(
-                    "File '{}' wasn't in config directory \
-                    therefore it was created".format(file))
+                logger.debug("File '{}' wasn't in ".format(file) +
+                             "config directory therefore it was created")
                 shutil.copyfile(
                     os.path.join(self.config_templates, file),
                     os.path.join(self.config_dir, file))
