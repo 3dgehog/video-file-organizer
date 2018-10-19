@@ -32,10 +32,12 @@ def transfer_fse(app, fse: FileSystemEntry):
 
 
 def _transfer_fse(app, fse: FileSystemEntry):
-    if not fse.valid or not fse.transfer_to:
+    if not fse.valid and not fse.transfer_to:
         return
-    _copy_fse(fse)
-    _delete_fse(fse)
+    if fse.valid and fse.transfer_to:
+        _copy_fse(fse)
+    if fse.valid:
+        _delete_fse(fse)
 
 
 def _copy_fse(fse: FileSystemEntry):

@@ -37,7 +37,9 @@ def test_rules_final_results(tmp_config_dir,
 format-title "One_Piece_{{ episode }}"',
         "Mahoutsukai no Yome": 'parent-dir',
         "Brooklyn Nine Nine": 'season',
-        "Boruto - Naruto Next Generations": 'parent-dir episode-only alt-title'
+        "Boruto - Naruto Next Generations": 'parent-dir episode-only \
+alt-title',
+        "Lucifer": 'season no-replace'
     }
     rule_book_injector.save()
     config_injector.append({
@@ -65,6 +67,12 @@ format-title "One_Piece_{{ episode }}"',
         in os.listdir(
             os.path.join(extract_series_dirs[1],
                          "Boruto - Naruto Next Generations")
+        )
+    # Check if correct no-replace
+    assert 'lucifer.s03e06.web.x264-tbs.mkv' \
+        in os.listdir(
+            os.path.join(extract_series_dirs[0],
+                         "Lucifer/Season 3")
         )
 
 

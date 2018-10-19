@@ -1,7 +1,9 @@
 import os
 import re
 import logging
+import guessit
 import jinja2
+import glob
 
 from video_file_organizer.obj.file_system_entry \
     import FileSystemEntry
@@ -132,3 +134,68 @@ def rule_alt_title(*args, **kwargs):
         fse.details['title'], fse.details['alternative_title']
     ])
     logger.debug("alt-title rule OK {}".format(fse.vfile.filename))
+
+
+@set_on_event('before_transfer')
+def rule_no_replace(*args, **kwargs):
+    fse = _get_fse(args)
+    # Apply Rule
+    # Get directory of transfer for fse
+    if not os.path.isdir(fse.transfer_to):
+        transfer_to = os.path.dirname(fse.transfer_to)
+    else:
+        transfer_to = fse.transfer_to
+
+    # Global search all files for same episode number
+    glob_search = glob.glob(
+        "{}/*{}*".format(transfer_to, fse.details['episode']))
+    if len(glob_search) == 0:
+        logger.debug("REPLACE: no duplicate episode")
+        if 'no-replace' in fse.rules:
+            logger.debug("no-replace rule OK {}".format(fse.vfile.filename))
+        return
+
+    # Iterate thru global search
+    for item in glob_search:
+        item_detail = guessit.guessit(item)
+        try:
+            if item_detail['episode'] != fse.details['episode']:
+                continue
+        except KeyError:
+            continue
+        logger.debug(
+            "REPLACE: same episode found: new -> {}: existing -> {}".format(
+                fse.vfile.filename, os.path.basename(item)))
+
+        # Prevent episode being replaced
+        if 'no-replace' in fse.rules:
+            logger.debug("no-replace rule OK {}".format(fse.vfile.filename))
+            fse.transfer_to = None
+            return
+
+        # Check if any of the 2 episodes are proper's
+        cur = False
+        ext = False
+        if 'proper_count' in fse.details:
+            cur = True
+        if 'proper_count' in item_detail:
+            ext = True
+
+        if cur and ext:
+            logger.debug("REPLACE: both are proper, favoring the new")
+            fse.replace = os.path.join(transfer_to, item)
+
+        elif cur and not ext:
+            logger.debug(
+                "REPLACE: this file proper, existing isn't, replacing")
+            fse.replace = os.path.join(transfer_to, item)
+
+        elif ext and not cur:
+            logger.debug(
+                "REPLACE: this file isn't proper, existing is, not replacing")
+            fse.transfer_to = None
+
+        else:
+            logger.debug("REPLACE: both are normal, favoring the new")
+            fse.replace = os.path.join(fse.transfer_to, item)
+        break

@@ -56,7 +56,7 @@ class RuleBookHandler:
         valid"""
         VALID_OPTIONS = [
             'season', 'parent-dir', 'sub-dir', 'episode-only', 'format-title',
-            'alt-title'
+            'alt-title', 'no-replace'
         ]
         INVALID_PAIRS = [['season', 'parent-dir', 'sub-dir']]
         RULES_WITH_SECONDARY = ['sub-dir', 'format-title']
