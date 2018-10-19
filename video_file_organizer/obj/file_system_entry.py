@@ -1,9 +1,8 @@
 import guessit
 import os
 import logging
-from typing import Union
 
-logger = logging.getLogger('fse')
+logger = logging.getLogger('app.fse')
 
 
 class FileSystemEntry:
@@ -83,11 +82,15 @@ class FileSystemEntry:
 
         # Try to set the title from the guessitmatch
         if 'title' not in guessitmatch:
-            logger.warning("NO TITLE MATCH:{}".format(self.vfile.filename))
+            logger.warning("NO TITLE MATCH: " +
+                           "Unable to find title for: " +
+                           "{}".format(self.vfile.filename))
             self.valid = False
 
         if 'type' not in guessitmatch:
-            logger.warning("NO TYPE MATCH:{}".format(self.vfile.filename))
+            logger.warning("NO TYPE MATCH: " +
+                           "Unable to find type of video for: " +
+                           "{}".format(self.vfile.filename))
             self.valid = False
 
         try:
@@ -96,15 +99,8 @@ class FileSystemEntry:
         except KeyError:
             pass
 
-    def _get_fse_rules(self) -> Union[dict, None]:
-        rules = None
-        if self.type == "episode":
-            rules = self.app.rule_book.get_series_rules_by_title(self.title)
-
-        if rules is None:
-            self.valid = False
-
-        return rules
+    def _get_fse_rules(self):
+        return self.app.rule_book.get_fse_rules(self)
 
 
 class VideoFile:

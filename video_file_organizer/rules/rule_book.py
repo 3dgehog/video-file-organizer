@@ -55,7 +55,8 @@ class RuleBookHandler:
         doesn't have invalid pairs and that rules with secondary values are
         valid"""
         VALID_OPTIONS = [
-            'season', 'parent-dir', 'sub-dir', 'episode-only', 'format-title'
+            'season', 'parent-dir', 'sub-dir', 'episode-only', 'format-title',
+            'alt-title'
         ]
         INVALID_PAIRS = [['season', 'parent-dir', 'sub-dir']]
         RULES_WITH_SECONDARY = ['sub-dir', 'format-title']
@@ -92,12 +93,40 @@ class RuleBookHandler:
                     logger.debug("added rule func {} to event {}".format(
                         rule_func.__name__, set_event))
 
-    def get_series_rules_by_title(self, title: str) -> list:
+    def get_fse_rules(self, fse) -> list:
+        VALID_TYPES = {
+            "episode": self._get_series_rules
+        }
         rules: list = []
+        for key, func in VALID_TYPES.items():
+            if fse.type == key:
+                rules = func(fse, rules)
+
+        if len(rules) == 0:
+            logger.warning("NO RULE MATCHED: " +
+                           "Unable to find the rules for: " +
+                           "{}".format(fse.vfile.filename))
+            fse.valid = False
+
+        return rules
+
+    def _get_series_rules(self, fse, rules):
         DIFF_CUTOFF = 0.7
         difflib_match = difflib.get_close_matches(
-            title, self.configparse.options('series'), n=1, cutoff=DIFF_CUTOFF)
+            fse.title, self.configparse.options('series'),
+            n=1, cutoff=DIFF_CUTOFF)
+
+        # Check if there is an alternative title and tries to use it also
+        if not difflib_match and 'alternative_title' in fse.details:
+            difflib_match = difflib.get_close_matches(
+                ' '.join(
+                    [fse.details['title'], fse.details['alternative_title']]
+                ), self.configparse.options('series'), n=1, cutoff=DIFF_CUTOFF
+            )
+
+        # Get the rules from the rule_book
         if difflib_match:
             rules = shlex.split(self.configparse.get(
                 'series', difflib_match[0]))
+
         return rules

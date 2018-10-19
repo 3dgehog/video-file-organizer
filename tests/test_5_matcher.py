@@ -63,7 +63,8 @@ def test_match_event_rules_warning(tmp_config_dir,
     # Home NO SEASON FOLDER
     rule_book_injector.configparse['series'] = {
         "Homeland": 'season',
-        "One Piece": 'sub-dir "null" episode-only'
+        "One Piece": 'sub-dir "null" episode-only',
+        "Fresh of the Boat": 'season alt-title'
     }
     rule_book_injector.save()
     config_injector.append({
@@ -79,8 +80,11 @@ def test_match_event_rules_warning(tmp_config_dir,
     assert "FAILED SEASON RULE: Cannot locate season folder: \
 Homeland.S07E06.WEB.H264-DEFLATE.mkv" in caplog.text
     # One Piece doesn't have sub-dir 'null'
-    assert "FAILED SUB-DIR RULE: Cannot locate sub-dir 'null': \
-[HorribleSubs] One Piece - 829 [720p].mkv"
+    assert "FAILED SUB-DIR RULE: Cannot locate sub-dir null: \
+[HorribleSubs] One Piece - 829 [720p].mkv" in caplog.text
+    # Fresh of the Boat doesn't have an alt-title
+    assert "FAILED ALT-TITLE RULE: Alternative title missing: \
+Fresh.Off.the.Boat.S04E14.WEBRip.x264-ION10.mp4" in caplog.text
 
 
 def test_success_matcher(

@@ -36,7 +36,8 @@ def test_rules_final_results(tmp_config_dir,
         "One Piece": 'sub-dir "One Piece Episodes" episode-only \
 format-title "One_Piece_{{ episode }}"',
         "Mahoutsukai no Yome": 'parent-dir',
-        "Brooklyn Nine Nine": 'season'
+        "Brooklyn Nine Nine": 'season',
+        "Boruto - Naruto Next Generations": 'parent-dir episode-only alt-title'
     }
     rule_book_injector.save()
     config_injector.append({
@@ -53,11 +54,18 @@ format-title "One_Piece_{{ episode }}"',
     )
     # Check if correct parent-dir
     assert '[HorribleSubs] Mahoutsukai no Yome - 24 [480p].mkv' in os.listdir(
-        os.path.join(extract_series_dirs[1], "Mahoutsukai no Yome"))
+        os.path.join(extract_series_dirs[1], "Mahoutsukai no Yome")
+    )
     # Check if correct season folder
     assert 'Brooklyn.Nine-Nine.S05E13.HDTV.x264-SVA.mkv' in os.listdir(
         os.path.join(extract_series_dirs[0], 'Brooklyn 99/Season 5')
     )
+    # Check if correct alt-title
+    assert '[HorribleSubs] Boruto - Naruto Next Generations - 50 [480p].mkv' \
+        in os.listdir(
+            os.path.join(extract_series_dirs[1],
+                         "Boruto - Naruto Next Generations")
+        )
 
 
 def test_success_transferer(tmp_config_dir,

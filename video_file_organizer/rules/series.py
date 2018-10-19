@@ -114,3 +114,21 @@ def rule_format_title(*args, **kwargs):
     new_name = template.render(fse.details)
     fse.transfer_to = os.path.join(fse.transfer_to, new_name)
     logger.debug("format-title rule OK {}".format(fse.vfile.filename))
+
+
+@set_on_event('before_match')
+def rule_alt_title(*args, **kwargs):
+    fse = _get_fse(args)
+    if 'alt-title' not in fse.rules:
+        return
+    # Apply Rule
+    if 'alternative_title' not in fse.details:
+        logger.warning("FAILED ALT-TITLE RULE: " +
+                       "Alternative title missing: " +
+                       "{}".format(fse.vfile.filename))
+        fse.valid = False
+        return
+    fse.title = ' '.join([
+        fse.details['title'], fse.details['alternative_title']
+    ])
+    logger.debug("alt-title rule OK {}".format(fse.vfile.filename))
