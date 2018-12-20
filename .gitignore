@@ -5,5 +5,5 @@ __pycache__
 venv
 *.pyc
 NOTES.md
-logs
+*.log
 dir_list_tree.txt

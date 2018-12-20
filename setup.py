@@ -21,10 +21,10 @@ setup(
     license='MIT',
     packages=find_packages(),
     include_package_data=True,
-    # entry_points={
-    #     'console_scripts': [
-    #         'name = name.__main__:main'
-    #     ]
-    # },
+    entry_points={
+        'console_scripts': [
+            'vfo = video_file_organizer.__main__:main'
+        ]
+    },
     install_requires=[requirements]
 )

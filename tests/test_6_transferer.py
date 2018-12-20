@@ -1,5 +1,4 @@
 import os
-import pytest
 import tempfile
 import yg.lockfile
 
@@ -8,7 +7,7 @@ from tests.utils.injectors import setup_app_with_injectors
 from tests.fixtures.setup_assets import SERIES_CONFIGPARSE
 
 
-def test_lockfile(tmp_config_dir, tmp_dir):
+def test_lockfile(tmp_config_dir, tmp_dir, caplog):
     app, config_injector, rule_book_injector = setup_app_with_injectors(
         tmp_config_dir)
     rule_book_injector.configparse['series'] = SERIES_CONFIGPARSE
@@ -19,13 +18,10 @@ def test_lockfile(tmp_config_dir, tmp_dir):
     })
     app.setup()
     with yg.lockfile.FileLock(
-            os.path.join(tempfile.gettempdir(), 'vfo_lock'), timeout=10):
-        with pytest.raises(yg.lockfile.FileLockTimeout):
-            app.run()
+            os.path.join(tempfile.gettempdir(), 'vfolock'), timeout=10):
+        app.run()
+        assert "FAILED LOCKFILE" in caplog.text
 
-
-# def test_transfer_event_rules_warning():
-#     pass
 
 def test_rules_final_results(tmp_config_dir,
                              extract_input_dir,

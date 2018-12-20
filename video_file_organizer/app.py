@@ -12,28 +12,8 @@ from video_file_organizer.transferer import transferer
 
 CONFIG_DIR = os.path.join(os.environ['HOME'], '.config/video_file_organizer/')
 
-# Create logger for app
+
 logger = logging.getLogger('app')
-logger.setLevel(logging.DEBUG)
-
-fh_debug = logging.FileHandler('logs/debug.log')
-fh_debug.setLevel(logging.DEBUG)
-
-fh_warning = logging.FileHandler('logs/warning.log')
-fh_warning.setLevel(logging.WARNING)
-
-ch = logging.StreamHandler()
-ch.setLevel(logging.WARNING)
-
-formatter = logging.Formatter(
-    '%(asctime)s - %(levelname)s:%(message)s')
-fh_debug.setFormatter(formatter)
-fh_warning.setFormatter(formatter)
-ch.setFormatter(formatter)
-
-logger.addHandler(fh_debug)
-logger.addHandler(fh_warning)
-logger.addHandler(ch)
 
 
 class App:
@@ -42,6 +22,10 @@ class App:
         self.args = args
 
     def setup(self):
+        """A function that starts up the app, it gets and executes the
+        ConfigHandler, args, EventHandler and RuleBookHandler. This is
+        run even before any of the searching and matching is done on the
+        directory to make sure tbat all the configs are ready to go"""
         logger.debug("setting up app")
         self.config = ConfigHandler(self)
         self.config.args = self.args
@@ -49,15 +33,24 @@ class App:
         self.rule_book = RuleBookHandler(self)
 
     def run(self):
+        """This is the main function of the app. This requires the setup
+        function to be run first before it will be able to run properly"""
         logger.debug("running app")
-        with yg.lockfile.FileLock(
-                os.path.join(tempfile.gettempdir(), 'vfo_lock'), timeout=10):
-            self.series_index = scan_series_dirs(self)
-            self.scan_queue = scan_input_dir(self)
-            self.matched_queue = matcher(self)
-            transferer(self)
+        try:
+            with yg.lockfile.FileLock(
+                    os.path.join(tempfile.gettempdir(), 'vfolock'),
+                    timeout=10):
+                self.series_index = scan_series_dirs(self)
+                self.scan_queue = scan_input_dir(self)
+                self.matched_queue = matcher(self)
+                transferer(self)
+        except yg.lockfile.FileLockTimeout:
+            logger.warning("FAILED LOCKFILE: " +
+                           "the program must already be running")
 
     def _requirements(self, requirements: list):
+        """A simple function used by all of the application to make sure
+        that the functions that run have their requirements ready"""
         for require in requirements:
             if require not in dir(self):
                 raise AttributeError(
