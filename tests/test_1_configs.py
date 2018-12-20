@@ -6,7 +6,7 @@ from tests.fixtures.setup_assets import ASSETS_DIR
 
 from tests.utils.injectors import ConfigInjector
 
-from video_file_organizer.configs import ConfigHandler
+from video_file_organizer.handlers.config import ConfigHandler
 from video_file_organizer.app import App
 
 

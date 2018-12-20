@@ -3,9 +3,9 @@ import logging
 import tempfile
 import yg.lockfile
 
-from video_file_organizer.configs import ConfigHandler
-from video_file_organizer.events import EventHandler
-from video_file_organizer.rules.rule_book import RuleBookHandler
+from video_file_organizer.handlers.config import ConfigHandler
+from video_file_organizer.handlers.event import EventHandler
+from video_file_organizer.handlers.rule_book import RuleBookHandler
 from video_file_organizer.matcher import matcher
 from video_file_organizer.scanners import scan_input_dir, scan_series_dirs
 from video_file_organizer.transferer import transferer

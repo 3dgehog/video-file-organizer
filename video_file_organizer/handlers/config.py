@@ -6,14 +6,17 @@ import yaml
 import re
 from typing import Pattern
 
-from video_file_organizer.configs.config \
-    import CONFIG_TEMPLATES, VIDEO_EXTENSIONS
 
 logger = logging.getLogger('app.config')
 
+CONFIG_TEMPLATES = os.path.join(
+    os.path.dirname(__file__), '../config_templates')
+VIDEO_EXTENSIONS = ['mkv', 'm4v', 'avi', 'mp4', 'mov']
+
 
 class ConfigHandler:
-    """Config Handler for the entire program"""
+    """The ConfigHandler handles all the configs of the application and is a
+    layer between the application and the config.yaml file. """
 
     def __init__(self, app) -> None:
         logger.debug("Initializing ConfigHandler")

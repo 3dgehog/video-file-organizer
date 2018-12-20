@@ -1,4 +1,4 @@
-from video_file_organizer.events import VALID_EVENT
+from video_file_organizer.handlers.event import VALID_EVENT
 
 
 DEFAULT_ORDER = 10

@@ -3,7 +3,7 @@ import os
 import yaml
 import configparser
 
-from video_file_organizer.configs.config import CONFIG_TEMPLATES
+from video_file_organizer.handlers.config import CONFIG_TEMPLATES
 
 from video_file_organizer.app import App
 

@@ -5,8 +5,8 @@ from tests.fixtures.setup_assets import SERIES_CONFIGPARSE
 from tests.utils.injectors import RuleBookInjector
 
 from video_file_organizer.app import App
-from video_file_organizer.events import EventHandler
-from video_file_organizer.rules.rule_book import RuleBookHandler
+from video_file_organizer.handlers.event import EventHandler
+from video_file_organizer.handlers.rule_book import RuleBookHandler
 
 
 def setup_app_for_rule_book(config_dir):

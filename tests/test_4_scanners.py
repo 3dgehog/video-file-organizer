@@ -3,9 +3,9 @@ from tests.fixtures.setup_assets import SERIES_CONFIGPARSE
 from tests.utils.injectors import ConfigInjector, RuleBookInjector
 
 from video_file_organizer.app import App
-from video_file_organizer.configs import ConfigHandler
-from video_file_organizer.events import EventHandler
-from video_file_organizer.rules.rule_book import RuleBookHandler
+from video_file_organizer.handlers.config import ConfigHandler
+from video_file_organizer.handlers.event import EventHandler
+from video_file_organizer.handlers.rule_book import RuleBookHandler
 from video_file_organizer.scanners import scan_input_dir, scan_series_dirs
 
 
