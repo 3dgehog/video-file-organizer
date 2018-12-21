@@ -82,15 +82,15 @@ class FileSystemEntry:
 
         # Try to set the title from the guessitmatch
         if 'title' not in guessitmatch:
-            logger.warning("NO TITLE MATCH: " +
-                           "Unable to find title for: " +
-                           "{}".format(self.vfile.filename))
+            logger.debug("NO TITLE MATCH: " +
+                         "Unable to find title for: " +
+                         "{}".format(self.vfile.filename))
             self.valid = False
 
         if 'type' not in guessitmatch:
-            logger.warning("NO TYPE MATCH: " +
-                           "Unable to find type of video for: " +
-                           "{}".format(self.vfile.filename))
+            logger.debug("NO TYPE MATCH: " +
+                         "Unable to find type of video for: " +
+                         "{}".format(self.vfile.filename))
             self.valid = False
 
         try:

@@ -6,7 +6,6 @@ VALID_EVENT = [
 ]
 
 logger = logging.getLogger('app.events')
-logger.setLevel(logging.DEBUG)
 
 
 class EventHandler:

@@ -49,9 +49,9 @@ def _match_fse(app, fse: FileSystemEntry):
     }
     index = INDEX.get(fse.type)
     if not index:
-        logger.warning("FAILED INDEX: " +
-                       "Unable to find index for type {}: ".format(fse.type) +
-                       "{}".format(fse.vfile.filename))
+        logger.debug("FAILED INDEX: " +
+                     "Unable to find index for type {}: ".format(fse.type) +
+                     "{}".format(fse.vfile.filename))
         fse.valid = False
         return
 
@@ -59,9 +59,9 @@ def _match_fse(app, fse: FileSystemEntry):
         fse.title, index.keys, n=1, cutoff=0.6)
 
     if not index_match:
-        logger.warning("FAILED MATCH: " +
-                       "Unable to find a match: " +
-                       "{}".format(fse.vfile.filename))
+        logger.debug("FAILED MATCH: " +
+                     "Unable to find a match: " +
+                     "{}".format(fse.vfile.filename))
         fse.valid = False
         return
 

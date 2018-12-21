@@ -29,9 +29,9 @@ def rule_season(*args, **kwargs):
     logger.debug("applying season rule to {}".format(fse.vfile.filename))
 
     if 'season' not in fse.details:
-        logger.warning("FAILED SEASON RULE: ",
-                       "Undefined season number from file: ",
-                       "{}".format(fse.vfile.filename))
+        logger.debug("FAILED SEASON RULE: ",
+                     "Undefined season number from file: ",
+                     "{}".format(fse.vfile.filename))
         fse.valid = False
         return
 
@@ -43,9 +43,9 @@ def rule_season(*args, **kwargs):
             logger.debug("season rule OK {}".format(fse.vfile.filename))
 
     if not fse.transfer_to:
-        logger.warning("FAILED SEASON RULE: " +
-                       "Cannot locate season folder: " +
-                       "{}".format(fse.vfile.filename))
+        logger.debug("FAILED SEASON RULE: " +
+                     "Cannot locate season folder: " +
+                     "{}".format(fse.vfile.filename))
         fse.valid = False
 
 
@@ -70,9 +70,9 @@ def rule_sub_dir(*args, **kwargs):
     subdir_name_index = fse.rules.index('sub-dir') + 1
     subdir_name = fse.rules[subdir_name_index]
     if subdir_name not in fse.matched_dir_entry.subdirs:
-        logger.warning("FAILED SUB-DIR RULE: " +
-                       "Cannot locate sub-dir {}: ".format(subdir_name) +
-                       "{}".format(fse.vfile.filename))
+        logger.debug("FAILED SUB-DIR RULE: " +
+                     "Cannot locate sub-dir {}: ".format(subdir_name) +
+                     "{}".format(fse.vfile.filename))
         fse.valid = False
         return
 
@@ -104,9 +104,9 @@ def rule_format_title(*args, **kwargs):
         return
     # Apply Rule
     if not fse.details.get('container') or not fse.transfer_to:
-        logger.warning("FAILED FORMAT-TITLE RULE: " +
-                       "Missing container or transfer_to value: " +
-                       "{}".format(fse.vfile.filename))
+        logger.debug("FAILED FORMAT-TITLE RULE: " +
+                     "Missing container or transfer_to value: " +
+                     "{}".format(fse.vfile.filename))
         fse.valid = False
         return
 
@@ -125,9 +125,9 @@ def rule_alt_title(*args, **kwargs):
         return
     # Apply Rule
     if 'alternative_title' not in fse.details:
-        logger.warning("FAILED ALT-TITLE RULE: " +
-                       "Alternative title missing: " +
-                       "{}".format(fse.vfile.filename))
+        logger.debug("FAILED ALT-TITLE RULE: " +
+                     "Alternative title missing: " +
+                     "{}".format(fse.vfile.filename))
         fse.valid = False
         return
     fse.title = ' '.join([

@@ -103,9 +103,9 @@ class RuleBookHandler:
                 rules = func(fse, rules)
 
         if len(rules) == 0:
-            logger.warning("NO RULE MATCHED: " +
-                           "Unable to find the rules for: " +
-                           "{}".format(fse.vfile.filename))
+            logger.debug("NO RULE MATCHED: " +
+                         "Unable to find the rules for: " +
+                         "{}".format(fse.vfile.filename))
             fse.valid = False
 
         return rules
