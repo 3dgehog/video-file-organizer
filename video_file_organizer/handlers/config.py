@@ -79,7 +79,7 @@ class ConfigHandler:
         for script in self._config_yaml['before_scripts']:
             logger.debug("running before script '{}'".format(script))
             subprocess.check_output([script], shell=True)
-            logger.debug("script ran")
+            logger.debug("{} script ran".format(script))
 
     def _get_input_dir(self) -> str:
         """Returns the input_dir path from the config.yaml"""
