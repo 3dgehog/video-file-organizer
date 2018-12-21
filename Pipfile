@@ -14,5 +14,8 @@ yg-lockfile = "*"
 guessit = "*"
 jinja2 = "*"
 
+[scripts]
+tests = "pytest tests"
+
 [requires]
-python_version = "3.7"
+python_version = "3.5.2"

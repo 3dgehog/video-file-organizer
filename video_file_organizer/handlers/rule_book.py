@@ -81,7 +81,7 @@ class RuleBookHandler:
             rule_func = getattr(series, rule)
             # Loops thru all the events and their listeners
             for event, listener in self.app.event.event_listeners_list.items():
-                rule_list: list = []
+                rule_list = []
                 # Loops thru all the events the rule_func has
                 for set_event, set_order in rule_func.events:
                     if set_event == event:
@@ -97,7 +97,7 @@ class RuleBookHandler:
         VALID_TYPES = {
             "episode": self._get_series_rules
         }
-        rules: list = []
+        rules = []
         for key, func in VALID_TYPES.items():
             if fse.type == key:
                 rules = func(fse, rules)

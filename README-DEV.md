@@ -3,11 +3,11 @@
 ## Run tests
 
 ```bash
-pipenv run pytest tests
+pipenv run tests
 ```
 
 Run tests with log outputs
 
 ```bash
-pipenv run pytest tests --log-file tests.log
+pipenv run tests --log-file tests.log
 ```

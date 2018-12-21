@@ -13,7 +13,7 @@ def matcher(app) -> queue.Queue:
     app._requirements(['scan_queue', 'event', 'series_index'])
 
     logger.debug("Running Matcher")
-    match_queue: queue.Queue = queue.Queue()
+    match_queue = queue.Queue()
 
     scan_queue = app.scan_queue
 

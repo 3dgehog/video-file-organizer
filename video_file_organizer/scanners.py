@@ -16,7 +16,7 @@ def scan_input_dir(app) -> queue.Queue:
     app._requirements(['config'])
     logger.debug("scanning input dir")
 
-    scan_queue: queue.Queue = queue.Queue()
+    scan_queue = queue.Queue()
 
     for item in os.listdir(app.config.input_dir):
 

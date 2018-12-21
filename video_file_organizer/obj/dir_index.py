@@ -6,8 +6,8 @@ class DirIndex:
     def __init__(self, path: Union[str, List[str]], subdirs=False) -> None:
         self.path = path
 
-        self.dict: dict = {}
-        self.entries: list = []
+        self.dict = {}
+        self.entries = []
         self._get_dict_and_entries()
         self.keys = self.dict.keys()
 
@@ -37,7 +37,7 @@ class DirEntry:
     def __init__(self, path: str) -> None:
         self.path = path
         self.name = os.path.basename(path)
-        self.subdirs: list = []
+        self.subdirs = []
         self._get_subdirs()
 
     def _get_subdirs(self):

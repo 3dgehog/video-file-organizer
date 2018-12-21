@@ -38,7 +38,7 @@ class EventHandler:
 
 class Event:
     def __init__(self):
-        self._listeners: list = []
+        self._listeners = []
 
     def add_listener(self, listener):
         self._listeners.append(listener)
