@@ -10,7 +10,7 @@ def set_on_event(event: str, order=DEFAULT_ORDER):
         raise ValueError("Event {} is not a valid event".format(event))
 
     def _set_on_event(func):
-        if hasattr(func, 'event'):
+        if hasattr(func, 'events'):
             func.events.append((event, order))
         else:
             func.events = [(event, order)]
