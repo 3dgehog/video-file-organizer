@@ -29,3 +29,17 @@ Then run the software against that folder by precizing the configs folder locati
 ```bash
 pipenv run vfo -c mock/configs
 ```
+
+#### Testing systemd with mock files
+
+Generate the systemd files with the toolbox
+
+```bash
+pipenv run python toolbox.py --systemd
+```
+
+Then edit `vfo.service` and append `-c mock/configs` to the end of ExecStart to run systemd against the mock files
+
+```text
+ExecStart = /usr/local/bin/pipenv run vfo -c mock/configs
+```

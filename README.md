@@ -2,7 +2,7 @@
 
 ## Installation
 
-### Get source and install
+### Get source files and install
 
 Clone the directory with git then:
 

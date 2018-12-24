@@ -31,11 +31,13 @@ def main():
     else:
         ch.setLevel(logging.INFO)
 
-    formatter = logging.Formatter(
+    file_format = logging.Formatter(
         '%(asctime)s - %(levelname)s:%(message)s')
+    console_format = logging.Formatter(
+        '%(message)s')
 
-    ch.setFormatter(formatter)
-    fh.setFormatter(formatter)
+    ch.setFormatter(console_format)
+    fh.setFormatter(file_format)
 
     logger.addHandler(ch)
     logger.addHandler(fh)
