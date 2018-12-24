@@ -1,13 +1,10 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 def readme():
     with open('README.md') as f:
         return f.read()
 
-
-with open('requirements.txt') as f:
-    requirements = f.read().splitlines()
 
 setup(
     name='Video File Organizer',
@@ -19,12 +16,11 @@ setup(
     author='MX',
     author_email='maxi730@gmail.com',
     license='MIT',
-    packages=find_packages(),
+    packages=['video_file_organizer'],
     include_package_data=True,
     entry_points={
         'console_scripts': [
             'vfo = video_file_organizer.__main__:main'
         ]
     },
-    install_requires=[requirements]
 )

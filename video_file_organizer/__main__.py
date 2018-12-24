@@ -10,11 +10,17 @@ def main():
     parser.add_argument("-v", "--verbose",
                         help="Displays debug messages",
                         action="store_true")
+    parser.add_argument("-c", "--config",
+                        help="Custom config files location",
+                        nargs=1)
     args = parser.parse_args()
 
     # Setup Logger
     logger = logging.getLogger('app')
     logger.setLevel(logging.DEBUG)
+
+    fh = logging.FileHandler('vfo.log')
+    fh.setLevel(logging.INFO)
 
     ch = logging.StreamHandler()
     ch.setLevel(logging.WARNING)
@@ -27,10 +33,17 @@ def main():
 
     formatter = logging.Formatter(
         '%(asctime)s - %(levelname)s:%(message)s')
-    ch.setFormatter(formatter)
-    logger.addHandler(ch)
 
-    app = App(args)
+    ch.setFormatter(formatter)
+    fh.setFormatter(formatter)
+
+    logger.addHandler(ch)
+    logger.addHandler(fh)
+
+    if args.config:
+        app = App(args.config[0], args)
+    else:
+        app = App(args)
     app.setup()
     app.run()
 

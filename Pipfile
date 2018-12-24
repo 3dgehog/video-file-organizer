@@ -13,6 +13,7 @@ pyaml = "*"
 yg-lockfile = "*"
 guessit = "*"
 jinja2 = "*"
+video-file-organizer = {editable = true,path = "."}
 
 [scripts]
 tests = "pytest tests"

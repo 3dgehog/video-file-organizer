@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "26c13e3a640299e648b01bb6c5f9ed6ce5fd8ba866aa7bc33c311f9041259a50"
+            "sha256": "ec214e396ba752f748f56f1876bb5dfbb91e3c246ce2a2dfb7622bf5d40d71cb"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.5"
+            "python_version": "3.5.2"
         },
         "sources": [
             {
@@ -142,6 +142,10 @@
                 "sha256:f8abbbd486eca3340bd3d242417b203c861d4e113ef778cd5fb9535b2b32ae54"
             ],
             "version": "==1.14"
+        },
+        "video-file-organizer": {
+            "editable": true,
+            "path": "."
         },
         "yg-lockfile": {
             "hashes": [

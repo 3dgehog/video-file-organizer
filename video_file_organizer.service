@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 WorkingDirectory=${VFO_WORKINGDIR}
-ExecStart=${VFO_VENVDIR}/bin/python ${VFO_WORKINGDIR}/video_file_organizer
+ExecStart=/usr/local/bin/pipenv run ${VFO_VENV}/bin/vfo
 
 [Install]
 WantedBy=multi-user.target
