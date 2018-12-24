@@ -1,0 +1,10 @@
+[Unit]
+Description=Video file organizer
+After=network.target
+
+[Service]
+WorkingDirectory=${VFO_WORKINGDIR}
+ExecStart=${VFO_VENVDIR}/bin/python ${VFO_WORKINGDIR}/video_file_organizer
+
+[Install]
+WantedBy=multi-user.target
