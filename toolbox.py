@@ -3,6 +3,8 @@ import zipfile
 import logging
 import argparse
 import shutil
+import configparser
+import subprocess
 
 from tests.utils.injectors import ConfigInjector, RuleBookInjector
 from tests.utils.vars import SERIES_CONFIGPARSE
@@ -13,10 +15,16 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--mock",
                     help="Creates a mock folder",
                     action="store_true")
+parser.add_argument("--systemd",
+                    help="Creates systemd files",
+                    action="store_true")
 args = parser.parse_args()
 
 MOCK_FOLDER = os.path.join(
     os.path.dirname(__file__), 'mock')
+
+SYSTEMD_FOLDER = os.path.join(
+    os.path.dirname(__file__), 'systemd')
 
 CONFIG_TEMPLATES = os.path.join(os.path.dirname(
     __file__), 'video_file_organizer/config_templates')
@@ -80,8 +88,61 @@ def setup_mock():
     })
 
 
+def setup_systemd():
+    if os.path.exists(SYSTEMD_FOLDER):
+        logging.warning("systemd folder already exists, aborting")
+        return
+
+    logging.debug("creating systemd folder")
+    os.makedirs(SYSTEMD_FOLDER)
+
+    venv_path = subprocess.check_output(
+        'pipenv --venv', shell=True).decode("utf-8")[:-1]
+    working_dir_path = os.path.dirname(os.path.realpath(__file__))
+
+    service_file_path = os.path.join(SYSTEMD_FOLDER, 'vfo.service')
+    service_config = configparser.ConfigParser()
+    service_config.optionxform = str
+    service_config['Unit'] = {
+        'Description': 'Service file for Video File Organizer',
+        'After': 'network.target'
+    }
+    service_config['Service'] = {
+        'WorkingDirectory': working_dir_path,
+        'ExecStart': '/usr/local/bin/pipenv run {}/bin/vfo'.format(venv_path)
+    }
+    service_config['Install'] = {
+        'WantedBy': 'multi-user.target'
+    }
+    with open(service_file_path, 'w') as service_file:
+        service_config.write(service_file)
+        logging.debug("vfo.service created")
+
+    timer_file_path = os.path.join(SYSTEMD_FOLDER, 'vfo.timer')
+    timer_config = configparser.ConfigParser()
+    timer_config.optionxform = str
+    timer_config['Unit'] = {
+        'Description': '15 minute timer for video file organizer'
+    }
+    timer_config['Timer'] = {
+        'Unit': 'vfo.service',
+        'OnCalendar': '*:0/15'
+    }
+    timer_config['Install'] = {
+        'WantedBy': 'timers.target'
+    }
+    with open(timer_file_path, 'w') as timer_file:
+        timer_config.write(timer_file)
+        logging.debug("vfo.service created")
+    logging.info("Files are ready in 'systemd/'")
+
+
 if args.mock:
     setup_mock()
     logging.info(
         "Run `pipenv run vfo -c mock/configs` \
 to run against mock folder")
+
+
+if args.systemd:
+    setup_systemd()
