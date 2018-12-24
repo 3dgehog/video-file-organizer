@@ -4,7 +4,6 @@ import logging
 import argparse
 import shutil
 import configparser
-import subprocess
 
 from tests.utils.injectors import ConfigInjector, RuleBookInjector
 from tests.utils.vars import SERIES_CONFIGPARSE
@@ -89,6 +88,11 @@ def setup_mock():
 
 
 def setup_systemd():
+    systemd_user = input("Which user?: ")
+    if not systemd_user:
+        logging.warning("software will not work without a user")
+        return
+
     if os.path.exists(SYSTEMD_FOLDER):
         logging.warning("systemd folder already exists, aborting")
         return
@@ -96,8 +100,6 @@ def setup_systemd():
     logging.debug("creating systemd folder")
     os.makedirs(SYSTEMD_FOLDER)
 
-    venv_path = subprocess.check_output(
-        'pipenv --venv', shell=True).decode("utf-8")[:-1]
     working_dir_path = os.path.dirname(os.path.realpath(__file__))
 
     service_file_path = os.path.join(SYSTEMD_FOLDER, 'vfo.service')
@@ -108,8 +110,9 @@ def setup_systemd():
         'After': 'network.target'
     }
     service_config['Service'] = {
+        'User': 'maxence',
         'WorkingDirectory': working_dir_path,
-        'ExecStart': '/usr/local/bin/pipenv run {}/bin/vfo'.format(venv_path)
+        'ExecStart': '/usr/local/bin/pipenv run vfo'
     }
     service_config['Install'] = {
         'WantedBy': 'multi-user.target'

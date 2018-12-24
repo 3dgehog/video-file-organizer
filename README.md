@@ -13,7 +13,7 @@ pipenv install
 
 ### Setup systemd service and timer
 
-Use the toolbox including to do so, run:
+Use the toolbox included to do so, run:
 
 ```bash
 pipenv run python toolbox.py --systemd
@@ -22,6 +22,8 @@ pipenv run python toolbox.py --systemd
 2 systemd files will be located in a newly created folder called `systemd/`. You simply have to link those files to systemd by:
 
 ```bash
-sudo systemctl enable /abs/path/to/systemd/vfo.service
-sudo systemctl enable /abs/path/to/systemd/vfo.timer
+cd systemd
+sudo systemctl link ${PWD}/vfo.service
+sudo systemctl enable ${PWD}/vfo.timer
+sudo systemctl start vfo.timer
 ```
