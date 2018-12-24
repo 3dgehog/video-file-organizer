@@ -1,7 +1,6 @@
 import pytest
 
-from tests.fixtures.setup_assets import SERIES_CONFIGPARSE
-
+from tests.utils.vars import SERIES_CONFIGPARSE
 from tests.utils.injectors import RuleBookInjector
 
 from video_file_organizer.app import App

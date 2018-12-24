@@ -8,3 +8,4 @@ Clone the directory with git then:
 cd video_file_organizer
 pipenv install
 ```
+

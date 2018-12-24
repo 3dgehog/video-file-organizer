@@ -5,7 +5,7 @@ import argparse
 import shutil
 
 from tests.utils.injectors import ConfigInjector, RuleBookInjector
-from tests.fixtures.setup_assets import SERIES_CONFIGPARSE
+from tests.utils.vars import SERIES_CONFIGPARSE
 
 logging.basicConfig(level=logging.DEBUG)
 

@@ -3,8 +3,7 @@ import tempfile
 import yg.lockfile
 
 from tests.utils.injectors import setup_app_with_injectors
-
-from tests.fixtures.setup_assets import SERIES_CONFIGPARSE
+from tests.utils.vars import SERIES_CONFIGPARSE
 
 
 def test_lockfile(tmp_config_dir, tmp_dir, caplog):

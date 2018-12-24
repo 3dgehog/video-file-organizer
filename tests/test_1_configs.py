@@ -2,7 +2,7 @@ import pytest
 import os
 import subprocess
 
-from tests.fixtures.setup_assets import ASSETS_DIR
+from tests.utils.vars import ASSETS_DIR
 
 from tests.utils.injectors import ConfigInjector
 

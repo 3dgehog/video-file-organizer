@@ -3,8 +3,7 @@ import os
 import queue
 
 from tests.utils.injectors import setup_app_with_injectors
-
-from tests.fixtures.setup_assets import SERIES_CONFIGPARSE
+from tests.utils.vars import SERIES_CONFIGPARSE
 
 from video_file_organizer.scanners import scan_input_dir, scan_series_dirs
 from video_file_organizer.matcher import matcher
