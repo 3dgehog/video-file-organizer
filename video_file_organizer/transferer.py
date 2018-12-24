@@ -37,7 +37,7 @@ def _transfer_fse(app, fse: FileSystemEntry):
     if fse.valid and fse.transfer_to:
         _copy_fse(fse)
         _delete_fse(fse)
-        logger.info("Transfered successfully {}".format(fse.vfile.filename))
+        logger.info("{} succeeded".format(fse.vfile.filename))
 
 
 def _copy_fse(fse: FileSystemEntry):
