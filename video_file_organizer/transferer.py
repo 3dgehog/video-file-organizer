@@ -34,10 +34,15 @@ def transfer_fse(app, fse: FileSystemEntry):
 def _transfer_fse(app, fse: FileSystemEntry):
     if not fse.valid and not fse.transfer_to:
         return
-    if fse.valid and fse.transfer_to:
-        _copy_fse(fse)
-        _delete_fse(fse)
-        logger.info("{} succeeded".format(fse.vfile.filename))
+    if fse.valid:
+        if fse.transfer_to:
+            _copy_fse(fse)
+            _delete_fse(fse)
+            logger.info("{} succeeded".format(fse.vfile.filename))
+        else:
+            _delete_fse(fse)
+            logger.log(11, "deleted {} without transfer".format(
+                fse.vfile.filename))
 
 
 def _copy_fse(fse: FileSystemEntry):
