@@ -75,9 +75,9 @@ def test_match_event_rules_warning(tmp_config_dir,
     app.scan_queue = scan_input_dir(app)
     app.matched_queue = matcher(app)
 
-    # Homeland doesn't have a Season 7 folder
-    assert "FAILED SEASON RULE: Cannot locate season folder: \
-Homeland.S07E06.WEB.H264-DEFLATE.mkv" in caplog.text
+    # Created the missing season folder for Homeland
+    assert "SEASON RULE: Created new Season 7 \
+folder for Series Homeland" in caplog.text
     # One Piece doesn't have sub-dir 'null'
     assert "FAILED SUB-DIR RULE: Cannot locate sub-dir null: \
 [HorribleSubs] One Piece - 829 [720p].mkv" in caplog.text

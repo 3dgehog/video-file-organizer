@@ -45,10 +45,13 @@ def rule_season(*args, **kwargs):
             logger.debug("season rule OK {}".format(fse.vfile.filename))
 
     if not fse.transfer_to:
-        logger.log(11, "FAILED SEASON RULE: " +
-                   "Cannot locate season folder: " +
-                   "{}".format(fse.vfile.filename))
-        fse.valid = False
+        path_to_new_season_dir = os.path.join(
+            fse.matched_dir_entry.path, "Season {}".format(season))
+        os.mkdir(path_to_new_season_dir)
+        fse.transfer_to = path_to_new_season_dir
+        logger.log(11, "SEASON RULE: " +
+                   "Created new Season {} folder for Series {}".format(
+                       season, fse.title))
 
 
 @set_on_event('after_match')
