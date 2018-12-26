@@ -94,6 +94,7 @@ class RuleBookHandler:
                         rule_func.__name__, set_event))
 
     def get_fse_rules(self, fse) -> list:
+        """Uses the video type to get all the rules from that specific type"""
         VALID_TYPES = {
             "episode": self._get_series_rules
         }
@@ -103,14 +104,16 @@ class RuleBookHandler:
                 rules = func(fse, rules)
 
         if len(rules) == 0:
-            logger.debug("NO RULE MATCHED: " +
-                         "Unable to find the rules for: " +
-                         "{}".format(fse.vfile.filename))
+            logger.log(11, "NO RULE MATCHED: " +
+                       "Unable to find the rules for: " +
+                       "{}".format(fse.vfile.filename))
             fse.valid = False
 
         return rules
 
     def _get_series_rules(self, fse, rules):
+        """Uses the title from the fse to try to match to its rules type from the
+        rule_book.ini"""
         DIFF_CUTOFF = 0.7
         difflib_match = difflib.get_close_matches(
             fse.title, self.configparse.options('series'),

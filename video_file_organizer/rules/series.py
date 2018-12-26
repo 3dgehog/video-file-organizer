@@ -22,6 +22,8 @@ def _get_fse(args) -> FileSystemEntry:
 
 @set_on_event('after_match')
 def rule_season(*args, **kwargs):
+    """Sets transfer_to to the correct season folder based on the fse
+    filename"""
     fse = _get_fse(args)
     if 'season' not in fse.rules:
         return
@@ -29,9 +31,9 @@ def rule_season(*args, **kwargs):
     logger.debug("applying season rule to {}".format(fse.vfile.filename))
 
     if 'season' not in fse.details:
-        logger.debug("FAILED SEASON RULE: ",
-                     "Undefined season number from file: ",
-                     "{}".format(fse.vfile.filename))
+        logger.log(11, "FAILED SEASON RULE: ",
+                   "Undefined season number from file: ",
+                   "{}".format(fse.vfile.filename))
         fse.valid = False
         return
 
@@ -43,14 +45,15 @@ def rule_season(*args, **kwargs):
             logger.debug("season rule OK {}".format(fse.vfile.filename))
 
     if not fse.transfer_to:
-        logger.debug("FAILED SEASON RULE: " +
-                     "Cannot locate season folder: " +
-                     "{}".format(fse.vfile.filename))
+        logger.log(11, "FAILED SEASON RULE: " +
+                   "Cannot locate season folder: " +
+                   "{}".format(fse.vfile.filename))
         fse.valid = False
 
 
 @set_on_event('after_match')
 def rule_parent_dir(*args, **kwargs):
+    """Sets transfer_to to the parent directory"""
     fse = _get_fse(args)
     if 'parent-dir' not in fse.rules:
         return
@@ -62,6 +65,7 @@ def rule_parent_dir(*args, **kwargs):
 
 @set_on_event('after_match')
 def rule_sub_dir(*args, **kwargs):
+    """Sets the transfer_to a specified sub directory"""
     fse = _get_fse(args)
     if 'sub-dir' not in fse.rules:
         return
@@ -70,9 +74,9 @@ def rule_sub_dir(*args, **kwargs):
     subdir_name_index = fse.rules.index('sub-dir') + 1
     subdir_name = fse.rules[subdir_name_index]
     if subdir_name not in fse.matched_dir_entry.subdirs:
-        logger.debug("FAILED SUB-DIR RULE: " +
-                     "Cannot locate sub-dir {}: ".format(subdir_name) +
-                     "{}".format(fse.vfile.filename))
+        logger.log(11, "FAILED SUB-DIR RULE: " +
+                   "Cannot locate sub-dir {}: ".format(subdir_name) +
+                   "{}".format(fse.vfile.filename))
         fse.valid = False
         return
 
@@ -82,6 +86,7 @@ def rule_sub_dir(*args, **kwargs):
 
 @set_on_event('after_match', order=9)
 def rule_episode_only(*args, **kwargs):
+    """Removes fse.detail['season'] and merges it with fse.detail['episode']"""
     fse = _get_fse(args)
     if 'episode-only' not in fse.rules:
         return
@@ -99,14 +104,15 @@ def rule_episode_only(*args, **kwargs):
 
 @set_on_event('before_transfer')
 def rule_format_title(*args, **kwargs):
+    """Sets transfer_to filename to a specified name for transfer"""
     fse = _get_fse(args)
     if 'format-title' not in fse.rules:
         return
     # Apply Rule
     if not fse.details.get('container') or not fse.transfer_to:
-        logger.debug("FAILED FORMAT-TITLE RULE: " +
-                     "Missing container or transfer_to value: " +
-                     "{}".format(fse.vfile.filename))
+        logger.log(11, "FAILED FORMAT-TITLE RULE: " +
+                   "Missing container or transfer_to value: " +
+                   "{}".format(fse.vfile.filename))
         fse.valid = False
         return
 
@@ -120,14 +126,16 @@ def rule_format_title(*args, **kwargs):
 
 @set_on_event('before_match')
 def rule_alt_title(*args, **kwargs):
+    """Checks if the fse has an alternative title and merges it with the
+    current title"""
     fse = _get_fse(args)
     if 'alt-title' not in fse.rules:
         return
     # Apply Rule
     if 'alternative_title' not in fse.details:
-        logger.debug("FAILED ALT-TITLE RULE: " +
-                     "Alternative title missing: " +
-                     "{}".format(fse.vfile.filename))
+        logger.log(11, "FAILED ALT-TITLE RULE: " +
+                   "Alternative title missing: " +
+                   "{}".format(fse.vfile.filename))
         fse.valid = False
         return
     fse.title = ' '.join([
@@ -138,6 +146,10 @@ def rule_alt_title(*args, **kwargs):
 
 @set_on_event('before_transfer')
 def rule_no_replace(*args, **kwargs):
+    """This rule first detects if a duplicate episode is found.
+    If found, it will determine to replace it or not based on if
+    the episode is proper or not. It will also just ignore replacing
+    it if the rule no-replace was set for this series"""
     fse = _get_fse(args)
     # Apply Rule
     # Get directory of transfer for fse
@@ -165,12 +177,14 @@ def rule_no_replace(*args, **kwargs):
             continue
         logger.debug(
             "REPLACE: same episode found: new -> {}: existing -> {}".format(
-                fse.vfile.filename, os.path.basename(item)))
+                fse.vfile.filename, os.path.basename(item))
+        )
 
         # Prevent episode being replaced
         if 'no-replace' in fse.rules:
             logger.debug("no-replace rule OK {}".format(fse.vfile.filename))
             fse.transfer_to = None
+            # NOTE: Probably need to find a way to remove this episode
             return
 
         # Check if any of the 2 episodes are proper's
@@ -182,20 +196,21 @@ def rule_no_replace(*args, **kwargs):
             ext = True
 
         if cur and ext:
-            logger.debug("REPLACE: both are proper, favoring the new")
+            logger.log(11, "REPLACE: both are proper, favoring the new")
             fse.replace = os.path.join(transfer_to, item)
 
         elif cur and not ext:
-            logger.debug(
-                "REPLACE: this file proper, existing isn't, replacing")
+            logger.log(11,
+                       "REPLACE: this file proper, existing isn't, replacing")
             fse.replace = os.path.join(transfer_to, item)
 
         elif ext and not cur:
-            logger.debug(
-                "REPLACE: this file isn't proper, existing is, not replacing")
+            logger.log(11,
+                       "REPLACE: this file isn't proper, existing is, ",
+                       "not replacing")
             fse.transfer_to = None
 
         else:
-            logger.debug("REPLACE: both are normal, favoring the new")
+            logger.log(11, "REPLACE: both are normal, favoring the new")
             fse.replace = os.path.join(fse.transfer_to, item)
         break

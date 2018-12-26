@@ -34,10 +34,11 @@ class FileSystemEntry:
 
         self.rules = self._get_fse_rules()
 
+        # For matcher
         self.matched_dir_path = None
         self.matched_dir_name = None
         self.matched_dir_entry = None
-
+        # For transferer
         self.transfer_to = None
 
     def _scan_fse_files(self):
@@ -54,6 +55,9 @@ class FileSystemEntry:
                     # if file was already valid, break and set to not valid
                     # reason: does not support multiple files right now!!
                     if self.vfile.filename:
+                        logger.debug(
+                            "More than one video file ",
+                            "found, invalid fse {}".format(self.name))
                         self.valid = False
                         break
                     self.vfile.filename = item
@@ -82,15 +86,15 @@ class FileSystemEntry:
 
         # Try to set the title from the guessitmatch
         if 'title' not in guessitmatch:
-            logger.debug("NO TITLE MATCH: " +
-                         "Unable to find title for: " +
-                         "{}".format(self.vfile.filename))
+            logger.log(11, "NO TITLE MATCH: ",
+                       "Unable to find title for: ",
+                       "{}".format(self.vfile.filename))
             self.valid = False
 
         if 'type' not in guessitmatch:
-            logger.debug("NO TYPE MATCH: " +
-                         "Unable to find type of video for: " +
-                         "{}".format(self.vfile.filename))
+            logger.log(11, "NO TYPE MATCH: ",
+                       "Unable to find type of video for: ",
+                       "{}".format(self.vfile.filename))
             self.valid = False
 
         try:

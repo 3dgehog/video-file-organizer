@@ -17,10 +17,12 @@ def main():
 
     # Setup Logger
     logger = logging.getLogger('app')
+    # LFRI = Log File Relevent Information
+    logging.addLevelName(11, 'LFRI')
     logger.setLevel(logging.DEBUG)
 
     fh = logging.FileHandler('vfo.log')
-    fh.setLevel(logging.INFO)
+    fh.setLevel(11)
 
     ch = logging.StreamHandler()
     ch.setLevel(logging.WARNING)
@@ -42,10 +44,14 @@ def main():
     logger.addHandler(ch)
     logger.addHandler(fh)
 
+    if args.verbose:
+        logger.info("Running in verbose mode")
+
     if args.config:
-        app = App(args.config[0], args)
+        app = App(config_dir=args.config[0], args=args)
+        logger.info("Running custom configs in {}".format(args.config[0]))
     else:
-        app = App(args)
+        app = App(args=args)
     app.setup()
     app.run()
 
