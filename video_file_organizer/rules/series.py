@@ -187,7 +187,6 @@ def rule_no_replace(*args, **kwargs):
         if 'no-replace' in fse.rules:
             logger.debug("no-replace rule OK {}".format(fse.vfile.filename))
             fse.transfer_to = None
-            # NOTE: Probably need to find a way to remove this episode
             return
 
         # Check if any of the 2 episodes are proper's
