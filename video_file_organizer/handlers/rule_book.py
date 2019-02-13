@@ -31,7 +31,7 @@ class RuleBookHandler:
     def _check_rule_book(self):
         """Simple check to see if the rule_book has the section series"""
         if not self.configparse.has_section('series'):
-            raise ValueError("Rule book is empty")
+            raise ValueError("Rule book has no series section")
 
     def _validate_rule_book(self):
         """Checks if all the sections are valid and checks all the values of
@@ -48,7 +48,7 @@ class RuleBookHandler:
                 # Get all the values for specific option
                 rules = self.configparse.get('series', option)
                 self._validate_series_rules_values(shlex.split(rules))
-        logger.debug("rule book was validated")
+        logger.debug("Rule book was validated")
 
     def _validate_series_rules_values(self, rules: list):
         """Checks if all the rules from a specific entry has all valid options,
@@ -90,7 +90,7 @@ class RuleBookHandler:
                 rule_list.sort(key=lambda x: x[1])
                 for set_event, set_order in rule_list:
                     listener(rule_func)
-                    logger.debug("added rule func {} to event {}".format(
+                    logger.debug("Added rule function {} to event {}".format(
                         rule_func.__name__, set_event))
 
     def get_fse_rules(self, fse) -> list:

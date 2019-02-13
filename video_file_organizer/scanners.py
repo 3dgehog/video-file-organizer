@@ -14,7 +14,7 @@ logger = logging.getLogger('app.scanner')
 def scan_input_dir(app) -> queue.Queue:
     """Returns a Queue with all the FSE"""
     app._requirements(['config'])
-    logger.debug("scanning input dir")
+    logger.debug("Scanning input dir")
 
     scan_queue = queue.Queue()
 
@@ -23,17 +23,17 @@ def scan_input_dir(app) -> queue.Queue:
         # Ignore config ignore files
         if app.config.ignore:
             if item in app.config.ignore:
-                logger.debug("fse '{}' ignored".format(item))
+                logger.debug("FSE '{}' ignored".format(item))
                 continue
 
         fse = FileSystemEntry(app, item)
 
         # Add FSE to queue is its valid
         if fse.valid:
-            logger.debug("fse '{}' added to scan_queue".format(item))
+            logger.debug("FSE '{}' added to scan_queue".format(item))
             scan_queue.put(fse)
         else:
-            logger.debug("invalid fse {}".format(fse.name))
+            logger.debug("Invalid FSE {}".format(fse.name))
 
     return scan_queue
 
@@ -42,5 +42,5 @@ def scan_series_dirs(app) -> DirIndex:
         """Returns a dir_index object for all the series_dirs from the
         configs"""
         app._requirements(['config'])
-        logger.debug("scanning series dirs")
+        logger.debug("Scanning series dirs")
         return DirIndex(app.config.series_dirs)

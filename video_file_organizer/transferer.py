@@ -15,12 +15,12 @@ def transferer(app):
 
     while True:
         if matched_queue.qsize() == 0:
-            logger.debug("end of matched queue")
+            logger.debug("End of matched queue")
             break
 
         fse = matched_queue.get()
 
-        logger.debug("working on {}".format(fse.vfile.filename))
+        logger.debug("Working on {}".format(fse.vfile.filename))
 
         transfer_fse(app, fse)
 
@@ -41,12 +41,12 @@ def _transfer_fse(app, fse: FileSystemEntry):
             logger.info("{} succeeded".format(fse.vfile.filename))
         else:
             _delete_fse(fse)
-            logger.log(11, "deleted {} without transfer".format(
+            logger.log(11, "Deleted {} without transfer".format(
                 fse.vfile.filename))
 
 
 def _copy_fse(fse: FileSystemEntry):
-    logger.debug("copying: '{}' to: '{}'".format(
+    logger.debug("Copying: '{}' to: '{}'".format(
         fse.vfile.filename, fse.transfer_to))
     shutil.copy(fse.vfile.abspath, fse.transfer_to)
 
@@ -56,4 +56,4 @@ def _delete_fse(fse: FileSystemEntry):
         shutil.rmtree(fse.abspath)
     else:
         os.remove(fse.abspath)
-    logger.debug("fse deleted")
+    logger.debug("FSE deleted")

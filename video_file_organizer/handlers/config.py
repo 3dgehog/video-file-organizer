@@ -41,7 +41,8 @@ class ConfigHandler:
         If it doesn't it creates the directory and adds template config
         files inside"""
         if not os.path.exists(self.config_dir):
-            logger.debug("Config folder doesn't exists, therefore its created")
+            logger.debug(
+                "Config folder doesn't exists, therefore it was created")
             os.makedirs(self.config_dir)
 
         for file in os.listdir(self.config_templates):
@@ -67,28 +68,28 @@ class ConfigHandler:
             if not self._config_yaml[field]:
                 raise ValueError(
                     "Value for '{}' empty on config.yaml".format(field))
-        logger.debug("all required fields are entered")
+        logger.debug("All required fields are entered")
 
     def _run_before_scripts(self):
         """Run all before_scripts in config.yaml"""
         # Checks if there are scripts to run
         if not self._config_yaml['before_scripts']:
-            logger.debug("no before scripts to run")
+            logger.debug("No before scripts to run")
             return
         # Run scripts
         for script in self._config_yaml['before_scripts']:
-            logger.debug("running before script '{}'".format(script))
+            logger.debug("Running before script '{}'".format(script))
             subprocess.check_output([script], shell=True)
-            logger.debug("{} script ran".format(script))
+            logger.debug("Ran script {}".format(script))
 
     def _get_input_dir(self) -> str:
         """Returns the input_dir path from the config.yaml"""
         # Checks that the directory exists
         if not os.path.exists(self._config_yaml["input_dir"]):
-            raise FileNotFoundError("{} doesn't exists".format(
+            raise FileNotFoundError("File {} doesn't exists".format(
                 self._config_yaml["input_dir"]))
 
-        logger.debug("got input dir {}".format(
+        logger.debug("Got input dir {}".format(
             self._config_yaml["input_dir"]))
         return self._config_yaml["input_dir"]
 
@@ -102,7 +103,7 @@ class ConfigHandler:
                     "Series Directory '{}' doesn't exists".format(dirs))
             dirs.append(dir_list)
 
-        logger.debug("got series dirs '{}'".format(dirs))
+        logger.debug("Got series dirs '{}'".format(dirs))
         return dirs
 
     def _compile_video_file_ext_pattern(self) -> Pattern[str]:

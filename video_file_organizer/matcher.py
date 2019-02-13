@@ -20,7 +20,7 @@ def matcher(app) -> queue.Queue:
     while True:
         # scan_queue is empty, break
         if scan_queue.qsize() == 0:
-            logger.debug("end of scan queue")
+            logger.debug("End of scan queue")
             break
 
         # Get FSE object from scan_queue
@@ -30,7 +30,7 @@ def matcher(app) -> queue.Queue:
         if not fse.valid or not fse.transfer_to:
             continue
 
-        logger.debug("{} added to match queue".format(fse.vfile.filename))
+        logger.debug("Added {} to match queue".format(fse.vfile.filename))
         match_queue.put(fse)
 
     return match_queue
@@ -68,4 +68,4 @@ def _match_fse(app, fse: FileSystemEntry):
     fse.matched_dir_path = index.dict[index_match[0]].path
     fse.matched_dir_name = index_match[0]
     fse.matched_dir_entry = index.dict[index_match[0]]
-    logger.debug("match successful for {}".format(fse.vfile.filename))
+    logger.debug("Match successful for {}".format(fse.vfile.filename))

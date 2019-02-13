@@ -21,7 +21,7 @@ A small set of tools used to help develop and test
 You can use the toolbox to create a full mock folder of blank folders to test against. The mock folder will also have setup the most basic configs to start your tests. To use:
 
 ```bash
-pipenv run toolbox.py --mock
+pipenv run python toolbox.py --mock
 ```
 
 Then run the software against that folder by precizing the configs folder location

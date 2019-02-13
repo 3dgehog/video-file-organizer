@@ -81,7 +81,7 @@ class FileSystemEntry:
             if len(guessitmatch_foldername) > len(guessitmatch):
                 guessitmatch = guessitmatch_foldername
                 logger.debug(
-                    "used foldername instead of filename for guessit match.")
+                    "Used foldername instead of filename for guessit match.")
         self.details = guessitmatch
 
         # Try to set the title from the guessitmatch

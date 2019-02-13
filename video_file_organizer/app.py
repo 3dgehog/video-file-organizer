@@ -25,8 +25,8 @@ class App:
         """A function that starts up the app, it gets and executes the
         ConfigHandler, args, EventHandler and RuleBookHandler. This is
         run even before any of the searching and matching is done on the
-        directory to make sure tbat all the configs are ready to go"""
-        logger.debug("setting up app")
+        directory to make sure that all the configs are ready to go"""
+        logger.debug("Setting up app")
         self.config = ConfigHandler(self)
         self.config.args = self.args
         self.event = EventHandler(self)
@@ -35,7 +35,7 @@ class App:
     def run(self):
         """This is the main function of the app. This requires the setup
         function to be run first before it will be able to run properly"""
-        logger.debug("running app")
+        logger.debug("Running app")
         try:
             with yg.lockfile.FileLock(
                     os.path.join(tempfile.gettempdir(), 'vfolock'),
@@ -46,7 +46,7 @@ class App:
                 transferer(self)
         except yg.lockfile.FileLockTimeout:
             logger.warning("FAILED LOCKFILE: " +
-                           "the program must already be running")
+                           "The program must already be running")
 
     def _requirements(self, requirements: list):
         """A simple function used by all of the application to make sure
