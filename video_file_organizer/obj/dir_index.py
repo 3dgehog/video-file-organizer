@@ -28,7 +28,8 @@ class DirIndex:
         for folder in os.listdir(entry):
             if folder in self.dict.keys():
                 raise KeyError("Duplicate folder '{}'".format(folder))
-            # BUG: Issue if its a file instead of a folder
+            if os.path.isfile(os.path.join(entry, folder)):
+                continue
             dir_entry = DirEntry(os.path.join(entry, folder))
             self.dict[folder] = dir_entry
             self.entries.append(dir_entry)
