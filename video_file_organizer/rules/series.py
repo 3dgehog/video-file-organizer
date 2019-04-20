@@ -208,7 +208,7 @@ def rule_no_replace(*args, **kwargs):
 
         elif ext and not cur:
             logger.log(11,
-                       "REPLACE: this file isn't proper, existing is, ",
+                       "REPLACE: this file isn't proper, existing is, " +
                        "not replacing")
             fse.transfer_to = None
 
