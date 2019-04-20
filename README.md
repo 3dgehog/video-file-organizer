@@ -11,6 +11,14 @@ cd video_file_organizer
 pipenv install
 ```
 
+### Setting up config files
+
+Before automizing the program, the setup config and rule book need to be setup. Run the program once to get empty config files created in `~/.config/video_file_orgainzer`
+
+```bash
+pipenv run vfo
+```
+
 ### Setup systemd service and timer
 
 Use the toolbox included to do so, run:
