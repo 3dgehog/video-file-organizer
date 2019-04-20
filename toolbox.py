@@ -4,6 +4,7 @@ import logging
 import argparse
 import shutil
 import configparser
+import subprocess
 
 from tests.utils.injectors import ConfigInjector, RuleBookInjector
 from tests.utils.vars import SERIES_CONFIGPARSE
@@ -102,6 +103,9 @@ def setup_systemd():
 
     working_dir_path = os.path.dirname(os.path.realpath(__file__))
 
+    pipenv_path = subprocess.check_output(
+        "which pipenv", shell=True).decode().replace('\n', '')
+
     service_file_path = os.path.join(SYSTEMD_FOLDER, 'vfo.service')
     service_config = configparser.ConfigParser()
     service_config.optionxform = str
@@ -112,7 +116,7 @@ def setup_systemd():
     service_config['Service'] = {
         'User': 'maxence',
         'WorkingDirectory': working_dir_path,
-        'ExecStart': 'pipenv run vfo'
+        'ExecStart': '{} run vfo'.format(pipenv_path)
     }
     service_config['Install'] = {
         'WantedBy': 'multi-user.target'
