@@ -41,7 +41,7 @@ def _transfer_fse(app, fse: FileSystemEntry):
             logger.info("{} succeeded".format(fse.vfile.filename))
         else:
             _delete_fse(fse)
-            logger.log(11, "Deleted {} without transfer".format(
+            logger.info("{} deleted without transfer".format(
                 fse.vfile.filename))
 
 
