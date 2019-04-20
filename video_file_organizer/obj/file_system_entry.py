@@ -27,6 +27,10 @@ class FileSystemEntry:
         self.vfile.abspath = None
         self._scan_fse_files()
 
+        if self.vfile.filename is None:
+            self.valid = False
+            return
+
         self.title = None
         self.type = None
         self.details = None

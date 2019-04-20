@@ -26,6 +26,7 @@ def scan_input_dir(app) -> queue.Queue:
                 logger.debug("FSE '{}' ignored".format(item))
                 continue
 
+        logger.debug("Scanning {}".format(item))
         fse = FileSystemEntry(app, item)
 
         # Add FSE to queue is its valid
