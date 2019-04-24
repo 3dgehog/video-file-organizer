@@ -4,6 +4,7 @@ import subprocess
 import logging
 import yaml
 import re
+import sys
 from typing import Pattern
 
 
@@ -79,7 +80,11 @@ class ConfigHandler:
         # Run scripts
         for script in self._config_yaml['before_scripts']:
             logger.debug("Running before script '{}'".format(script))
-            subprocess.check_output([script], shell=True)
+            try:
+                subprocess.check_output([script], shell=True)
+            except subprocess.CalledProcessError as e:
+                logger.info(e)
+                sys.exit()
             logger.debug("Ran script {}".format(script))
 
     def _get_input_dir(self) -> str:

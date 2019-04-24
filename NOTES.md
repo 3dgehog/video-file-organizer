@@ -15,5 +15,10 @@
 - [x] By default vfo should create a new Season folder if it doesn't exist
 - [x] no-replace rule doesn't delete the file after it was check successfully
 - [] create before_script.d directory to link before scripts strait into the app without needed to add them to the config file
+- [x] Remove traceback on before_script failing
+- [] Rework the logs, more information about the files for the vfo.logs
 
 ## Notes to self
+
+Fix empty series folder error
+Fix One punch man not finding episode number error

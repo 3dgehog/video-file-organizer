@@ -1,6 +1,5 @@
 import pytest
 import os
-import subprocess
 
 from tests.utils.vars import ASSETS_DIR
 
@@ -52,11 +51,12 @@ def test_failing_before_script(tmp_config_dir, tmp_dir):
     app = App()
     app.config_dir = tmp_config_dir
     # CalledProcessError because the script failed
-    with pytest.raises(subprocess.CalledProcessError):
+    with pytest.raises(SystemExit):
         ConfigHandler(app)
 
 
 def test_success_confighandler(tmp_config_dir, tmp_dir):
+    """This is a text of if everything goes well"""
     config_injector = ConfigInjector(tmp_config_dir)
     os.mkdir(os.path.join(tmp_dir, "series_dirs"))
     os.mkdir(os.path.join(tmp_dir, "input_dir"))
