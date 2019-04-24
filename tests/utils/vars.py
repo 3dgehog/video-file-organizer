@@ -5,6 +5,7 @@ ASSETS_DIR = os.path.join(os.path.dirname(__file__), "../assets")
 SERIES_CONFIGPARSE = {
     "Boruto - Naruto Next Generations": 'parent-dir episode-only alt-title',
     "Gintama": 'parent-dir episode-only',
+    "One Punch Man": 'season',
     "Mahoutsukai no Yome": 'parent-dir',
     "One Piece": 'sub-dir "One Piece Episodes" episode-only \
 format-title "One_Piece_{{ episode }}"',

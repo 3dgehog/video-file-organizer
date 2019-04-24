@@ -34,7 +34,8 @@ format-title "One_Piece_{{ episode }}"',
         "Brooklyn Nine Nine": 'season',
         "Boruto - Naruto Next Generations": 'parent-dir episode-only \
 alt-title',
-        "Lucifer": 'season no-replace'
+        "Lucifer": 'season no-replace',
+        "One Punch Man": 'season'
     }
     rule_book_injector.save()
     config_injector.append({
@@ -68,6 +69,13 @@ alt-title',
         in os.listdir(
             os.path.join(extract_series_dirs[0],
                          "Lucifer/Season 3")
+        )
+
+    # Check if episode transfered even though episode number was not detected
+    assert '[HorribleSubs] One Punch Man S2 - 03 [480p].mkv' \
+        in os.listdir(
+            os.path.join(extract_series_dirs[1],
+                         "One-Punch Man/Season 2")
         )
 
 

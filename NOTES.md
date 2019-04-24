@@ -17,8 +17,7 @@
 - [] create before_script.d directory to link before scripts strait into the app without needed to add them to the config file
 - [x] Remove traceback on before_script failing
 - [] Rework the logs, more information about the files for the vfo.logs
+- [x] Issue when episode number isn't detected
+- [] Fix empty series folder error
 
 ## Notes to self
-
-Fix empty series folder error
-Fix One punch man not finding episode number error

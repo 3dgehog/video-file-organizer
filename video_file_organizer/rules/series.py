@@ -162,8 +162,16 @@ def rule_no_replace(*args, **kwargs):
         transfer_to = fse.transfer_to
 
     # Global search all files for same episode number
-    glob_search = glob.glob(
-        "{}/*{}*".format(transfer_to, fse.details['episode']))
+    try:
+        glob_search = glob.glob(
+            "{}/*{}*".format(transfer_to, fse.details['episode']))
+    except KeyError:
+        # If couldn't detect episode number, let it through
+        logger.log(11,
+                   "REPLACE: Couldn't detect the episode number, " +
+                   "transfering the file anyways")
+        return
+
     if len(glob_search) == 0:
         logger.debug("REPLACE: no duplicate episode")
         if 'no-replace' in fse.rules:
