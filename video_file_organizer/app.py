@@ -41,8 +41,9 @@ class App:
                     timeout=10):
                 self.series_index = scan_series_dirs(self.config.series_dirs)
                 self.scan_queue = scan_input_dir(self.config, self.rule_book)
-                self.matched_queue = matcher(self)
-                transferer(self)
+                self.matched_queue = matcher(
+                    self.scan_queue, self.event, self.series_index)
+                transferer(self.matched_queue, self.event)
         except yg.lockfile.FileLockTimeout:
             logger.warning("FAILED LOCKFILE: " +
                            "The program must already be running")

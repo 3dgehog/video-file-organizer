@@ -41,7 +41,7 @@ def test_matcher_warnings(
         tmp_queue.put(fse)
     app.scan_queue = tmp_queue
 
-    app.matched_queue = matcher(app)
+    app.matched_queue = matcher(app.scan_queue, app.event, app.series_index)
 
     # Check if warning for missing Supernatural folder
     assert "FAILED MATCH: Unable to find a match: \
@@ -73,7 +73,7 @@ def test_match_event_rules_warning(tmp_config_dir,
     app.setup()
     app.series_index = scan_series_dirs(app.config.series_dirs)
     app.scan_queue = scan_input_dir(app.config, app.rule_book)
-    app.matched_queue = matcher(app)
+    app.matched_queue = matcher(app.scan_queue, app.event, app.series_index)
 
     # Created the missing season folder for Homeland
     assert "SEASON RULE: Created new Season 7 \
@@ -99,7 +99,7 @@ def test_success_matcher(
     app.setup()
     app.series_index = scan_series_dirs(app.config.series_dirs)
     app.scan_queue = scan_input_dir(app.config, app.rule_book)
-    app.matched_queue = matcher(app)
+    app.matched_queue = matcher(app.scan_queue, app.event, app.series_index)
 
     while True:
         if app.matched_queue.qsize() == 0:

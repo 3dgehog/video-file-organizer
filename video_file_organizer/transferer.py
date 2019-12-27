@@ -7,10 +7,10 @@ from video_file_organizer.obj.file_system_entry import FileSystemEntry
 logger = logging.getLogger('app.transferer')
 
 
-def transferer(app):
+def transferer(matched_queue, event):
     logger.debug("Running Transferer")
 
-    matched_queue = app.matched_queue
+    matched_queue = matched_queue
 
     while True:
         if matched_queue.qsize() == 0:
@@ -21,16 +21,16 @@ def transferer(app):
 
         logger.debug("Working on {}".format(fse.vfile.filename))
 
-        transfer_fse(app, fse)
+        transfer_fse(event, fse)
 
 
-def transfer_fse(app, fse: FileSystemEntry):
-    app.event.before_transfer(fse)
-    _transfer_fse(app, fse)
-    app.event.after_transfer(fse)
+def transfer_fse(event, fse: FileSystemEntry):
+    event.before_transfer(fse)
+    _transfer_fse(fse)
+    event.after_transfer(fse)
 
 
-def _transfer_fse(app, fse: FileSystemEntry):
+def _transfer_fse(fse: FileSystemEntry):
     if not fse.valid and not fse.transfer_to:
         return
     if fse.valid:
