@@ -13,7 +13,8 @@ def setup_app_for_rule_book(config_dir):
     has the attr config_dir and event set"""
     app = App()
     app.config_dir = config_dir
-    app.event = EventHandler(app)
+    event = EventHandler()
+    app.event = event
     rule_book_editor = RuleBookInjector(config_dir)
     return app, rule_book_editor
 
@@ -25,7 +26,7 @@ def test_invalid_rule(tmp_config_dir):
     }
     rule_book_injector.save()
     with pytest.raises(KeyError):
-        RuleBookHandler(app)
+        RuleBookHandler(app.config_dir, app.event)
 
 
 def test_valid_secondary_rule(tmp_config_dir):
@@ -34,7 +35,7 @@ def test_valid_secondary_rule(tmp_config_dir):
         'That 70s Show': 'sub-dir "hi"'
     }
     rule_book_injector.save()
-    RuleBookHandler(app)
+    RuleBookHandler(app.config_dir, app.event)
 
 
 def test_missing_event(tmp_config_dir):
@@ -43,11 +44,11 @@ def test_missing_event(tmp_config_dir):
     rule_book_injector.save()
     del app.event
     with pytest.raises(AttributeError):
-        RuleBookHandler(app)
+        RuleBookHandler(app.config_dir, app.event)
 
 
 def test_success_rulebookhandler(tmp_config_dir):
     app, rule_book_injector = setup_app_for_rule_book(tmp_config_dir)
     rule_book_injector.configparse['series'] = SERIES_CONFIGPARSE
     rule_book_injector.save()
-    RuleBookHandler(app)
+    RuleBookHandler(app.config_dir, app.event)

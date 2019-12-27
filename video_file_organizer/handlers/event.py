@@ -9,9 +9,8 @@ logger = logging.getLogger('app.events')
 
 
 class EventHandler:
-    def __init__(self, app):
+    def __init__(self):
         logger.debug("Initializing EventHandler")
-        self.app = app
         self.event_before_match = Event()
         self.event_after_match = Event()
         self.event_before_transfer = Event()

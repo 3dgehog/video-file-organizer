@@ -12,11 +12,10 @@ logger = logging.getLogger('app.rule_book')
 
 
 class RuleBookHandler:
-    def __init__(self, app) -> None:
+    def __init__(self, config_dir, event) -> None:
         logger.debug("Initializing RuleBookHandler")
-        app._requirements(['config_dir', 'event'])
-        self.app = app
-        self.config_dir = app.config_dir
+        self.config_dir = config_dir
+        self.event = event
         self.configparse = self._get_rule_book()
         self._check_rule_book()
         self._validate_rule_book()
@@ -80,7 +79,7 @@ class RuleBookHandler:
             # Gets the function using getattr()
             rule_func = getattr(series, rule)
             # Loops thru all the events and their listeners
-            for event, listener in self.app.event.event_listeners_list.items():
+            for event, listener in self.event.event_listeners_list.items():
                 rule_list = []
                 # Loops thru all the events the rule_func has
                 for set_event, set_order in rule_func.events:

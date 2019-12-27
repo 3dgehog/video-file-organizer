@@ -27,10 +27,9 @@ class App:
         run even before any of the searching and matching is done on the
         directory to make sure that all the configs are ready to go"""
         logger.debug("Setting up app")
-        self.config = ConfigHandler(self)
-        self.config.args = self.args
-        self.event = EventHandler(self)
-        self.rule_book = RuleBookHandler(self)
+        self.config = ConfigHandler(self.config_dir, self.args)
+        self.event = EventHandler()
+        self.rule_book = RuleBookHandler(self.config_dir, self.event)
 
     def run(self):
         """This is the main function of the app. This requires the setup
@@ -47,11 +46,3 @@ class App:
         except yg.lockfile.FileLockTimeout:
             logger.warning("FAILED LOCKFILE: " +
                            "The program must already be running")
-
-    def _requirements(self, requirements: list):
-        """A simple function used by all of the application to make sure
-        that the functions that run have their requirements ready"""
-        for require in requirements:
-            if require not in dir(self):
-                raise AttributeError(
-                    "Missing attributes {} in app".format(require))

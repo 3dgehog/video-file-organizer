@@ -6,7 +6,6 @@ from tests.utils.vars import ASSETS_DIR
 from tests.utils.injectors import ConfigInjector
 
 from video_file_organizer.handlers.config import ConfigHandler
-from video_file_organizer.app import App
 
 
 def test_empty_config_folder(tmp_dir):
@@ -15,11 +14,9 @@ def test_empty_config_folder(tmp_dir):
     - Creation of new configs from templates
     - Opening and reading config.yaml
     - If all required fields are entered"""
-    app = App()
-    app.config_dir = tmp_dir
     # ValueError because the required fields are not entered
     with pytest.raises(ValueError):
-        ConfigHandler(app)
+        ConfigHandler(tmp_dir)
     # Checks the files where created by the ConfigHandler
     assert os.path.exists(tmp_dir)
 
@@ -31,11 +28,9 @@ def test_none_existing_series_and_input_dirs(tmp_config_dir, tmp_dir):
         "series_dirs": [os.path.join(tmp_dir, "series_dirs")],
         "input_dir": os.path.join(tmp_dir, "input_dir")
     })
-    app = App()
-    app.config_dir = tmp_config_dir
     # FileNotFoundError because the directory doesn't exist
     with pytest.raises(FileNotFoundError):
-        ConfigHandler(app)
+        ConfigHandler(tmp_config_dir)
 
 
 def test_failing_before_script(tmp_config_dir, tmp_dir):
@@ -48,11 +43,9 @@ def test_failing_before_script(tmp_config_dir, tmp_dir):
         "input_dir": os.path.join(tmp_dir, "input_dir"),
         "before_scripts": [os.path.join(ASSETS_DIR, "fail_script.sh")]
     })
-    app = App()
-    app.config_dir = tmp_config_dir
     # CalledProcessError because the script failed
     with pytest.raises(SystemExit):
-        ConfigHandler(app)
+        ConfigHandler(tmp_config_dir)
 
 
 def test_success_confighandler(tmp_config_dir, tmp_dir):
@@ -64,6 +57,4 @@ def test_success_confighandler(tmp_config_dir, tmp_dir):
         "series_dirs": [os.path.join(tmp_dir, "series_dirs")],
         "input_dir": os.path.join(tmp_dir, "input_dir")
     })
-    app = App()
-    app.config_dir = tmp_config_dir
-    ConfigHandler(app)
+    ConfigHandler(tmp_config_dir)

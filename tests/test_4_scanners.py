@@ -14,7 +14,7 @@ def setup_app_for_scanners(config_dir):
     app = App()
     app.config_dir = config_dir
     config_injector = ConfigInjector(config_dir)
-    app.event = EventHandler(app)
+    app.event = EventHandler()
     rule_book_injector = RuleBookInjector(config_dir)
     return app, config_injector, rule_book_injector
 
@@ -30,8 +30,8 @@ def test_scan_input_dir(tmp_config_dir, extract_input_dir, tmp_dir):
         "input_dir": input_dir,
         "series_dirs": series_dirs
     })
-    app.config = ConfigHandler(app)
-    app.rule_book = RuleBookHandler(app)
+    app.config = ConfigHandler(app.config_dir)
+    app.rule_book = RuleBookHandler(app.config_dir, app.event)
     app.scan_queue = scan_input_dir(app)
     while True:
         if app.scan_queue.qsize() == 0:
@@ -64,8 +64,8 @@ def test_scan_series_dirs(tmp_config_dir, extract_series_dirs, tmp_dir):
         "input_dir": input_dir,
         "series_dirs": series_dirs
     })
-    app.config = ConfigHandler(app)
-    app.rule_book = RuleBookHandler(app)
+    app.config = ConfigHandler(app.config_dir)
+    app.rule_book = RuleBookHandler(app.config_dir, app.event)
     app.series_index = scan_series_dirs(app)
     for name, entry in app.series_index.dict.items():
         # Check the name is the same from the entry

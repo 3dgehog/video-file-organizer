@@ -19,11 +19,10 @@ class ConfigHandler:
     """The ConfigHandler handles all the configs of the application and is a
     layer between the application and the config.yaml file. """
 
-    def __init__(self, app) -> None:
+    def __init__(self, config_dir, args=None) -> None:
         logger.debug("Initializing ConfigHandler")
-        app._requirements(['config_dir'])
-        self.app = app
-        self.config_dir = app.config_dir
+        self.config_dir = config_dir
+        self.args = args
         self.config_templates = CONFIG_TEMPLATES
 
         self._init_config_dir()

@@ -8,7 +8,6 @@ logger = logging.getLogger('app.transferer')
 
 
 def transferer(app):
-    app._requirements(['matched_queue', 'event'])
     logger.debug("Running Transferer")
 
     matched_queue = app.matched_queue
