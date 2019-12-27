@@ -32,7 +32,7 @@ def test_scan_input_dir(tmp_config_dir, extract_input_dir, tmp_dir):
     })
     app.config = ConfigHandler(app.config_dir)
     app.rule_book = RuleBookHandler(app.config_dir, app.event)
-    app.scan_queue = scan_input_dir(app)
+    app.scan_queue = scan_input_dir(app.config, app.rule_book)
     while True:
         if app.scan_queue.qsize() == 0:
             break
@@ -66,7 +66,7 @@ def test_scan_series_dirs(tmp_config_dir, extract_series_dirs, tmp_dir):
     })
     app.config = ConfigHandler(app.config_dir)
     app.rule_book = RuleBookHandler(app.config_dir, app.event)
-    app.series_index = scan_series_dirs(app)
+    app.series_index = scan_series_dirs(app.config.series_dirs)
     for name, entry in app.series_index.dict.items():
         # Check the name is the same from the entry
         assert name == entry.name

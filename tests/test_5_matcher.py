@@ -27,8 +27,8 @@ def test_matcher_warnings(
     shutil.rmtree(os.path.join(extract_series_dirs[0], "Supernatural"))
 
     app.setup()
-    app.series_index = scan_series_dirs(app)
-    app.scan_queue = scan_input_dir(app)
+    app.series_index = scan_series_dirs(app.config.series_dirs)
+    app.scan_queue = scan_input_dir(app.config, app.rule_book)
 
     # Set an FSE to an unknown type
     tmp_queue = queue.Queue()
@@ -71,8 +71,8 @@ def test_match_event_rules_warning(tmp_config_dir,
         "series_dirs": extract_series_dirs
     })
     app.setup()
-    app.series_index = scan_series_dirs(app)
-    app.scan_queue = scan_input_dir(app)
+    app.series_index = scan_series_dirs(app.config.series_dirs)
+    app.scan_queue = scan_input_dir(app.config, app.rule_book)
     app.matched_queue = matcher(app)
 
     # Created the missing season folder for Homeland
@@ -97,8 +97,8 @@ def test_success_matcher(
         "series_dirs": extract_series_dirs
     })
     app.setup()
-    app.series_index = scan_series_dirs(app)
-    app.scan_queue = scan_input_dir(app)
+    app.series_index = scan_series_dirs(app.config.series_dirs)
+    app.scan_queue = scan_input_dir(app.config, app.rule_book)
     app.matched_queue = matcher(app)
 
     while True:
