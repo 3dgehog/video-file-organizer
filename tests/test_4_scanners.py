@@ -66,7 +66,7 @@ def test_scan_series_dirs(tmp_config_dir, extract_series_dirs, tmp_dir):
     })
     app.config = ConfigHandler(app.config_dir)
     app.rule_book = RuleBookHandler(app.config_dir, app.event)
-    app.series_index = scan_series_dirs(app.config.series_dirs)
+    app.series_index = scan_series_dirs(app.config)
     for name, entry in app.series_index.dict.items():
         # Check the name is the same from the entry
         assert name == entry.name

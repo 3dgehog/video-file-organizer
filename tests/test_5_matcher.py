@@ -27,7 +27,7 @@ def test_matcher_warnings(
     shutil.rmtree(os.path.join(extract_series_dirs[0], "Supernatural"))
 
     app.setup()
-    app.series_index = scan_series_dirs(app.config.series_dirs)
+    app.series_index = scan_series_dirs(app.config)
     app.scan_queue = scan_input_dir(app.config, app.rule_book)
 
     # Set an FSE to an unknown type
@@ -71,7 +71,7 @@ def test_match_event_rules_warning(tmp_config_dir,
         "series_dirs": extract_series_dirs
     })
     app.setup()
-    app.series_index = scan_series_dirs(app.config.series_dirs)
+    app.series_index = scan_series_dirs(app.config)
     app.scan_queue = scan_input_dir(app.config, app.rule_book)
     app.matched_queue = matcher(app.scan_queue, app.event, app.series_index)
 
@@ -97,7 +97,7 @@ def test_success_matcher(
         "series_dirs": extract_series_dirs
     })
     app.setup()
-    app.series_index = scan_series_dirs(app.config.series_dirs)
+    app.series_index = scan_series_dirs(app.config)
     app.scan_queue = scan_input_dir(app.config, app.rule_book)
     app.matched_queue = matcher(app.scan_queue, app.event, app.series_index)
 

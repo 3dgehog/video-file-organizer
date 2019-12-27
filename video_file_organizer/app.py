@@ -39,7 +39,7 @@ class App:
             with yg.lockfile.FileLock(
                     os.path.join(tempfile.gettempdir(), 'vfolock'),
                     timeout=10):
-                self.series_index = scan_series_dirs(self.config.series_dirs)
+                self.series_index = scan_series_dirs(self.config)
                 self.scan_queue = scan_input_dir(self.config, self.rule_book)
                 self.matched_queue = matcher(
                     self.scan_queue, self.event, self.series_index)

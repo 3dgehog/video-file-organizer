@@ -41,13 +41,13 @@ def scan_input_dir(config, rule_book) -> queue.Queue:
     return scan_queue
 
 
-def scan_series_dirs(series_dirs) -> DirIndex:
+def scan_series_dirs(config) -> DirIndex:
     """
     Returns a dir_index object for all the series_dirs from the
     configs
     """
     logger.debug("Scanning series dirs")
-    return DirIndex(series_dirs)
+    return DirIndex(config.series_dirs)
 
 
 ###
