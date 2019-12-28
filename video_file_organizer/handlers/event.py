@@ -1,10 +1,5 @@
 import logging
 
-
-VALID_EVENT = [
-    'before_match', 'after_match', 'before_transfer', 'after_transfer'
-]
-
 logger = logging.getLogger('app.events')
 
 

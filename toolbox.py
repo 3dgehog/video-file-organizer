@@ -26,8 +26,6 @@ MOCK_FOLDER = os.path.join(
 SYSTEMD_FOLDER = os.path.join(
     os.path.dirname(__file__), 'systemd')
 
-CONFIG_TEMPLATES = os.path.join(os.path.dirname(
-    __file__), 'video_file_organizer/config_templates')
 
 ASSETS_DIR = os.path.join(
     os.path.dirname(__file__), 'tests/assets')

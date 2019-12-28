@@ -1,4 +1,5 @@
-[] Init config files -> instead of auto create
+[] move config templates to .py
+[] config.yaml to settings.py
 [] seperate rule match and output folder match
 [] seperate input dir scan and output folder scan
 [] add controllers on matchers and transfer

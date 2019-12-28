@@ -1,10 +1,9 @@
-from video_file_organizer.handlers.event import VALID_EVENT
+from video_file_organizer.handlers.event import EventHandler
+
+VALID_EVENT = EventHandler().event_listeners_list.keys()
 
 
-DEFAULT_ORDER = 10
-
-
-def set_on_event(event: str, order=DEFAULT_ORDER):
+def set_on_event(event: str, order=10):
     """Adds attr events on function with a tuple of the event and order"""
     if event not in VALID_EVENT:
         raise ValueError("Event {} is not a valid event".format(event))

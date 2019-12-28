@@ -5,7 +5,7 @@ import importlib
 import shlex
 import logging
 
-VALID_SECTIONS = ['series']
+from video_file_organizer.settings import VALID_SECTIONS
 
 
 logger = logging.getLogger('app.rule_book')

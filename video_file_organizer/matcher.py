@@ -2,8 +2,7 @@ import queue
 import logging
 import difflib
 
-from video_file_organizer.obj.file_system_entry \
-    import FileSystemEntry
+from video_file_organizer.models import FileSystemEntry
 
 
 logger = logging.getLogger('app.matcher')

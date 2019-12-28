@@ -5,8 +5,7 @@ import guessit
 import jinja2
 import glob
 
-from video_file_organizer.obj.file_system_entry \
-    import FileSystemEntry
+from video_file_organizer.models import FileSystemEntry
 from video_file_organizer.rules import set_on_event
 
 

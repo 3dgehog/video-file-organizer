@@ -7,12 +7,10 @@ import re
 import sys
 from typing import Pattern
 
+from video_file_organizer.settings import CONFIG_TEMPLATES, VIDEO_EXTENSIONS
+
 
 logger = logging.getLogger('app.config')
-
-CONFIG_TEMPLATES = os.path.join(
-    os.path.dirname(__file__), '../config_templates')
-VIDEO_EXTENSIONS = ['mkv', 'm4v', 'avi', 'mp4', 'mov']
 
 
 class ConfigHandler:

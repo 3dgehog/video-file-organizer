@@ -3,10 +3,7 @@ import os
 import logging
 import guessit
 
-from video_file_organizer.obj.file_system_entry \
-    import FileSystemEntry
-from video_file_organizer.obj.dir_index \
-    import DirIndex
+from video_file_organizer.models import FileSystemEntry, DirIndex
 
 
 logger = logging.getLogger('app.scanner')
