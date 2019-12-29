@@ -5,25 +5,17 @@ import guessit
 import jinja2
 import glob
 
-from video_file_organizer.models import FileSystemEntry
-from video_file_organizer.rules import set_on_event
+from video_file_organizer.rules import set_on_event, get_fse_from_args
 
 
 logger = logging.getLogger('app.series.rules')
-
-
-def _get_fse(args) -> FileSystemEntry:
-    for arg in args:
-        if isinstance(arg, FileSystemEntry):
-            return arg
-    raise ValueError("FileSystemEntry argument wasn't passed")
 
 
 @set_on_event('after_match')
 def rule_season(*args, **kwargs):
     """Sets transfer_to to the correct season folder based on the fse
     filename"""
-    fse = _get_fse(args)
+    fse = get_fse_from_args(args)
     if 'season' not in fse.rules:
         return
     # Apply Rule
@@ -56,7 +48,7 @@ def rule_season(*args, **kwargs):
 @set_on_event('after_match')
 def rule_parent_dir(*args, **kwargs):
     """Sets transfer_to to the parent directory"""
-    fse = _get_fse(args)
+    fse = get_fse_from_args(args)
     if 'parent-dir' not in fse.rules:
         return
     # Apply Rule
@@ -68,7 +60,7 @@ def rule_parent_dir(*args, **kwargs):
 @set_on_event('after_match')
 def rule_sub_dir(*args, **kwargs):
     """Sets the transfer_to a specified sub directory"""
-    fse = _get_fse(args)
+    fse = get_fse_from_args(args)
     if 'sub-dir' not in fse.rules:
         return
     # Apply Rule
@@ -89,7 +81,7 @@ def rule_sub_dir(*args, **kwargs):
 @set_on_event('after_match', order=9)
 def rule_episode_only(*args, **kwargs):
     """Removes fse.detail['season'] and merges it with fse.detail['episode']"""
-    fse = _get_fse(args)
+    fse = get_fse_from_args(args)
     if 'episode-only' not in fse.rules:
         return
     # Apply Rule
@@ -107,7 +99,7 @@ def rule_episode_only(*args, **kwargs):
 @set_on_event('before_transfer')
 def rule_format_title(*args, **kwargs):
     """Sets transfer_to filename to a specified name for transfer"""
-    fse = _get_fse(args)
+    fse = get_fse_from_args(args)
     if 'format-title' not in fse.rules:
         return
     # Apply Rule
@@ -130,7 +122,7 @@ def rule_format_title(*args, **kwargs):
 def rule_alt_title(*args, **kwargs):
     """Checks if the fse has an alternative title and merges it with the
     current title"""
-    fse = _get_fse(args)
+    fse = get_fse_from_args(args)
     if 'alt-title' not in fse.rules:
         return
     # Apply Rule
@@ -152,7 +144,7 @@ def rule_no_replace(*args, **kwargs):
     If found, it will determine to replace it or not based on if
     the episode is proper or not. It will also just ignore replacing
     it if the rule no-replace was set for this series"""
-    fse = _get_fse(args)
+    fse = get_fse_from_args(args)
     # Apply Rule
     # Get directory of transfer for fse
     if not os.path.isdir(fse.transfer_to):

@@ -9,8 +9,7 @@ from video_file_organizer.handlers.rule_book import RuleBookHandler
 from video_file_organizer.matcher import matcher
 from video_file_organizer.scanners import scan_input_dir, scan_series_dirs
 from video_file_organizer.transferer import transferer
-
-CONFIG_DIR = os.path.join(os.environ['HOME'], '.config/video_file_organizer/')
+from video_file_organizer.settings import CONFIG_DIR
 
 
 logger = logging.getLogger('app')
