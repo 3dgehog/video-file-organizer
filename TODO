@@ -1,8 +1,9 @@
 [] move config templates to .py
 [] config.yaml to settings.py
 [] seperate rule match and output folder match
-[] seperate input dir scan and output folder scan
-[] add controllers on matchers and transfer
+[x] seperate input dir scan and output folder scan
+[x] add controller on matcher
+[] add controller on transferer
 [] prevent repeated "no rule for file" error
 [] add event triggers for external tools
 [] Change matchers to pure functions -> only pass nessary information

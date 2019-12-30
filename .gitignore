@@ -9,3 +9,4 @@ Video_File_Organizer.egg-info
 mock
 ignore
 systemd
+loader.py

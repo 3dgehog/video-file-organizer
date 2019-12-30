@@ -132,3 +132,61 @@ class RuleBookHandler:
                 'series', difflib_match[0]))
 
         return rules
+
+# v2
+    def get_vfile_rules(
+            self, name, *args, vtype=None, title=None,
+            alternative_title=None, **kwargs):
+        """Uses the video type to get all the rules from that specific type"""
+        for arg in args:
+            if 'type' in arg:
+                vtype = arg['type']
+            if 'title' in arg:
+                title = arg['title']
+            if 'alternative_title' in arg:
+                alternative_title = arg['alternative_title']
+
+        if vtype is None:
+            return None
+
+        VALID_TYPES = {
+            "episode": self._get_series_rules_v2
+        }
+        rules = []
+        for key, func in VALID_TYPES.items():
+            if vtype == key:
+                rules = func(name, title, alternative_title)
+
+        if len(rules) == 0:
+            logger.log(11, "NO RULE MATCHED: " +
+                       f"Unable to find the rules for: {name}")
+            return None
+
+        return rules
+
+    def _get_series_rules_v2(self, name, title=None, alternative_title=None):
+        """Uses the title from the fse to try to match to its rules type from the
+        rule_book.ini"""
+        if title is None:
+            return []
+        DIFF_CUTOFF = 0.7
+        difflib_match = difflib.get_close_matches(
+            title, self.configparse.options('series'),
+            n=1, cutoff=DIFF_CUTOFF)
+
+        # Check if there is an alternative title and tries to use it also
+        if not difflib_match and alternative_title:
+            difflib_match = difflib.get_close_matches(
+                ' '.join(
+                    [title, alternative_title]
+                ), self.configparse.options('series'), n=1, cutoff=DIFF_CUTOFF
+            )
+
+        # Get the rules from the rule_book
+        if difflib_match:
+            rules = shlex.split(self.configparse.get(
+                'series', difflib_match[0]))
+        else:
+            rules = []
+
+        return rules
