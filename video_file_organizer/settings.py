@@ -9,5 +9,3 @@ CONFIG_TEMPLATES = os.path.join(
 VIDEO_EXTENSIONS = [
     'mkv', 'm4v', 'avi', 'mp4', 'mov'
 ]
-
-VALID_SECTIONS = ['series']

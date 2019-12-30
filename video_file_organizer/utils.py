@@ -1,35 +1,28 @@
 import logging
 import guessit
 import difflib
-from typing import Union
 
 from video_file_organizer.models import VideoFile
+
 logger = logging.getLogger('app.utils')
 
 
-def scan_vfile(
-        name: Union[str, None] = None,
-        vfile: Union[VideoFile, None] = None) -> dict:
+def get_vfile_guessit(vfile: VideoFile):
+    if not isinstance(vfile, VideoFile):
+        raise TypeError("vfile needs to be an instance of VideoFile")
 
-    if vfile:
-        if not isinstance(vfile, VideoFile):
-            raise TypeError("vfile needs to be an instance of VideoFile")
-        name = vfile.name
+    return get_guessit(vfile.name)
 
-    if name is None:
-        logging.warn("name or vfile has to passed for this function to work")
-        return None
 
+def get_guessit(name: str) -> dict:
     guessitmatch = guessit.guessit(name)
 
     if 'title' not in guessitmatch:
-        logger.log(11, "NO TITLE MATCH: ",
-                   f"Unable to find title for: '{name}'")
+        logger.warn(f"Unable to find title for: '{name}'")
         return None
 
     if 'type' not in guessitmatch:
-        logger.log(11, "NO TYPE MATCH: ",
-                   f"Unable to find type of video for: '{name}'")
+        logger.warn(f"Unable to find video type for: '{name}'")
         return None
 
     return guessitmatch
@@ -40,25 +33,18 @@ class Matcher:
 
     def __init__(self, output_folder):
         self.output_folder = output_folder
-
         self.entries = self.output_folder.entries
 
-    def scan_vfile(
-            self,
-            name: Union[str, None] = None,
-            title: Union[str, None] = None,
-            vfile: Union[VideoFile, None] = None
-    ):
+    def get_vfile_match(self, vfile: VideoFile):
+        if not isinstance(vfile, VideoFile):
+            raise TypeError("vfile needs to be an instance of VideoFile")
+        if not hasattr(vfile, 'guessit'):
+            raise ValueError("vfile needs to have guessit as an attribute")
+        name = vfile.name
+        title = vfile.guessit['title']
+        return self.get_match(name, title)
 
-        if vfile:
-            if not isinstance(vfile, VideoFile):
-                raise TypeError("vfile needs to be an instance of VideoFile")
-            name = vfile.name
-            title = vfile.guessit['title']
-
-        if title is None or name is None:
-            return None
-
+    def get_match(self, name: str, title: str) -> dict:
         index_match = difflib.get_close_matches(
             title, self.entries.keys(), n=1, cutoff=0.6
         )[0]

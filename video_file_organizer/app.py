@@ -4,14 +4,10 @@ import tempfile
 import yg.lockfile
 
 from video_file_organizer.handlers.config import ConfigHandler
-from video_file_organizer.handlers.event import EventHandler
 from video_file_organizer.handlers.rule_book import RuleBookHandler
-# from video_file_organizer.matcher import matcher
-# from video_file_organizer.scanners import scan_input_dir, scan_series_dirs
-# from video_file_organizer.transferer import transferer
 from video_file_organizer.settings import CONFIG_DIR
 from video_file_organizer.models import OutputFolder, InputFolder
-from video_file_organizer.utils import scan_vfile, Matcher
+from video_file_organizer.utils import get_vfile_guessit, Matcher
 
 
 logger = logging.getLogger('app')
@@ -29,8 +25,7 @@ class App:
         directory to make sure that all the configs are ready to go"""
         logger.debug("Setting up app")
         self.config = ConfigHandler(self.config_dir, self.args)
-        self.event = EventHandler()
-        self.rule_book = RuleBookHandler(self.config_dir, self.event)
+        self.rule_book = RuleBookHandler(self.config_dir)
 
     def run(self):
         """This is the main function of the app. This requires the setup
@@ -46,39 +41,31 @@ class App:
 
                 # Add guessit match to vfile
                 for name, vfile in self.input_folder.iterate_vfiles():
-                    results = scan_vfile(vfile=vfile)
+                    results = get_vfile_guessit(vfile=vfile)
                     if results is None:
                         self.input_folder.remove_vfile(name)
                         continue
-                    self.input_folder.edit_vfile_data(
+                    self.input_folder.edit_vfile(
                         name, guessit=results)
 
                 # Add rules from rule_book
                 for name, vfile in self.input_folder.iterate_vfiles():
-                    rules = self.rule_book.get_vfile_rules(
-                        name,
-                        vfile.guessit
-                    )
+                    rules = self.rule_book.get_vfile_rules(vfile)
                     if rules is None:
                         self.input_folder.remove_vfile(name)
                         continue
-                    self.input_folder.edit_vfile_data(
+                    self.input_folder.edit_vfile(
                         name, rules=rules)
 
                 # Match to output folder
                 matcher = Matcher(self.output_folder)
                 for name, vfile in self.input_folder.iterate_vfiles():
-                    results = matcher.scan_vfile(vfile=vfile)
+                    results = matcher.get_vfile_match(vfile=vfile)
                     if results is None:
                         self.input_folder.remove_vfile(name)
                         continue
-                    self.input_folder.edit_vfile_data(name, match=results)
+                    self.input_folder.edit_vfile(name, match=results)
 
-                # self.series_index = scan_series_dirs(self.config)
-                # self.scan_queue = scan_input_dir(self.config, self.rule_book)
-                # self.matched_queue = matcher(
-                #     self.scan_queue, self.event, self.series_index)
-                # transferer(self.matched_queue, self.event)
         except yg.lockfile.FileLockTimeout:
             logger.warning("FAILED LOCKFILE: " +
                            "The program must already be running")
