@@ -7,6 +7,7 @@ verify_ssl = true
 flake8 = "*"
 autopep8 = "*"
 pytest = "*"
+mypy = "*"
 
 [packages]
 pyaml = "*"
@@ -17,6 +18,7 @@ video-file-organizer = {editable = true,path = "."}
 
 [scripts]
 tests = "pytest tests"
+type = "mypy video_file_organizer"
 
 [requires]
 python_version = "3.5.2"

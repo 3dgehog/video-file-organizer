@@ -5,7 +5,8 @@ import logging
 import yaml
 import re
 import sys
-from typing import Pattern
+
+from typing import Pattern, List
 
 from video_file_organizer.settings import CONFIG_TEMPLATES, VIDEO_EXTENSIONS
 
@@ -97,7 +98,7 @@ class ConfigHandler:
 
     def _get_series_dirs(self) -> list:
         """Returns list of all directories from config.yaml 'series_dirs'"""
-        dirs = []
+        dirs: List[str] = []
         for dir_list in self._config_yaml["series_dirs"]:
             # Checks that the directory exists
             if not os.path.exists(dir_list):

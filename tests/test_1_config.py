@@ -3,7 +3,7 @@ import os
 
 from tests.utils.vars import ASSETS_DIR
 
-from tests.utils.injectors import ConfigInjector
+from tests.utils.injectors import ConfigFileInjector
 
 from video_file_organizer.handlers.config import ConfigHandler
 
@@ -23,7 +23,7 @@ def test_empty_config_folder(tmp_dir):
 
 def test_none_existing_series_and_input_dirs(tmp_config_dir, tmp_dir):
     """Test ValueError on missing series_dirs and input_dir folders in path"""
-    config_injector = ConfigInjector(tmp_config_dir)
+    config_injector = ConfigFileInjector(tmp_config_dir)
     config_injector.append({
         "series_dirs": [os.path.join(tmp_dir, "series_dirs")],
         "input_dir": os.path.join(tmp_dir, "input_dir")
@@ -35,7 +35,7 @@ def test_none_existing_series_and_input_dirs(tmp_config_dir, tmp_dir):
 
 def test_failing_before_script(tmp_config_dir, tmp_dir):
     """Test if there is a fail before script"""
-    config_injector = ConfigInjector(tmp_config_dir)
+    config_injector = ConfigFileInjector(tmp_config_dir)
     os.mkdir(os.path.join(tmp_dir, "series_dirs"))
     os.mkdir(os.path.join(tmp_dir, "input_dir"))
     config_injector.append({
@@ -50,7 +50,7 @@ def test_failing_before_script(tmp_config_dir, tmp_dir):
 
 def test_success_confighandler(tmp_config_dir, tmp_dir):
     """This is a text of if everything goes well"""
-    config_injector = ConfigInjector(tmp_config_dir)
+    config_injector = ConfigFileInjector(tmp_config_dir)
     os.mkdir(os.path.join(tmp_dir, "series_dirs"))
     os.mkdir(os.path.join(tmp_dir, "input_dir"))
     config_injector.append({

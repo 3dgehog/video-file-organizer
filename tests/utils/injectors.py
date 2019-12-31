@@ -12,12 +12,12 @@ def setup_app_with_injectors(config_dir):
     """Returns app, config_injector and rule_book_injector"""
     app = App()
     app.config_dir = config_dir
-    config_injector = ConfigInjector(config_dir)
-    rule_book_injector = RuleBookInjector(config_dir)
+    config_injector = ConfigFileInjector(config_dir)
+    rule_book_injector = RuleBookFileInjector(config_dir)
     return app, config_injector, rule_book_injector
 
 
-class ConfigInjector:
+class ConfigFileInjector:
     """A class that helps inject the configs in the config.yaml"""
 
     def __init__(self, config_dir):
@@ -45,11 +45,11 @@ class ConfigInjector:
 
     def _get_configvalue(self):
         with open(self.config_path, 'r') as yml:
-            configyaml = yaml.load(yml)
+            configyaml = yaml.load(yml, Loader=yaml.FullLoader)
         return configyaml
 
 
-class RuleBookInjector:
+class RuleBookFileInjector:
     """A class that helps inject the rules in the rule_book.ini"""
 
     def __init__(self, config_dir):

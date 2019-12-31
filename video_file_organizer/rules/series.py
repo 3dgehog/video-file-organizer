@@ -3,6 +3,7 @@ import re
 import logging
 import jinja2
 
+from typing import Union
 
 logger = logging.getLogger('app.series.rules')
 
@@ -10,7 +11,10 @@ logger = logging.getLogger('app.series.rules')
 
 
 def rule_season(
-        name: str, guessit: dict, match: dict, transfer: dict = {}) -> dict:
+        name: str,
+        guessit: dict,
+        match: dict,
+        transfer: dict = {}) -> Union[dict, None]:
     """Sets transfer_to to the correct season folder
 
     Args:
@@ -112,7 +116,7 @@ def rule_episode_only(name: str, guessit: dict) -> dict:
 
 
 def rule_format_title(
-        name: str, guessit: dict, rules: dict, transfer: dict) -> dict:
+        name: str, guessit: dict, rules: list, transfer: dict) -> dict:
     """Sets transfer_to filename to a specified name for transfer"""
     logger.debug(f"Applying rule 'format-title' to {name}")
     if not guessit.get('container') or not transfer['transfer_to']:
@@ -130,7 +134,7 @@ def rule_format_title(
     return transfer
 
 
-def rule_alt_title(name, guessit):
+def rule_alt_title(name: str, guessit: dict) -> dict:
     """Checks if the fse has an alternative title and merges it with the
     current title"""
     logger.debug(f"Applying rule 'alternative_title' to {name}")

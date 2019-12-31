@@ -4,7 +4,9 @@ import difflib
 import shutil
 import os
 
-from video_file_organizer.models import VideoFile
+from typing import Union
+
+from video_file_organizer.models import VideoFile, OutputFolder
 
 logger = logging.getLogger('app.utils')
 
@@ -21,7 +23,7 @@ def get_vfile_guessit(vfile: VideoFile):
     return get_guessit(vfile.name)
 
 
-def get_guessit(name: str) -> dict:
+def get_guessit(name: str) -> Union[dict, None]:
     """Returns the guessit result for the name of the file passed
 
     Args:
@@ -44,6 +46,9 @@ class Matcher:
     """Matcher class to scan vfile based on output_folder"""
 
     def __init__(self, output_folder):
+        if not isinstance(output_folder, OutputFolder):
+            raise TypeError(
+                "output_folder needs to be an instance of OutputFolder")
         self.output_folder = output_folder
         self.entries = self.output_folder.entries
 
@@ -56,7 +61,7 @@ class Matcher:
         title = vfile.guessit['title']
         return self.get_match(name, title)
 
-    def get_match(self, name: str, title: str) -> dict:
+    def get_match(self, name: str, title: str) -> Union[dict, None]:
         """Matches the name & title to the output folder specified in __init__
 
         Args:

@@ -1,1 +1,0 @@
-from tests.fixtures.setup_assets import *  # noqa

@@ -22,3 +22,13 @@ format-title "One_Piece_{{ episode }}"',
     "Vikings": 'season',
     "That 70s Show": 'season'
 }
+
+VFILE_NAME_LIST = [
+    'Marvels.Agents.of.S.H.I.E.L.D.S05E14.HDTV.x264-SVA.mkv',
+    '[HorribleSubs] Boruto - Naruto Next Generations - 50 [480p].mkv',
+    '[HorribleSubs] Gintama - 353 [480p].mkv',
+    '[HorribleSubs] Mahoutsukai no Yome - 24 [480p].mkv',
+    '[HorribleSubs] One Piece - 829 [720p].mkv',
+    '[HorribleSubs] One Punch Man S2 - 03 [480p].mkv',
+    'lucifer.s03e06.web.PROPER.x264-tbs.mkv'
+]

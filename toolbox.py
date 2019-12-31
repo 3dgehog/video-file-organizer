@@ -6,7 +6,7 @@ import shutil
 import configparser
 import subprocess
 
-from tests.utils.injectors import ConfigInjector, RuleBookInjector
+from tests.utils.injectors import ConfigFileInjector, RuleBookFileInjector
 from tests.utils.vars import SERIES_CONFIGPARSE
 
 logging.basicConfig(level=logging.DEBUG)
@@ -47,8 +47,8 @@ def setup_mock():
     os.makedirs(config_folder_path)
 
     logging.debug("initializing config/rule injectors")
-    config_injector = ConfigInjector(config_folder_path)
-    rule_book_injector = RuleBookInjector(config_folder_path)
+    config_injector = ConfigFileInjector(config_folder_path)
+    rule_book_injector = RuleBookFileInjector(config_folder_path)
 
     # Create and extract input folder
     input_folder_path = os.path.join(MOCK_FOLDER, 'input_dir')

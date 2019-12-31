@@ -1,5 +1,5 @@
 import os
-from typing import Union, List
+from typing import Union, Dict
 import logging
 
 from video_file_organizer.settings import VIDEO_EXTENSIONS
@@ -10,10 +10,10 @@ logger = logging.getLogger('app.models')
 class Folder:
     """A representation of a generic folder"""
 
-    def __init__(self, path: Union[str, List[str]], ignore=[]):
+    def __init__(self, path: Union[str, list], ignore=[]):
         self.path = path
         # Makes sure path is a list
-        if type(self.path) is not list:
+        if type(path) is str:
             self.path = [self.path]
 
         self.ignore = ignore
@@ -53,7 +53,7 @@ class Folder:
 
 
 class OutputFolder(Folder):
-    def __init__(self, path: Union[str, List[str]], ignore=[]):
+    def __init__(self, path: Union[str, list], ignore=[]):
         super().__init__(path, ignore)
 
 
@@ -63,7 +63,7 @@ class InputFolder(Folder):
             raise TypeError("Input Folder can only be a single folder")
         super().__init__(path, ignore)
 
-        self._vfiles = {}
+        self._vfiles: Dict[str, Union[VideoFile, None]] = {}
         self._scan_vfiles()
 
     def __enter__(self):
@@ -143,4 +143,10 @@ class InputFolder(Folder):
 
 
 class VideoFile:
-    pass
+    def __init__(self):
+        self.name: str
+        self.guessit: dict
+        self.rules: list
+        self.match: dict
+        self.path: str
+        self.transfer: dict

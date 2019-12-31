@@ -8,6 +8,13 @@ from tests.utils.vars import ASSETS_DIR
 
 
 @pytest.fixture
+def tmp_file():
+    tmpfile = tempfile.mkstemp()[1]
+    yield tmpfile
+    os.remove(tmpfile)
+
+
+@pytest.fixture
 def tmp_dir():
     """Creates a temp folder which is deleted after used"""
     tmpdir = tempfile.mkdtemp()
