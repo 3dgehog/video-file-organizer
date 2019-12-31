@@ -8,7 +8,7 @@ from typing import Union
 
 from video_file_organizer.models import VideoFile, OutputFolder
 
-logger = logging.getLogger('app.utils')
+logger = logging.getLogger('vfo.utils')
 
 
 def get_vfile_guessit(vfile: VideoFile):

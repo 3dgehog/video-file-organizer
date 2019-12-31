@@ -3,26 +3,25 @@ import shutil
 import subprocess
 import logging
 import yaml
-import re
 import sys
 
-from typing import Pattern, List
+from typing import List
 
-from video_file_organizer.settings import CONFIG_TEMPLATES, VIDEO_EXTENSIONS
+from video_file_organizer.settings import CONFIG_TEMPLATES
 
 
-logger = logging.getLogger('app.config')
+logger = logging.getLogger('vfo.config')
 
 
 class ConfigHandler:
     """The ConfigHandler handles all the configs of the application and is a
     layer between the application and the config.yaml file. """
 
-    def __init__(self, config_dir, args=None) -> None:
+    def __init__(
+            self, config_dir: str, create: bool = False, **kwargs) -> None:
         logger.debug("Initializing ConfigHandler")
         self.config_dir = config_dir
-        self.args = args
-        self.config_templates = CONFIG_TEMPLATES
+        self.create = create
 
         self._init_config_dir()
         self._config_yaml = self._get_config_yaml()
@@ -31,25 +30,30 @@ class ConfigHandler:
         self.input_dir = self._get_input_dir()
         self.series_dirs = self._get_series_dirs()
         self.ignore = self._config_yaml["ignore"]
-        self.re_file_ext_pattern = self._compile_video_file_ext_pattern()
-
-        self.args = None
 
     def _init_config_dir(self):
-        """Checks if ~/.config/video_file_organizer directory exists.
+        """Checks if config_dir directory exists.
         If it doesn't it creates the directory and adds template config
         files inside"""
-        if not os.path.exists(self.config_dir):
-            logger.debug(
-                "Config folder doesn't exists, therefore it was created")
-            os.makedirs(self.config_dir)
+        if os.path.exists(os.path.join(self.config_dir, 'config.yaml')) and \
+                os.path.exists(os.path.join(self.config_dir, 'rule_book.ini')):
+            return
 
-        for file in os.listdir(self.config_templates):
+        if self.create:
+            self._create_config_dir()
+            logger.info("Config folder created")
+            return
+
+        if os.path.exists(os.path.join(self.config_dir)):
+            raise FileNotFoundError("config directory doesn't exist")
+        raise FileNotFoundError("config files don't exist")
+
+    def _create_config_dir(self):
+        os.makedirs(self.config_dir, exist_ok=True)
+        for file in os.listdir(CONFIG_TEMPLATES):
             if not os.path.exists(os.path.join(self.config_dir, file)):
-                logger.debug("File '{}' wasn't in ".format(file) +
-                             "config directory therefore it was created")
                 shutil.copyfile(
-                    os.path.join(self.config_templates, file),
+                    os.path.join(CONFIG_TEMPLATES, file),
                     os.path.join(self.config_dir, file))
 
     def _get_config_yaml(self) -> dict:
@@ -108,12 +112,3 @@ class ConfigHandler:
 
         logger.debug("Got series dirs '{}'".format(dirs))
         return dirs
-
-    def _compile_video_file_ext_pattern(self) -> Pattern[str]:
-        """returns re.compile('^.*(\.mkv|\.mp4)$', re.IGNORECASE)"""
-        extensions = VIDEO_EXTENSIONS
-        output = '^.*('
-        for extension in extensions:
-            output = output + '\.' + extension + '|'
-        output = output[:-1] + ")$"
-        return re.compile("{}".format(output), re.IGNORECASE)

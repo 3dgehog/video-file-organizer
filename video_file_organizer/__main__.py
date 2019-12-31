@@ -2,6 +2,7 @@ import argparse
 import logging
 
 from video_file_organizer.app import App
+from video_file_organizer.settings import CONFIG_DIR
 
 
 def main():
@@ -13,16 +14,16 @@ def main():
     parser.add_argument("-c", "--config",
                         help="Custom config files location",
                         nargs=1)
+    parser.add_argument("--create-config",
+                        help="Displays debug messages",
+                        action="store_true")
     args = parser.parse_args()
 
     # Setup Logger
-    logger = logging.getLogger('app')
-    # LFRI = Log File Relevent Information
-    logging.addLevelName(11, 'LFRI')
-    logger.setLevel(logging.DEBUG)
+    logger = logging.getLogger('vfo')
 
     fh = logging.FileHandler('vfo.log')
-    fh.setLevel(11)
+    fh.setLevel(logging.INFO)
 
     ch = logging.StreamHandler()
     ch.setLevel(logging.WARNING)
@@ -51,8 +52,13 @@ def main():
         app = App(config_dir=args.config[0], args=args)
         logger.info("Running custom configs in {}".format(args.config[0]))
     else:
-        app = App(args=args)
-    app.setup()
+        app = App(config_dir=CONFIG_DIR)
+
+    if args.create_config:
+        app.setup(create=True)
+    else:
+        app.setup()
+
     app.run()
 
 

@@ -5,7 +5,7 @@ import jinja2
 
 from typing import Union
 
-logger = logging.getLogger('app.series.rules')
+logger = logging.getLogger('vfo.series.rules')
 
 # after match
 

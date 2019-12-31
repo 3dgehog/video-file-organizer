@@ -5,7 +5,6 @@ import yg.lockfile
 
 from video_file_organizer.handlers.config import ConfigHandler
 from video_file_organizer.handlers.rule_book import RuleBookHandler
-from video_file_organizer.settings import CONFIG_DIR
 from video_file_organizer.models import OutputFolder, InputFolder
 from video_file_organizer.utils import get_vfile_guessit, Matcher, \
     Transferer
@@ -13,21 +12,20 @@ from video_file_organizer.rules import rules_before_matching_vfile, \
     rules_before_transfering_vfile
 
 
-logger = logging.getLogger('app')
+logger = logging.getLogger('vfo.app')
 
 
 class App:
-    def __init__(self, config_dir=CONFIG_DIR, args=None) -> None:
+    def __init__(self, config_dir: str):
         self.config_dir = config_dir
-        self.args = args
 
-    def setup(self):
+    def setup(self, **kwargs):
         """A function that starts up the app, it gets and executes the
         ConfigHandler, args and RuleBookHandler. This is
         run even before any of the searching and matching is done on the
         directory to make sure that all the configs are ready to go"""
         logger.debug("Setting up app")
-        self.config = ConfigHandler(self.config_dir, self.args)
+        self.config = ConfigHandler(self.config_dir, **kwargs)
         self.rule_book = RuleBookHandler(self.config_dir)
 
     def run(self):

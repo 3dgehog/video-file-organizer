@@ -4,7 +4,7 @@ import logging
 
 from video_file_organizer.settings import VIDEO_EXTENSIONS
 
-logger = logging.getLogger('app.models')
+logger = logging.getLogger('vfo.models')
 
 
 class Folder:

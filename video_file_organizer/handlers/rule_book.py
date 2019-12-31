@@ -6,7 +6,7 @@ import logging
 
 from video_file_organizer.models import VideoFile
 
-logger = logging.getLogger('app.rule_book')
+logger = logging.getLogger('vfo.rule_book')
 
 
 class RuleBookHandler:

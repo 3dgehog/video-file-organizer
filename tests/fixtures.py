@@ -23,16 +23,7 @@ def tmp_dir():
 
 
 @pytest.fixture
-def tmp_config_dir():
-    """Creates a temp folder which is deleted after used... used specifically
-    for config_dir"""
-    tmpdir = tempfile.mkdtemp()
-    yield tmpdir
-    shutil.rmtree(tmpdir)
-
-
-@pytest.fixture
-def extract_input_dir():
+def sample_input_dir():
     """Returns a temp folder with sample input dir files which
     is deleted after being used"""
     tmpdir = tempfile.mkdtemp()
@@ -44,7 +35,7 @@ def extract_input_dir():
 
 
 @pytest.fixture
-def extract_series_dirs():
+def sample_series_dirs():
     """Returns a list with 2 dirs populated with series and animes,
     they are deleted after used"""
     # Extract Series
