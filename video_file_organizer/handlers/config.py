@@ -54,7 +54,7 @@ class ConfigHandler:
     def _get_config_yaml(self) -> dict:
         """Returns config.yaml as dict"""
         with open(os.path.join(self.config_dir, "config.yaml"), 'r') as yml:
-            return yaml.load(yml)
+            return yaml.load(yml, Loader=yaml.FullLoader)
 
     def _check_required_fields(self):
         """Checks that all the required fields are not empty"""

@@ -1,217 +1,146 @@
 import os
 import re
 import logging
-import guessit
 import jinja2
-import glob
-
-from video_file_organizer.rules import set_on_event, get_fse_from_args
 
 
 logger = logging.getLogger('app.series.rules')
 
+# after match
 
-@set_on_event('after_match')
-def rule_season(*args, **kwargs):
-    """Sets transfer_to to the correct season folder based on the fse
-    filename"""
-    fse = get_fse_from_args(args)
-    if 'season' not in fse.rules:
-        return
-    # Apply Rule
-    logger.debug("Applying season rule to {}".format(fse.vfile.filename))
 
-    if 'season' not in fse.details:
-        logger.log(11, "FAILED SEASON RULE: ",
-                   "Undefined season number for file: ",
-                   "{}".format(fse.vfile.filename))
-        fse.valid = False
-        return
+def rule_season(
+        name: str, guessit: dict, match: dict, transfer: dict = {}) -> dict:
+    """Sets transfer_to to the correct season folder
 
-    season = str(fse.details['season'])
-    for subdir in fse.matched_dir_entry.subdirs:
-        search = re.search("^Season {}".format(season), subdir, re.IGNORECASE)
+    Args:
+        name (str): Name of the file
+        guessit (dict): guessit dictionary of the file
+        match (dict): match dictionary of the file
+        transfer (dict, optional): tranfer dictionary of the file. 
+            Defaults to {}.
+
+    Returns:
+        dict: transfer dictionary with new 'transfer_to' key & value
+    """
+    logger.debug(f"Applying rule 'season' to {name}")
+
+    if 'season' not in guessit:
+        logger.warn("Rule 'season' FAILED: ",
+                    f"Undefined season number for file: {name}")
+        return None
+
+    season = str(guessit['season'])
+    for sub_name, sub_entry in match['sub_entries'].items():
+        search = re.search(f"^Season {season}", sub_name, re.IGNORECASE)
         if search:
-            fse.transfer_to = os.path.join(fse.matched_dir_path, subdir)
-            logger.debug("Season rule OK {}".format(fse.vfile.filename))
+            transfer['transfer_to'] = sub_entry['_entry'].path
 
-    if not fse.transfer_to:
+    if 'transfer_to' not in transfer:
         path_to_new_season_dir = os.path.join(
-            fse.matched_dir_entry.path, "Season {}".format(season))
-        os.mkdir(path_to_new_season_dir)
-        fse.transfer_to = path_to_new_season_dir
-        logger.log(11, "SEASON RULE: " +
-                   "Created new Season {} folder for Series {}".format(
-                       season, fse.title))
+            match['_entry'].path, f"Season {season}")
+        # os.mkdir(path_to_new_season_dir)
+        print(f"NEW DIRECTORY CREATED {path_to_new_season_dir}")
+        transfer['transfer_to'] = path_to_new_season_dir
+        logger.info("Rule 'season' " +
+                    f"Created new Season {season} folder for Series {name}")
+
+    logger.debug(f"Rule 'season' OK for {name}")
+    return transfer
 
 
-@set_on_event('after_match')
-def rule_parent_dir(*args, **kwargs):
-    """Sets transfer_to to the parent directory"""
-    fse = get_fse_from_args(args)
-    if 'parent-dir' not in fse.rules:
-        return
-    # Apply Rule
-    logger.debug("Applying parent-dir rule to {}".format(fse.vfile.filename))
-    fse.transfer_to = fse.matched_dir_path
-    logger.debug("Parent-dir rule OK {}".format(fse.vfile.filename))
+def rule_parent_dir(name: str, match: dict, transfer: dict = {}) -> dict:
+    """Sets 'trasnfer_to to the parent directory
+
+    Args:
+        name (str): Name of the file
+        match (dict): match dictionary of the file
+        transfer (dict, optional): transfer dictionary of the file.
+            Defaults to {}.
+
+    Returns:
+        dict: transfer dictionary with new 'transfer_to' key & value
+    """
+    logger.debug(f"Applying rule 'parent-dir' to {name}")
+    transfer['transfer_to'] = match['_entry'].path
+
+    logger.debug(f"Rule 'parent-dir' OK for {name}")
+    return transfer
 
 
-@set_on_event('after_match')
-def rule_sub_dir(*args, **kwargs):
-    """Sets the transfer_to a specified sub directory"""
-    fse = get_fse_from_args(args)
-    if 'sub-dir' not in fse.rules:
-        return
-    # Apply Rule
-    logger.debug("Applying sub-dir rule to {}".format(fse.vfile.filename))
-    subdir_name_index = fse.rules.index('sub-dir') + 1
-    subdir_name = fse.rules[subdir_name_index]
-    if subdir_name not in fse.matched_dir_entry.subdirs:
-        logger.log(11, "FAILED SUB-DIR RULE: " +
-                   "Cannot locate sub-dir {}: ".format(subdir_name) +
-                   "{}".format(fse.vfile.filename))
-        fse.valid = False
-        return
+def rule_sub_dir(
+        name: str, match: dict, rules: list, transfer: dict = {}) -> dict:
+    """Sets the transfer_to a specified sub directory
 
-    fse.transfer_to = os.path.join(fse.matched_dir_path, subdir_name)
-    logger.debug("Sub-dir rule OK {}".format(fse.vfile.filename))
+    Args:
+        name (str): Name of the file
+        match (dict): match dictionary of the file
+        rules (list): rules list of the file
+        transfer (dict, optional): transfer dictionary of the file.
+            Defaults to {}.
+
+    Returns:
+        dict: transfer dictionary with new 'transfer_to' key & value
+    """
+    logger.debug(f"Applying rule 'sub-dir' to {name}")
+    subdir_name_index = rules.index('sub-dir') + 1
+    subdir_name = rules[subdir_name_index]
+    if subdir_name not in match['sub_entries'].keys():
+        logger.warn("Rule 'sub-dir' FAILED: " +
+                    f"Cannot locate sub-dir {subdir_name}: {name}")
+        return transfer
+
+    transfer['transfer_to'] = match['sub_entries'][subdir_name]['_entry'].path
+
+    logger.debug(f"Rule 'sub-dir' OK for {name}")
+    return transfer
 
 
-@set_on_event('after_match', order=9)
-def rule_episode_only(*args, **kwargs):
-    """Removes fse.detail['season'] and merges it with fse.detail['episode']"""
-    fse = get_fse_from_args(args)
-    if 'episode-only' not in fse.rules:
-        return
-    # Apply Rule
-    logger.debug("Applying episode-only rule to {}".format(fse.vfile.filename))
+def rule_episode_only(name: str, guessit: dict) -> dict:
+    """Removes guessit['season'] and merges it with guessit['episode']"""
+    logger.debug(f"Applying rule 'episode-only' to {name}")
     try:
-        fse.details['episode'] = int(
-            str(fse.details['season']) + str(fse.details['episode']))
+        guessit['episode'] = int(
+            str(guessit['season']) + str(guessit['episode']))
     except KeyError:
         # Any episode number below 100 will raise... therefore its ignored
         pass
-    fse.details.pop('season', None)
-    logger.debug("Episode-only rule OK {}".format(fse.vfile.filename))
+    guessit.copy().pop('season', None)
+
+    logger.debug(f"Rule 'episode-only' OK for {name}")
+    return guessit
 
 
-@set_on_event('before_transfer')
-def rule_format_title(*args, **kwargs):
+def rule_format_title(
+        name: str, guessit: dict, rules: dict, transfer: dict) -> dict:
     """Sets transfer_to filename to a specified name for transfer"""
-    fse = get_fse_from_args(args)
-    if 'format-title' not in fse.rules:
-        return
-    # Apply Rule
-    if not fse.details.get('container') or not fse.transfer_to:
-        logger.log(11, "FAILED FORMAT-TITLE RULE: " +
-                   "Missing container or transfer_to value: " +
-                   "{}".format(fse.vfile.filename))
-        fse.valid = False
-        return
+    logger.debug(f"Applying rule 'format-title' to {name}")
+    if not guessit.get('container') or not transfer['transfer_to']:
+        logger.warn("Rule 'format-title' FAILED: " +
+                    f"Missing container or transfer_to value: {name}")
+        return transfer
 
-    format_index = fse.rules.index('format-title') + 1
+    format_index = rules.index('format-title') + 1
     template = jinja2.Template(
-        str(fse.rules[format_index]) + "." + str(fse.details['container']))
-    new_name = template.render(fse.details)
-    fse.transfer_to = os.path.join(fse.transfer_to, new_name)
-    logger.debug("Format-title rule OK {}".format(fse.vfile.filename))
+        str(rules[format_index]) + "." + str(guessit['container']))
+    new_name = template.render(guessit)
+    transfer['transfer_to'] = os.path.join(transfer['transfer_to'], new_name)
+
+    logger.debug(f"Rule 'format-title' OK for {name}")
+    return transfer
 
 
-@set_on_event('before_match')
-def rule_alt_title(*args, **kwargs):
+def rule_alt_title(name, guessit):
     """Checks if the fse has an alternative title and merges it with the
     current title"""
-    fse = get_fse_from_args(args)
-    if 'alt-title' not in fse.rules:
-        return
-    # Apply Rule
-    if 'alternative_title' not in fse.details:
-        logger.log(11, "FAILED ALT-TITLE RULE: " +
-                   "Alternative title missing: " +
-                   "{}".format(fse.vfile.filename))
-        fse.valid = False
-        return
-    fse.title = ' '.join([
-        fse.details['title'], fse.details['alternative_title']
+    logger.debug(f"Applying rule 'alternative_title' to {name}")
+    if 'alternative_title' not in guessit:
+        logger.warn("Rule 'alternative_title' FAILED: " +
+                    f"Alternative title missing: {name}")
+        return guessit
+    guessit['title'] = ' '.join([
+        guessit['title'], guessit['alternative_title']
     ])
-    logger.debug("Alt-title rule OK {}".format(fse.vfile.filename))
 
-
-@set_on_event('before_transfer')
-def rule_no_replace(*args, **kwargs):
-    """This rule first detects if a duplicate episode is found.
-    If found, it will determine to replace it or not based on if
-    the episode is proper or not. It will also just ignore replacing
-    it if the rule no-replace was set for this series"""
-    fse = get_fse_from_args(args)
-    # Apply Rule
-    # Get directory of transfer for fse
-    if not os.path.isdir(fse.transfer_to):
-        transfer_to = os.path.dirname(fse.transfer_to)
-    else:
-        transfer_to = fse.transfer_to
-
-    # Global search all files for same episode number
-    try:
-        glob_search = glob.glob(
-            "{}/*{}*".format(transfer_to, fse.details['episode']))
-    except KeyError:
-        # If couldn't detect episode number, let it through
-        logger.log(11,
-                   "REPLACE: Couldn't detect the episode number, " +
-                   "transfering the file anyways")
-        return
-
-    if len(glob_search) == 0:
-        logger.debug("REPLACE: no duplicate episode")
-        if 'no-replace' in fse.rules:
-            logger.debug("No-replace rule OK {}".format(fse.vfile.filename))
-        return
-
-    # Iterate thru global search
-    for item in glob_search:
-        item_detail = guessit.guessit(item)
-        try:
-            if item_detail['episode'] != fse.details['episode']:
-                continue
-        except KeyError:
-            continue
-        logger.debug(
-            "REPLACE: same episode found: new -> {}: existing -> {}".format(
-                fse.vfile.filename, os.path.basename(item))
-        )
-
-        # Prevent episode being replaced
-        if 'no-replace' in fse.rules:
-            logger.debug("No-replace rule OK {}".format(fse.vfile.filename))
-            fse.transfer_to = None
-            return
-
-        # Check if any of the 2 episodes are proper's
-        cur = False
-        ext = False
-        if 'proper_count' in fse.details:
-            cur = True
-        if 'proper_count' in item_detail:
-            ext = True
-
-        if cur and ext:
-            logger.log(11, "REPLACE: both are proper, favoring the new")
-            fse.replace = os.path.join(transfer_to, item)
-
-        elif cur and not ext:
-            logger.log(11,
-                       "REPLACE: this file proper, existing isn't, replacing")
-            fse.replace = os.path.join(transfer_to, item)
-
-        elif ext and not cur:
-            logger.log(11,
-                       "REPLACE: this file isn't proper, existing is, " +
-                       "not replacing")
-            fse.transfer_to = None
-
-        else:
-            logger.log(11, "REPLACE: both are normal, favoring the new")
-            fse.replace = os.path.join(fse.transfer_to, item)
-        break
+    logger.debug(f"Rule 'alternative_title' OK for {name}")
+    return guessit

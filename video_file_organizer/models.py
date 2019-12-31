@@ -64,9 +64,25 @@ class InputFolder(Folder):
         super().__init__(path, ignore)
 
         self._vfiles = {}
-        self.scan_vfiles()
+        self._scan_vfiles()
 
-    def scan_vfiles(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self._purge()
+        return True
+
+    def _purge(self):
+        """Removes all dictionary entries from self._vfile where the
+        Videofile is missing"""
+        del_list = [x for x in self._vfiles.items(
+        ) if not isinstance(x[1], VideoFile)]
+        for name in del_list:
+            self._vfiles.pop(name, None)
+            logger.debug(f"Purged vfile {name}")
+
+    def _scan_vfiles(self):
         """
         Returns a dict with this format
         {
@@ -81,7 +97,9 @@ class InputFolder(Folder):
                 for sub_fname, sub_fdata in fdata['sub_entries'].items():
                     if sub_fname.rpartition('.')[-1] in VIDEO_EXTENSIONS:
                         self.add_vfile(
-                            sub_fname, path=sub_fdata['_entry'].path)
+                            sub_fname,
+                            path=sub_fdata['_entry'].path,
+                            root_path=fdata['_entry'].path)
         return data
 
     def add_vfile(self, name, **kwargs):
@@ -99,21 +117,27 @@ class InputFolder(Folder):
             raise ValueError("This video file doesn't exists in list")
         return self._vfiles[name]
 
-    def remove_vfile(self, name):
-        if name not in self._vfiles.keys():
-            raise ValueError("This video file doesn't exists in list")
-        logger.debug(f"Removed vfile {name}")
-        del self._vfiles[name]
-
     def edit_vfile(self, name: str, merge: bool = True, **kwargs):
         if name not in self._vfiles.keys():
             raise ValueError("This video file doesn't exist in list")
         logger.debug(f"Edited vfile {name} with kwargs {kwargs}")
         vfile = self._vfiles[name]
         for key, value in kwargs.items():
+            if merge:
+                if hasattr(vfile, key):
+                    if getattr(vfile, key) is not None:
+                        orig = getattr(vfile, key)
+                        orig.update(value)
+                        value = orig
             setattr(vfile, key, value)
 
-    def iterate_vfiles(self):
+    def remove_vfile(self, name: str):
+        if name not in self._vfiles.keys():
+            raise ValueError("This video file doesn't exist in list")
+        logger.debug(f"Removed vfile {name} ")
+        self._vfiles[name] = None
+
+    def iter_vfiles(self):
         for name, vfile in self._vfiles.copy().items():
             yield name, vfile
 

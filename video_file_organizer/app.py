@@ -7,7 +7,10 @@ from video_file_organizer.handlers.config import ConfigHandler
 from video_file_organizer.handlers.rule_book import RuleBookHandler
 from video_file_organizer.settings import CONFIG_DIR
 from video_file_organizer.models import OutputFolder, InputFolder
-from video_file_organizer.utils import get_vfile_guessit, Matcher
+from video_file_organizer.utils import get_vfile_guessit, Matcher, \
+    Transferer
+from video_file_organizer.rules import rules_before_matching_vfile, \
+    rules_before_transfering_vfile
 
 
 logger = logging.getLogger('app')
@@ -20,7 +23,7 @@ class App:
 
     def setup(self):
         """A function that starts up the app, it gets and executes the
-        ConfigHandler, args, EventHandler and RuleBookHandler. This is
+        ConfigHandler, args and RuleBookHandler. This is
         run even before any of the searching and matching is done on the
         directory to make sure that all the configs are ready to go"""
         logger.debug("Setting up app")
@@ -39,32 +42,46 @@ class App:
                 self.output_folder = OutputFolder(self.config.series_dirs)
                 self.input_folder = InputFolder(self.config.input_dir)
 
-                # Add guessit match to vfile
-                for name, vfile in self.input_folder.iterate_vfiles():
-                    results = get_vfile_guessit(vfile=vfile)
-                    if results is None:
-                        self.input_folder.remove_vfile(name)
-                        continue
-                    self.input_folder.edit_vfile(
-                        name, guessit=results)
-
-                # Add rules from rule_book
-                for name, vfile in self.input_folder.iterate_vfiles():
-                    rules = self.rule_book.get_vfile_rules(vfile)
-                    if rules is None:
-                        self.input_folder.remove_vfile(name)
-                        continue
-                    self.input_folder.edit_vfile(
-                        name, rules=rules)
-
-                # Match to output folder
                 matcher = Matcher(self.output_folder)
-                for name, vfile in self.input_folder.iterate_vfiles():
-                    results = matcher.get_vfile_match(vfile=vfile)
-                    if results is None:
-                        self.input_folder.remove_vfile(name)
-                        continue
-                    self.input_folder.edit_vfile(name, match=results)
+
+                with self.input_folder as ifolder:
+                    for name, vfile in ifolder.iter_vfiles():
+                        # Guessit
+                        results = get_vfile_guessit(vfile=vfile)
+                        if results is None:
+                            ifolder.remove_vfile(name)
+                            continue
+                        ifolder.edit_vfile(
+                            name, guessit=results)
+                        # Rules from rule_book
+                        rules = self.rule_book.get_vfile_rules(vfile)
+                        if rules is None:
+                            ifolder.remove_vfile(name)
+                            continue
+                        ifolder.edit_vfile(
+                            name, rules=rules)
+                        # Apply rules before matcher
+                        result = rules_before_matching_vfile(vfile)
+                        ifolder.edit_vfile(
+                            name, guessit=result)
+                        # Matcher
+                        results = matcher.get_vfile_match(vfile=vfile)
+                        if results is None:
+                            ifolder.remove_vfile(name)
+                            continue
+                        ifolder.edit_vfile(name, match=results)
+                        # Apply rules before transfering
+                        transfer, guessit = rules_before_transfering_vfile(
+                            vfile)
+                        if transfer is None:
+                            ifolder.remove_vfile(name)
+                            continue
+                        ifolder.edit_vfile(
+                            name, transfer=transfer, guessit=guessit)
+                # Transfer
+                with Transferer() as transferer:
+                    for name, vfile in self.input_folder.iter_vfiles():
+                        transferer.transfer_vfile(vfile)
 
         except yg.lockfile.FileLockTimeout:
             logger.warning("FAILED LOCKFILE: " +
