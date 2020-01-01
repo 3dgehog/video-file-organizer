@@ -8,7 +8,7 @@ def readme():
 
 setup(
     name='Video File Organizer',
-    version='0.1b',
+    version='2',
     python_requires='>=3.5',
     description="""Organizes the video files in the correct directories""",
     long_description=readme(),

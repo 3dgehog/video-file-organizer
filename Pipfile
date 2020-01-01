@@ -21,4 +21,4 @@ tests = "pytest tests"
 type = "mypy video_file_organizer"
 
 [requires]
-python_version = "3.5.2"
+python_version = "3.6.9"
