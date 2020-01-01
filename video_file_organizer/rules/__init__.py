@@ -25,8 +25,6 @@ def rules_before_transfering_vfile(vfile: VideoFile) -> tuple:
         raise ValueError("vfile needs to have guessit as an attribute")
     if not hasattr(vfile, 'match'):
         raise ValueError("vfile needs to have match as an attribute")
-    if not hasattr(vfile, 'transfer'):
-        vfile.transfer = {}
 
     name = vfile.name
     guessit = vfile.guessit

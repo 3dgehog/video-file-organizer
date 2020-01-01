@@ -1,9 +1,9 @@
 import pytest
 import os
 
-from tests.utils.vars import ASSETS_DIR
+from tests.vars import ASSETS_DIR
 
-from tests.utils.injectors import ConfigFileInjector
+from tests.utils import ConfigFileInjector
 
 from video_file_organizer.handlers.config import ConfigHandler
 

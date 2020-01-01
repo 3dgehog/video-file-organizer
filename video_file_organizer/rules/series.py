@@ -21,7 +21,7 @@ def rule_season(
         name (str): Name of the file
         guessit (dict): guessit dictionary of the file
         match (dict): match dictionary of the file
-        transfer (dict, optional): tranfer dictionary of the file. 
+        transfer (dict, optional): tranfer dictionary of the file.
             Defaults to {}.
 
     Returns:
@@ -30,8 +30,8 @@ def rule_season(
     logger.debug(f"Applying rule 'season' to {name}")
 
     if 'season' not in guessit:
-        logger.warn("Rule 'season' FAILED: ",
-                    f"Undefined season number for file: {name}")
+        logger.warning("Rule 'season' FAILED: ",
+                       f"Undefined season number for file: {name}")
         return None
 
     season = str(guessit['season'])
@@ -90,8 +90,8 @@ def rule_sub_dir(
     subdir_name_index = rules.index('sub-dir') + 1
     subdir_name = rules[subdir_name_index]
     if subdir_name not in match['sub_entries'].keys():
-        logger.warn("Rule 'sub-dir' FAILED: " +
-                    f"Cannot locate sub-dir {subdir_name}: {name}")
+        logger.warning("Rule 'sub-dir' FAILED: " +
+                       f"Cannot locate sub-dir {subdir_name}: {name}")
         return transfer
 
     transfer['transfer_to'] = match['sub_entries'][subdir_name]['_entry'].path
@@ -120,8 +120,8 @@ def rule_format_title(
     """Sets transfer_to filename to a specified name for transfer"""
     logger.debug(f"Applying rule 'format-title' to {name}")
     if not guessit.get('container') or not transfer['transfer_to']:
-        logger.warn("Rule 'format-title' FAILED: " +
-                    f"Missing container or transfer_to value: {name}")
+        logger.warning("Rule 'format-title' FAILED: " +
+                       f"Missing container or transfer_to value: {name}")
         return transfer
 
     format_index = rules.index('format-title') + 1
@@ -139,8 +139,8 @@ def rule_alt_title(name: str, guessit: dict) -> dict:
     current title"""
     logger.debug(f"Applying rule 'alternative_title' to {name}")
     if 'alternative_title' not in guessit:
-        logger.warn("Rule 'alternative_title' FAILED: " +
-                    f"Alternative title missing: {name}")
+        logger.warning("Rule 'alternative_title' FAILED: " +
+                       f"Alternative title missing: {name}")
         return guessit
     guessit['title'] = ' '.join([
         guessit['title'], guessit['alternative_title']

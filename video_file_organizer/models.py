@@ -105,12 +105,12 @@ class InputFolder(Folder):
     def add_vfile(self, name, **kwargs):
         if name in self._vfiles.keys():
             raise ValueError("This video file already exists in list")
-        logger.debug(f"Added vfile {name} with kwargs {kwargs}")
         vfile = VideoFile()
         setattr(vfile, 'name', name)
         for key, value in kwargs.items():
             setattr(vfile, key, value)
         self._vfiles[name] = vfile
+        logger.debug(f"Added vfile {name} with kwargs {kwargs}")
 
     def get_vfile(self, name):
         if name not in self._vfiles.keys():
@@ -120,33 +120,37 @@ class InputFolder(Folder):
     def edit_vfile(self, name: str, merge: bool = True, **kwargs):
         if name not in self._vfiles.keys():
             raise ValueError("This video file doesn't exist in list")
-        logger.debug(f"Edited vfile {name} with kwargs {kwargs}")
         vfile = self._vfiles[name]
-        for key, value in kwargs.items():
-            if merge:
-                if hasattr(vfile, key):
-                    if getattr(vfile, key) is not None:
-                        orig = getattr(vfile, key)
-                        orig.update(value)
-                        value = orig
-            setattr(vfile, key, value)
+        vfile.edit(merge, **kwargs)
 
     def remove_vfile(self, name: str):
         if name not in self._vfiles.keys():
             raise ValueError("This video file doesn't exist in list")
-        logger.debug(f"Removed vfile {name} ")
         self._vfiles[name] = None
+        logger.debug(f"Removed vfile {name} ")
 
     def iter_vfiles(self):
-        for name, vfile in self._vfiles.copy().items():
+        for name, vfile in self._vfiles.items():
             yield name, vfile
 
 
 class VideoFile:
     def __init__(self):
-        self.name: str
-        self.guessit: dict
-        self.rules: list
-        self.match: dict
-        self.path: str
-        self.transfer: dict
+        self.name: str = ''
+        self.guessit: dict = {}
+        self.rules: list = []
+        self.match: dict = {}
+        self.path: str = ''
+        self.transfer: dict = {}
+
+    def edit(self, merge: bool = True, **kwargs):
+        for key, value in kwargs.items():
+            if not hasattr(self, key):
+                raise AttributeError("Attribute {name} is not valid")
+            if merge:
+                if getattr(self, key) in [list, dict]:
+                    orig = getattr(self, key)
+                    orig.update(value)
+                    value = orig
+        setattr(self, key, value)
+        logger.debug(f"Edited vfile {self.name} with kwargs {kwargs}")

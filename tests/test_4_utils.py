@@ -1,7 +1,7 @@
 import pytest
 import random
 
-from tests.utils.vars import VFILE_NAME_LIST
+from tests.vars import VFILE_NAME_LIST
 
 from video_file_organizer.utils import get_guessit, get_vfile_guessit, \
     Matcher, Transferer
@@ -19,10 +19,6 @@ def test_get_vfile_guessit():
     with pytest.raises(TypeError):
         get_vfile_guessit('')
 
-    vfile = VideoFile()
-    with pytest.raises(AttributeError):
-        get_vfile_guessit(vfile)
-
     class Fake:
         pass
 
@@ -32,6 +28,7 @@ def test_get_vfile_guessit():
     with pytest.raises(TypeError):
         get_vfile_guessit(fake_vfile)
 
+    vfile = VideoFile()
     vfile.name = VFILE_NAME_LIST[random.randint(0, len(VFILE_NAME_LIST) - 1)]
     get_vfile_guessit(vfile)
 

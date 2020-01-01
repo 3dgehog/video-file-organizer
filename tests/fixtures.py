@@ -4,7 +4,7 @@ import shutil
 import os
 import zipfile
 
-from tests.utils.vars import ASSETS_DIR
+from tests.vars import ASSETS_DIR
 
 
 @pytest.fixture

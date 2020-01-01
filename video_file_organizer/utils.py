@@ -32,11 +32,11 @@ def get_guessit(name: str) -> Union[dict, None]:
     guessitmatch = dict(guessit.guessit(name))
 
     if 'title' not in guessitmatch:
-        logger.warn(f"Unable to find title for: '{name}'")
+        logger.warning(f"Unable to find title for: '{name}'")
         return None
 
     if 'type' not in guessitmatch:
-        logger.warn(f"Unable to find video type for: '{name}'")
+        logger.warning(f"Unable to find video type for: '{name}'")
         return None
 
     return guessitmatch

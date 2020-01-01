@@ -21,6 +21,7 @@ def main():
 
     # Setup Logger
     logger = logging.getLogger('vfo')
+    logger.setLevel(logging.DEBUG)
 
     fh = logging.FileHandler('vfo.log')
     fh.setLevel(logging.INFO)
@@ -48,17 +49,25 @@ def main():
     if args.verbose:
         logger.info("Running in verbose mode")
 
+    # App Init
+    kwargs: dict = {}
+    kwargs['config_dir'] = CONFIG_DIR
+
     if args.config:
-        app = App(config_dir=args.config[0], args=args)
-        logger.info("Running custom configs in {}".format(args.config[0]))
-    else:
-        app = App(config_dir=CONFIG_DIR)
+        logger.info(f"Running custom configs in {args.config[0]}")
+        kwargs.update(config_dir=args.config[0])
+
+    app = App(**kwargs)
+
+    # App Setup
+    kwargs: dict = {}
 
     if args.create_config:
-        app.setup(create=True)
-    else:
-        app.setup()
+        kwargs.update(create=True)
 
+    app.setup(**kwargs)
+
+    # App run
     app.run()
 
 

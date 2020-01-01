@@ -1,7 +1,7 @@
 import pytest
 
-from tests.utils.vars import SERIES_CONFIGPARSE
-from tests.utils.injectors import RuleBookFileInjector
+from tests.vars import SERIES_CONFIGPARSE
+from tests.utils import RuleBookFileInjector
 
 from video_file_organizer.handlers.rule_book import RuleBookHandler
 

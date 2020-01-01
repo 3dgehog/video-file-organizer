@@ -16,7 +16,7 @@ logger = logging.getLogger('vfo.app')
 
 
 class App:
-    def __init__(self, config_dir: str):
+    def __init__(self, config_dir: str, **kwargs):
         self.config_dir = config_dir
 
     def setup(self, **kwargs):
@@ -28,7 +28,7 @@ class App:
         self.config = ConfigHandler(self.config_dir, **kwargs)
         self.rule_book = RuleBookHandler(self.config_dir)
 
-    def run(self):
+    def run(self, **kwargs):
         """This is the main function of the app. This requires the setup
         function to be run first before it will be able to run properly"""
         logger.debug("Running app")
@@ -49,38 +49,34 @@ class App:
                         if results is None:
                             ifolder.remove_vfile(name)
                             continue
-                        ifolder.edit_vfile(
-                            name, guessit=results)
+                        vfile.edit(guessit=results)
                         # Rules from rule_book
-                        rules = self.rule_book.get_vfile_rules(vfile)
-                        if rules is None:
+                        results = self.rule_book.get_vfile_rules(vfile)
+                        if results is None:
                             ifolder.remove_vfile(name)
                             continue
-                        ifolder.edit_vfile(
-                            name, rules=rules)
+                        vfile.edit(rules=results)
                         # Apply rules before matcher
                         result = rules_before_matching_vfile(vfile)
-                        ifolder.edit_vfile(
-                            name, guessit=result)
+                        vfile.edit(guessit=result)
                         # Matcher
                         results = matcher.get_vfile_match(vfile=vfile)
                         if results is None:
                             ifolder.remove_vfile(name)
                             continue
-                        ifolder.edit_vfile(name, match=results)
+                        vfile.edit(name, match=results)
                         # Apply rules before transfering
                         transfer, guessit = rules_before_transfering_vfile(
                             vfile)
                         if transfer is None:
                             ifolder.remove_vfile(name)
                             continue
-                        ifolder.edit_vfile(
-                            name, transfer=transfer, guessit=guessit)
+                        vfile.edit(transfer=transfer, guessit=guessit)
                 # Transfer
                 with Transferer() as transferer:
                     for name, vfile in self.input_folder.iter_vfiles():
                         transferer.transfer_vfile(vfile)
 
         except yg.lockfile.FileLockTimeout:
-            logger.warning("FAILED LOCKFILE: " +
+            logger.warning("Lockfile FAILED: " +
                            "The program must already be running")

@@ -19,6 +19,7 @@ video-file-organizer = {editable = true,path = "."}
 [scripts]
 tests = "pytest tests"
 type = "mypy video_file_organizer"
+mock = "python toolbox.py --mock"
 
 [requires]
 python_version = "3.6.9"
