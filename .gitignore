@@ -10,3 +10,5 @@ mock
 ignore
 systemd
 loader.py
+NOTES.md
+TODO
