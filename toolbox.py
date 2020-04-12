@@ -6,8 +6,8 @@ import shutil
 import configparser
 import subprocess
 
-from tests.utils.injectors import ConfigFileInjector, RuleBookFileInjector
-from tests.utils.vars import SERIES_CONFIGPARSE
+from tests.utils import ConfigFileInjector, RuleBookFileInjector
+from tests.vars import SERIES_CONFIGPARSE
 
 logging.basicConfig(level=logging.DEBUG)
 

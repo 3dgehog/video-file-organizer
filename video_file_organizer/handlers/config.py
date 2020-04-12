@@ -18,20 +18,20 @@ class ConfigHandler:
     layer between the application and the config.yaml file. """
 
     def __init__(
-            self, config_dir: str, create: bool = False, **kwargs) -> None:
+            self, config_dir: str, create: bool = False) -> None:
         logger.debug("Initializing ConfigHandler")
         self.config_dir = config_dir
-        self.create = create
 
-        self._init_config_dir()
+        self._init_config_dir(create)
         self._config_yaml = self._get_config_yaml()
         self._check_required_fields()
         self._run_before_scripts()
+
         self.input_dir = self._get_input_dir()
         self.series_dirs = self._get_series_dirs()
         self.ignore = self._config_yaml["ignore"]
 
-    def _init_config_dir(self):
+    def _init_config_dir(self, create):
         """Checks if config_dir directory exists.
         If it doesn't it creates the directory and adds template config
         files inside"""
@@ -39,7 +39,7 @@ class ConfigHandler:
                 os.path.exists(os.path.join(self.config_dir, 'rule_book.ini')):
             return
 
-        if self.create:
+        if create:
             self._create_config_dir()
             logger.info("Config folder created")
             return

@@ -17,9 +17,9 @@ class Folder:
             self.path = [self.path]
 
         self.ignore = ignore
-        self.entries = self.scan()
+        self.entries = self.scan(self.path)
 
-    def scan(self) -> dict:
+    def scan(self, paths: list) -> dict:
         """
         Returns a dict with this format
         {
@@ -34,7 +34,7 @@ class Folder:
         }
         """
         data = {}
-        for path in self.path:
+        for path in paths:
             for entry in os.scandir(path):
                 if entry.name in self.ignore:
                     continue
@@ -64,7 +64,7 @@ class InputFolder(Folder):
         super().__init__(path, ignore)
 
         self._vfiles: Dict[str, Union[VideoFile, None]] = {}
-        self._scan_vfiles()
+        self._scan_vfiles(self.entries)
 
     def __enter__(self):
         return self
@@ -82,7 +82,7 @@ class InputFolder(Folder):
             self._vfiles.pop(name, None)
             logger.debug(f"Purged vfile {name}")
 
-    def _scan_vfiles(self):
+    def _scan_vfiles(self, entries: dict):
         """
         Returns a dict with this format
         {
@@ -90,7 +90,7 @@ class InputFolder(Folder):
         }
         """
         data = {}
-        for fname, fdata in self.entries.items():
+        for fname, fdata in entries.items():
             if fname.rpartition('.')[-1] in VIDEO_EXTENSIONS:
                 self.add_vfile(fname, path=fdata['_entry'].path)
             if fdata['_entry'].is_dir():

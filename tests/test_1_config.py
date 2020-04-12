@@ -52,7 +52,7 @@ def test_failing_before_script(tmp_dir):
 
 
 def test_success_confighandler(tmp_dir):
-    """This is a text of if everything goes well"""
+    """This is a test of if everything goes well"""
     config_injector = ConfigFileInjector(tmp_dir)
     os.mkdir(os.path.join(tmp_dir, "series_dirs"))
     os.mkdir(os.path.join(tmp_dir, "input_dir"))
