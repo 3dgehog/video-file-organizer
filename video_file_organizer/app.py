@@ -3,7 +3,10 @@ import logging
 import tempfile
 import yg.lockfile
 
-from video_file_organizer.handlers.config import ConfigHandler
+from typing import Union
+
+from video_file_organizer.config import setup_config_dir
+from video_file_organizer.config.config_file import ConfigFile
 from video_file_organizer.handlers.rule_book import RuleBookHandler
 from video_file_organizer.models import OutputFolder, InputFolder
 from video_file_organizer.utils import get_vfile_guessit, Matcher, \
@@ -16,16 +19,21 @@ logger = logging.getLogger('vfo.app')
 
 
 class App:
-    def __init__(self, config_dir: str, **kwargs):
-        self.config_dir = config_dir
+    def setup(
+            self,
+            config_dir: Union[str, None] = None,
+            create: bool = False):
 
-    def setup(self, **kwargs):
-        """A function that starts up the app, it gets and executes the
-        ConfigHandler, args and RuleBookHandler. This is
-        run even before any of the searching and matching is done on the
-        directory to make sure that all the configs are ready to go"""
         logger.debug("Setting up app")
-        self.config = ConfigHandler(self.config_dir, **kwargs)
+
+        self.config_dir = setup_config_dir(
+            create=create,
+            path=config_dir)
+
+        config_file_path = os.path.join(
+            self.config_dir, 'config.yaml')
+
+        self.config = ConfigFile(config_file_path, create=create)
         self.rule_book = RuleBookHandler(self.config_dir)
 
     def run(self, **kwargs):

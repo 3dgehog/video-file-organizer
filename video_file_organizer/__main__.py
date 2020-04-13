@@ -2,7 +2,6 @@ import argparse
 import logging
 
 from video_file_organizer.app import App
-from video_file_organizer.settings import CONFIG_DIR
 
 
 def main():
@@ -49,18 +48,13 @@ def main():
     if args.verbose:
         logger.info("Running in verbose mode")
 
-    # App Init
+    # App Setup
+    app = App()
     kwargs: dict = {}
-    kwargs['config_dir'] = CONFIG_DIR
 
     if args.config:
         logger.info(f"Running custom configs in {args.config[0]}")
         kwargs.update(config_dir=args.config[0])
-
-    app = App(**kwargs)
-
-    # App Setup
-    kwargs: dict = {}
 
     if args.create_config:
         kwargs.update(create=True)

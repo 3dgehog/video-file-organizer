@@ -1,11 +1,11 @@
-import shutil
 import os
 import yaml
 import configparser
-
-from video_file_organizer.settings import CONFIG_TEMPLATES
+import shutil
 
 from video_file_organizer.app import App
+from video_file_organizer.config.config_file import \
+    CONFIG_FILE_TEMPLATE_LOCATION
 
 
 def setup_app_with_injectors(config_dir):
@@ -22,8 +22,8 @@ class ConfigFileInjector:
 
     def __init__(self, config_dir):
         self.config_dir = config_dir
-        self.config_path = os.path.join(self.config_dir, 'config.yaml')
-        self._copy_config_template()
+        self.path = os.path.join(self.config_dir, 'config.yaml')
+        self._copy_config_file_template()
         self.configvalue = self._get_configvalue()
 
     def append(self, data):
@@ -33,20 +33,18 @@ class ConfigFileInjector:
             self._save()
 
     def _save(self):
-        with open(self.config_path, 'w') as yml:
+        with open(self.path, 'w') as yml:
             yaml.dump(self.configvalue, yml, default_flow_style=False)
 
-    def _copy_config_template(self):
-        for file in os.listdir(CONFIG_TEMPLATES):
-            shutil.copyfile(
-                os.path.join(CONFIG_TEMPLATES, file),
-                os.path.join(self.config_dir, file))
-        self._get_configvalue()
-
     def _get_configvalue(self):
-        with open(self.config_path, 'r') as yml:
+        with open(self.path, 'r') as yml:
             configyaml = yaml.load(yml, Loader=yaml.FullLoader)
         return configyaml
+
+    def _copy_config_file_template(self):
+        shutil.copyfile(
+            CONFIG_FILE_TEMPLATE_LOCATION,
+            os.path.join(self.config_dir, 'config.yaml'))
 
 
 class RuleBookFileInjector:
