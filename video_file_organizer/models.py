@@ -23,10 +23,10 @@ class Folder:
         """
         Returns a dict with this format
         {
-            "name": {
+            "<name>": {
                 "_entry": <DirEntry>
                 "sub_entries": {
-                    "name": {
+                    "<name>": {
                         "_entry" : <DirEntry>
                     }
                 }

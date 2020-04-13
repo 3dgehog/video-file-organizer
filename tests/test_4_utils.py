@@ -4,7 +4,7 @@ import random
 from tests.vars import VFILE_NAME_LIST
 
 from video_file_organizer.utils import get_guessit, get_vfile_guessit, \
-    Matcher, Transferer
+    OutputFolderMatcher, Transferer
 from video_file_organizer.models import VideoFile, OutputFolder
 
 
@@ -35,17 +35,17 @@ def test_get_vfile_guessit():
 
 def test_matcher_init(tmp_dir):
     with pytest.raises(TypeError):
-        Matcher('')
+        OutputFolderMatcher('')
 
     class Fake:
         pass
 
     output_folder = Fake()
     with pytest.raises(TypeError):
-        Matcher(output_folder)
+        OutputFolderMatcher(output_folder)
 
     output_folder = OutputFolder(tmp_dir)
-    Matcher(output_folder)
+    OutputFolderMatcher(output_folder)
 
 
 def test_transferer_init():

@@ -5,8 +5,7 @@ from tests.vars import ASSETS_DIR
 
 from tests.utils import ConfigFileInjector
 
-from video_file_organizer.config import setup_config_dir
-from video_file_organizer.config.config_file import ConfigFile
+from video_file_organizer.config import setup_config_dir, ConfigFile
 
 
 def test_invalid_path_var(tmp_dir):

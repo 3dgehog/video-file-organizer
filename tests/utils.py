@@ -4,8 +4,7 @@ import configparser
 import shutil
 
 from video_file_organizer.app import App
-from video_file_organizer.config.config_file import \
-    CONFIG_FILE_TEMPLATE_LOCATION
+from video_file_organizer.config import CONFIG_FILE_TEMPLATE_LOCATION
 
 
 def setup_app_with_injectors(config_dir):

@@ -3,10 +3,12 @@ import guessit
 import difflib
 import shutil
 import os
+import shlex
 
 from typing import Union
 
 from video_file_organizer.models import VideoFile, OutputFolder
+from video_file_organizer.config import RuleBookFile
 
 logger = logging.getLogger('vfo.utils')
 
@@ -42,7 +44,77 @@ def get_guessit(name: str) -> Union[dict, None]:
     return guessitmatch
 
 
-class Matcher:
+class RuleBookMatcher:
+    def __init__(self, rulebookfile):
+        if not isinstance(rulebookfile, RuleBookFile):
+            raise TypeError(
+                "output_folder needs to be an instance of RuleBookFile")
+
+        self.rule_book_file = rulebookfile
+        self.configparse = self.rule_book_file.configparse
+
+    def get_vfile_rules(self, vfile: VideoFile):
+        if not isinstance(vfile, VideoFile):
+            raise TypeError("vfile needs to be an instance of VideoFile")
+        if not hasattr(vfile, 'guessit'):
+            raise AttributeError("Guessit attribute missing")
+
+        name = vfile.name
+        vtype = vfile.guessit['type']
+        title = vfile.guessit['title']
+        alternative_title = None
+        if 'alternative_title' in vfile.guessit:
+            alternative_title = vfile.guessit['alternative_title']
+
+        return self.get_rules(name, vtype, title, alternative_title)
+
+    def get_rules(
+            self, name: str, vtype: str, title: str,
+            alternative_title: str = None) -> list:
+        VALID_TYPES = {"episode": self._get_series_rules}
+
+        rules = []
+        for key, func in VALID_TYPES.items():
+            if vtype == key:
+                rules = func(name, title, alternative_title)
+
+        if len(rules) == 0:
+            logger.warn(f"Unable to find the rules for: {name}")
+            return None
+
+        return rules
+
+    def _get_series_rules(
+            self, name, title=None, alternative_title=None) -> list:
+        """Uses the title from the fse to try to match to its rules type from the
+        rule_book.ini"""
+        if title is None:
+            return []
+
+        # Get difflib_match from title
+        DIFF_CUTOFF = 0.7
+        difflib_match = difflib.get_close_matches(
+            title, self.configparse.options('series'),
+            n=1, cutoff=DIFF_CUTOFF)
+
+        # Get difflib_match from alternative_title
+        if not difflib_match and alternative_title:
+            difflib_match = difflib.get_close_matches(
+                ' '.join([title, alternative_title]),
+                self.configparse.options('series'),
+                n=1, cutoff=DIFF_CUTOFF
+            )
+
+        # Get the rules from the rule_book with difflib_match
+        rules = []
+        if difflib_match:
+            rules = shlex.split(self.configparse.get(
+                'series', difflib_match[0]))
+
+        return rules
+
+
+class OutputFolderMatcher:
     """Matcher class to scan vfile based on output_folder"""
 
     def __init__(self, output_folder):
