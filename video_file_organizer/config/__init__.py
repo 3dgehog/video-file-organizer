@@ -15,107 +15,83 @@ DEFAULT_DIR = '.config/video_file_organizer/'
 
 CONFIG_FILE_TEMPLATE_LOCATION = os.path.join(
     os.path.dirname(__file__), 'config.yaml')
+RULEBOOK_FILE_TEMPLATE_LOCATION = os.path.join(
+    os.path.dirname(__file__), 'rule_book.ini')
 
 
-def setup_config_dir(
-        path: Union[str, None],
-        create: bool = False) -> str:
+class ConfigDirectory:
+    def __init__(
+            self, path: Union[str, None] = None, create: bool = False) -> None:
+        # Default path if path not provided
+        if not path:
+            path = os.path.join(os.environ['HOME'], DEFAULT_DIR)
+            logger.debug(
+                f'No config dir path given, going to default path of: {path}')
 
-    if not path:
-        path = os.path.join(os.environ['HOME'], DEFAULT_DIR)
-        logger.debug(
-            f'No config dir path given, going to default path of: {path}')
+        self.path = path
 
-    if create:
-        os.makedirs(path, exist_ok=True)
-        logger.info("Config directory created")
+        # Create folder if create is True
+        if create:
+            os.makedirs(path, exist_ok=True)
+            logger.info("Config directory created")
 
-    if not os.path.exists(path):
-        raise FileNotFoundError("Config directory doesn't exist")
+        # Error if folder doesn't exists
+        if not os.path.exists(path):
+            raise FileNotFoundError("Config directory doesn't exist")
 
-    return path
+        # Initiate file handlers
+        self.configfile = ConfigFile(
+            os.path.join(self.path, 'config.yaml'),
+            create
+        )
+        self.rulebookfile = RuleBookFile(
+            os.path.join(self.path, 'rule_book.ini'),
+            create
+        )
 
 
 class ConfigFile:
-    def __init__(
-            self,
-            path: str,
-            create: bool = False) -> None:
+    def __init__(self, path: str, create: bool) -> None:
 
         logger.debug("Initializing ConfigFile")
 
         self.path = path
 
         if create:
-            self._create_config_file_yaml()
+            self.create_file_from_template()
+
+        if not os.path.exists(path):
+            raise FileNotFoundError("File doesn't exist")
 
         fileextension = self.path.rpartition('.')[-1]
         if fileextension not in ['yaml', 'yml']:
-            raise TypeError('File needs to be a yaml format')
+            raise TypeError('File needs to be a .yaml format')
 
-        self.raw_config = self._get_config_file_yaml()
+        self._raw_config = self.load_file()
 
-        self._validate_required_fields()
-        self._run_before_scripts()
+        self.validate_required_fields()
+        self.run_before_scripts()
 
-        self.input_dir = self._get_input_dir()
-        self.series_dirs = self._get_series_dirs()
-        self.ignore = self.raw_config["ignore"]
+        self.input_dir = self.get_input_dir()
+        self.series_dirs = self.get_series_dirs()
+        self.ignore = self._raw_config["ignore"]
+        self.videoextensions = ['mkv', 'm4v', 'avi', 'mp4', 'mov']
 
-    def _create_config_file_yaml(self):
-        """Creates config.yaml"""
-        if os.path.exists(self.path):
-            logger.info("config_file already exists")
-            return
-        shutil.copyfile(CONFIG_FILE_TEMPLATE_LOCATION, self.path)
-
-    def _get_config_file_yaml(self) -> dict:
-        """Return config.yaml as dict"""
-        if not os.path.exists(self.path):
-            raise FileNotFoundError("Config file doesn't exist")
-
-        with open(self.path, 'r') as yml:
-            return yaml.load(yml, Loader=yaml.FullLoader)
-
-    def _validate_required_fields(self):
-        """Validate all required fields"""
-        required_fields = ["input_dir", "series_dirs"]
-        for field in required_fields:
-            if not self.raw_config[field]:
-                raise ValueError(f"Value for '{field}' empty on config.yaml")
-        logger.debug("All required fields are entered")
-
-    def _run_before_scripts(self):
-        """Run all before_scripts in config"""
-        # Checks if there are scripts to run
-        if not self.raw_config['before_scripts']:
-            logger.debug("No before scripts to run")
-            return
-        # Run scripts
-        for script in self.raw_config['before_scripts']:
-            logger.debug("Running before script '{}'".format(script))
-            try:
-                subprocess.check_output([script], shell=True)
-            except subprocess.CalledProcessError as e:
-                logger.info(e)
-                sys.exit()
-            logger.debug("Ran script {}".format(script))
-
-    def _get_input_dir(self) -> str:
+    def get_input_dir(self) -> str:
         """Returns the input_dir path from the config.yaml"""
         # Checks that the directory exists
-        if not os.path.exists(self.raw_config["input_dir"]):
+        if not os.path.exists(self._raw_config["input_dir"]):
             raise FileNotFoundError("File {} doesn't exists".format(
-                self.raw_config["input_dir"]))
+                self._raw_config["input_dir"]))
 
         logger.debug("Got input dir {}".format(
-            self.raw_config["input_dir"]))
-        return self.raw_config["input_dir"]
+            self._raw_config["input_dir"]))
+        return self._raw_config["input_dir"]
 
-    def _get_series_dirs(self) -> list:
+    def get_series_dirs(self) -> list:
         """Returns list of all directories from config.yaml 'series_dirs'"""
         dirs: List[str] = []
-        for dir_list in self.raw_config["series_dirs"]:
+        for dir_list in self._raw_config["series_dirs"]:
             # Checks that the directory exists
             if not os.path.exists(dir_list):
                 raise FileNotFoundError(
@@ -125,34 +101,93 @@ class ConfigFile:
         logger.debug("Got series dirs '{}'".format(dirs))
         return dirs
 
+    def create_file_from_template(self):
+        """Creates config.yaml from template"""
+        if os.path.exists(self.path):
+            logger.info("config.yaml already exists")
+            return
+        shutil.copyfile(CONFIG_FILE_TEMPLATE_LOCATION, self.path)
+
+    def load_file(self) -> dict:
+        """Return config.yaml as dict"""
+        if not os.path.exists(self.path):
+            raise FileNotFoundError("Config file doesn't exist")
+
+        with open(self.path, 'r') as yml:
+            return yaml.load(yml, Loader=yaml.FullLoader)
+
+    def validate_required_fields(self):
+        """Validate all required fields"""
+        required_fields = ["input_dir", "series_dirs"]
+        for field in required_fields:
+            if not self._raw_config[field]:
+                raise ValueError(f"Value for '{field}' empty on config.yaml")
+        logger.debug("All required fields are entered")
+
+    def run_before_scripts(self):
+        """Run all before_scripts in config"""
+        # Checks if there are scripts to run
+        if not self._raw_config['before_scripts']:
+            logger.debug("No before scripts to run")
+            return
+        # Run scripts
+        for script in self._raw_config['before_scripts']:
+            logger.debug("Running before script '{}'".format(script))
+            try:
+                subprocess.check_output([script], shell=True)
+            except subprocess.CalledProcessError as e:
+                logger.info(e)
+                sys.exit()
+            logger.debug("Ran script {}".format(script))
+
 
 class RuleBookFile:
-    def __init__(self, config_dir, setup=True) -> None:
-        logger.debug("Initializing RuleBookHandler")
-        self.config_dir = config_dir
-        self.configparse = None
+    def __init__(self, path: str, create: bool) -> None:
+        logger.debug("Initializing RuleBookFile")
 
-        if setup:
-            self.setup()
+        self.path = path
 
-    def setup(self):
-        self.configparse = self._get_rule_book()
-        self._validate_rule_book()
+        if create:
+            self.create_file_from_template()
 
-    def _get_rule_book(self):
+        if not os.path.exists(path):
+            raise FileNotFoundError("File doesn't exist")
+
+        fileextension = self.path.rpartition('.')[-1]
+        if fileextension not in ['ini']:
+            raise TypeError('File needs to be a .ini format')
+
+        self.configparse = self.load_file()
+        self.validate_rule_book()
+
+    def load_file(self):
         """Returns configparser object for rule_book.ini"""
         config = configparser.ConfigParser(allow_no_value=True)
-        config.read(os.path.join(self.config_dir, 'rule_book.ini'))
+        config.read(self.path)
         return config
 
-    def _validate_rule_book(self):
+    def create_file_from_template(self):
+        """Creates rule_book.ini from template"""
+        if os.path.exists(self.path):
+            logger.info("rule_book.ini already exists")
+            return
+        shutil.copyfile(RULEBOOK_FILE_TEMPLATE_LOCATION, self.path)
+
+    def list_of_series(self):
+        return self.configparse.options('series')
+
+    def get_series_rule(self, name):
+        return self.configparse.get('series', name)
+
+    def validate_rule_book(self):
         """Checks if all the sections are valid and checks all the values of
         each entries"""
         # Validate sections
         RULE_BOOK_SECTIONS = ['series']
+
         for section in RULE_BOOK_SECTIONS:
             if not self.configparse.has_section(section):
-                raise ValueError(f"Rule book has no {section} section")
+                raise ValueError(f"Rule book is missing {section} section")
 
         for section in self.configparse.sections():
             if section not in RULE_BOOK_SECTIONS:
@@ -183,11 +218,11 @@ class RuleBookFile:
             if rule not in VALID_OPTIONS:
                 # Check wether its a value of a secondary value
                 if rules[rules.index(rule) - 1] not in RULES_WITH_SECONDARY:
-                    logger.critical("{}".format(rules))
+                    logger.critical(f"{rules}")
                     raise KeyError("Invalid series rule: '{}'".format(rule))
 
         # Check invalid pairs
         for invalid_pair in INVALID_PAIRS:
             found = [rule for rule in rules if rule in invalid_pair]
             if len(found) > 1:
-                raise KeyError("Invalid pair {}".format(found))
+                raise KeyError(f"Invalid pair {found}")

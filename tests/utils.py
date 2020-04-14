@@ -51,14 +51,14 @@ class RuleBookFileInjector:
 
     def __init__(self, config_dir):
         self.config_dir = config_dir
-        self.rule_book_path = os.path.join(self.config_dir, 'rule_book.ini')
+        self.path = os.path.join(self.config_dir, 'rule_book.ini')
         self.configparse = self._get_configpaser()
 
     def _get_configpaser(self):
         configparse = configparser.ConfigParser(allow_no_value=True)
-        configparse.read(self.rule_book_path)
+        configparse.read(self.path)
         return configparse
 
     def save(self):
-        with open(self.rule_book_path, 'w') as configfile:
+        with open(self.path, 'w') as configfile:
             self.configparse.write(configfile)

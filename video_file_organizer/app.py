@@ -5,8 +5,7 @@ import yg.lockfile
 
 from typing import Union
 
-from video_file_organizer.config import setup_config_dir, ConfigFile, \
-    RuleBookFile
+from video_file_organizer.config import ConfigDirectory
 from video_file_organizer.models import OutputFolder, InputFolder
 from video_file_organizer.utils import get_vfile_guessit, \
     OutputFolderMatcher, Transferer, RuleBookMatcher
@@ -19,21 +18,14 @@ logger = logging.getLogger('vfo.app')
 
 class App:
     def setup(
-            self,
-            config_dir: Union[str, None] = None,
-            create: bool = False):
+            self, config_dir: Union[str, None] = None, create: bool = False):
 
         logger.debug("Setting up app")
 
-        self.config_dir = setup_config_dir(
-            create=create,
-            path=config_dir)
+        self.configdir = ConfigDirectory(config_dir, create)
 
-        config_file_path = os.path.join(
-            self.config_dir, 'config.yaml')
-
-        self.config = ConfigFile(config_file_path, create=create)
-        self.rule_book = RuleBookFile(self.config_dir)
+        self.config = self.configdir.configfile
+        self.rulebook = self.configdir.rulebookfile
 
     def run(self, **kwargs):
         """This is the main function of the app. This requires the setup
@@ -45,10 +37,12 @@ class App:
                     timeout=10):
 
                 self.output_folder = OutputFolder(self.config.series_dirs)
-                self.input_folder = InputFolder(self.config.input_dir)
+                self.input_folder = InputFolder(
+                    self.config.input_dir,
+                    videoextensions=self.config.videoextensions)
 
                 folder_matcher = OutputFolderMatcher(self.output_folder)
-                rulebook_matcher = RuleBookMatcher(self.rule_book)
+                rulebook_matcher = RuleBookMatcher(self.rulebook)
 
                 with self.input_folder as ifolder:
                     for name, vfile in ifolder.iter_vfiles():

@@ -2,8 +2,6 @@ import os
 from typing import Union, Dict
 import logging
 
-from video_file_organizer.settings import VIDEO_EXTENSIONS
-
 logger = logging.getLogger('vfo.models')
 
 
@@ -58,10 +56,15 @@ class OutputFolder(Folder):
 
 
 class InputFolder(Folder):
-    def __init__(self, path: str, ignore=[]):
+    def __init__(
+            self, path: str, ignore: list = [],
+            videoextensions: list = []) -> None:
+
         if type(path) is not str:
             raise TypeError("Input Folder can only be a single folder")
         super().__init__(path, ignore)
+
+        self.videoextensions = videoextensions
 
         self._vfiles: Dict[str, Union[VideoFile, None]] = {}
         self._scan_vfiles(self.entries)
@@ -89,13 +92,13 @@ class InputFolder(Folder):
             "name": <VideoFile>
         }
         """
-        data = {}
+        data: dict = {}
         for fname, fdata in entries.items():
-            if fname.rpartition('.')[-1] in VIDEO_EXTENSIONS:
+            if fname.rpartition('.')[-1] in self.videoextensions:
                 self.add_vfile(fname, path=fdata['_entry'].path)
             if fdata['_entry'].is_dir():
                 for sub_fname, sub_fdata in fdata['sub_entries'].items():
-                    if sub_fname.rpartition('.')[-1] in VIDEO_EXTENSIONS:
+                    if sub_fname.rpartition('.')[-1] in self.videoextensions:
                         self.add_vfile(
                             sub_fname,
                             path=sub_fdata['_entry'].path,

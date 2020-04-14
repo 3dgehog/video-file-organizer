@@ -50,8 +50,7 @@ class RuleBookMatcher:
             raise TypeError(
                 "output_folder needs to be an instance of RuleBookFile")
 
-        self.rule_book_file = rulebookfile
-        self.configparse = self.rule_book_file.configparse
+        self.rulebook = rulebookfile
 
     def get_vfile_rules(self, vfile: VideoFile):
         if not isinstance(vfile, VideoFile):
@@ -94,22 +93,22 @@ class RuleBookMatcher:
         # Get difflib_match from title
         DIFF_CUTOFF = 0.7
         difflib_match = difflib.get_close_matches(
-            title, self.configparse.options('series'),
+            title, self.rulebook.list_of_series(),
             n=1, cutoff=DIFF_CUTOFF)
 
         # Get difflib_match from alternative_title
         if not difflib_match and alternative_title:
             difflib_match = difflib.get_close_matches(
                 ' '.join([title, alternative_title]),
-                self.configparse.options('series'),
+                self.rulebook.list_of_series(),
                 n=1, cutoff=DIFF_CUTOFF
             )
 
         # Get the rules from the rule_book with difflib_match
         rules = []
         if difflib_match:
-            rules = shlex.split(self.configparse.get(
-                'series', difflib_match[0]))
+            rules = shlex.split(
+                self.rulebook.get_series_rule(difflib_match[0]))
 
         return rules
 
