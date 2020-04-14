@@ -3,8 +3,8 @@ import random
 
 from tests.vars import VFILE_NAME_LIST
 
-from video_file_organizer.utils import get_guessit, get_vfile_guessit, \
-    OutputFolderMatcher, Transferer
+from video_file_organizer.matchers import get_guessit, get_vfile_guessit, \
+    OutputFolderMatcher
 from video_file_organizer.models import VideoFile, OutputFolder
 
 
@@ -48,5 +48,5 @@ def test_matcher_init(tmp_dir):
     OutputFolderMatcher(output_folder)
 
 
-def test_transferer_init():
-    Transferer()
+# def test_transferer_init():
+#     Transferer()

@@ -7,8 +7,9 @@ from typing import Union
 
 from video_file_organizer.config import ConfigDirectory
 from video_file_organizer.models import OutputFolder, InputFolder
-from video_file_organizer.utils import get_vfile_guessit, \
-    OutputFolderMatcher, Transferer, RuleBookMatcher
+from video_file_organizer.matchers import get_vfile_guessit, \
+    OutputFolderMatcher, RuleBookMatcher
+from video_file_organizer.transferer import Transferer
 from video_file_organizer.rules import rules_before_matching_vfile, \
     rules_before_transfering_vfile
 
