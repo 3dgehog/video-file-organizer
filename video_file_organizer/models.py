@@ -140,9 +140,9 @@ class InputFolder(Folder):
 class VideoFile:
     def __init__(self):
         self.name: str = ''
-        self.guessit: dict = {}
+        self.metadata: dict = {}
         self.rules: list = []
-        self.match: dict = {}
+        self.foldermatch: dict = {}
         self.path: str = ''
         self.transfer: dict = {}
 

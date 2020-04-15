@@ -29,17 +29,17 @@ def get_guessit(name: str) -> Union[dict, None]:
     Args:
         name: The filename name
     """
-    guessitmatch = dict(guessit.guessit(name))
+    results = dict(guessit.guessit(name))
 
-    if 'title' not in guessitmatch:
+    if 'title' not in results:
         logger.warning(f"Unable to find title for: '{name}'")
         return None
 
-    if 'type' not in guessitmatch:
+    if 'type' not in results:
         logger.warning(f"Unable to find video type for: '{name}'")
         return None
 
-    return guessitmatch
+    return results
 
 
 class RuleBookMatcher:
@@ -53,15 +53,15 @@ class RuleBookMatcher:
     def get_vfile_rules(self, vfile: VideoFile):
         if not isinstance(vfile, VideoFile):
             raise TypeError("vfile needs to be an instance of VideoFile")
-        if not hasattr(vfile, 'guessit'):
-            raise AttributeError("Guessit attribute missing")
+        if not hasattr(vfile, 'metadata'):
+            raise AttributeError("Metadata attribute missing")
 
         name = vfile.name
-        vtype = vfile.guessit['type']
-        title = vfile.guessit['title']
+        vtype = vfile.metadata['type']
+        title = vfile.metadata['title']
         alternative_title = None
-        if 'alternative_title' in vfile.guessit:
-            alternative_title = vfile.guessit['alternative_title']
+        if 'alternative_title' in vfile.metadata:
+            alternative_title = vfile.metadata['alternative_title']
 
         return self.get_rules(name, vtype, title, alternative_title)
 
@@ -124,10 +124,10 @@ class OutputFolderMatcher:
     def get_vfile_match(self, vfile: VideoFile):
         if not isinstance(vfile, VideoFile):
             raise TypeError("vfile needs to be an instance of VideoFile")
-        if not hasattr(vfile, 'guessit'):
-            raise ValueError("vfile needs to have guessit as an attribute")
+        if not hasattr(vfile, 'metadata'):
+            raise ValueError("vfile needs to have metadata as an attribute")
         name = vfile.name
-        title = vfile.guessit['title']
+        title = vfile.metadata['title']
         return self.get_match(name, title)
 
     def get_match(self, name: str, title: str) -> Union[dict, None]:

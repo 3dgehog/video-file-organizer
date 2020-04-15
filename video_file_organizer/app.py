@@ -48,33 +48,34 @@ class App:
                 with self.input_folder as ifolder:
                     for name, vfile in ifolder.iter_vfiles():
                         # Guessit
-                        results = get_vfile_guessit(vfile=vfile)
-                        if results is None:
+                        metadata = get_vfile_guessit(vfile=vfile)
+                        if metadata is None:
                             ifolder.remove_vfile(name)
                             continue
-                        vfile.edit(guessit=results)
+                        vfile.edit(metadata=metadata)
                         # Rules from rule_book
-                        results = rulebook_matcher.get_vfile_rules(vfile)
-                        if results is None:
+                        rules = rulebook_matcher.get_vfile_rules(vfile)
+                        if rules is None:
                             ifolder.remove_vfile(name)
                             continue
-                        vfile.edit(rules=results)
+                        vfile.edit(rules=rules)
                         # Apply rules before matcher
-                        result = rules_before_matching_vfile(vfile)
-                        vfile.edit(guessit=result)
+                        metadata = rules_before_matching_vfile(vfile)
+                        vfile.edit(metadata=metadata)
                         # Matcher
-                        results = folder_matcher.get_vfile_match(vfile=vfile)
-                        if results is None:
+                        foldermatch = folder_matcher.get_vfile_match(
+                            vfile=vfile)
+                        if foldermatch is None:
                             ifolder.remove_vfile(name)
                             continue
-                        vfile.edit(name, match=results)
+                        vfile.edit(foldermatch=foldermatch)
                         # Apply rules before transfering
-                        transfer, guessit = rules_before_transfering_vfile(
+                        transfer, metadata = rules_before_transfering_vfile(
                             vfile)
                         if transfer is None:
                             ifolder.remove_vfile(name)
                             continue
-                        vfile.edit(transfer=transfer, guessit=guessit)
+                        vfile.edit(transfer=transfer, metadata=metadata)
                 # Transfer
                 with Transferer() as transferer:
                     for name, vfile in self.input_folder.iter_vfiles():

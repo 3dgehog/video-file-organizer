@@ -6,34 +6,34 @@ from video_file_organizer.rules import series
 def rules_before_matching_vfile(vfile: VideoFile) -> dict:
     if not isinstance(vfile, VideoFile):
         raise TypeError("vfile needs to be an instance of VideoFile")
-    if not hasattr(vfile, 'guessit'):
-        raise ValueError("vfile needs to have guessit as an attribute")
+    if not hasattr(vfile, 'metadata'):
+        raise ValueError("vfile needs to have metadata as an attribute")
 
     name = vfile.name
-    guessit = vfile.guessit
+    metadata = vfile.metadata
 
     if "alt-title" in vfile.rules:
-        guessit = series.rule_alt_title(name, guessit)
+        metadata = series.rule_alt_title(name, metadata)
 
-    return guessit
+    return metadata
 
 
 def rules_before_transfering_vfile(vfile: VideoFile) -> tuple:
     if not isinstance(vfile, VideoFile):
         raise TypeError("vfile needs to be an instance of VideoFile")
-    if not hasattr(vfile, 'guessit'):
-        raise ValueError("vfile needs to have guessit as an attribute")
-    if not hasattr(vfile, 'match'):
-        raise ValueError("vfile needs to have match as an attribute")
+    if not hasattr(vfile, 'metadata'):
+        raise ValueError("vfile needs to have metadata as an attribute")
+    if not hasattr(vfile, 'foldermatch'):
+        raise ValueError("vfile needs to have foldermatch as an attribute")
 
     name = vfile.name
-    guessit = vfile.guessit
-    match = vfile.match
+    metadata = vfile.metadata
+    match = vfile.foldermatch
     rules = vfile.rules
     transfer = vfile.transfer
 
     if "season" in rules:
-        transfer.update(series.rule_season(name, guessit, match))
+        transfer.update(series.rule_season(name, metadata, match))
 
     if "parent-dir" in rules:
         transfer.update(series.rule_parent_dir(name, match))
@@ -42,10 +42,10 @@ def rules_before_transfering_vfile(vfile: VideoFile) -> tuple:
         transfer.update(series.rule_sub_dir(name, match, rules))
 
     if "episode-only" in rules:
-        guessit.update(series.rule_episode_only(name, guessit))
+        metadata.update(series.rule_episode_only(name, metadata))
 
     if "format-title" in rules:
         transfer.update(series.rule_format_title(
-            name, guessit, rules, transfer))
+            name, metadata, rules, transfer))
 
-    return transfer, guessit
+    return transfer, metadata
