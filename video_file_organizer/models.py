@@ -162,12 +162,6 @@ class InputFolder(FolderCollection):
             raise ValueError("This video file doesn't exists in list")
         return self._vfiles[name]
 
-    def edit_vfile(self, name: str, merge: bool = True, **kwargs):
-        if name not in self._vfiles.keys():
-            raise ValueError("This video file doesn't exist in list")
-        vfile = self._vfiles[name]
-        vfile.edit(merge, **kwargs)
-
     def remove_vfile(self, name: str):
         if name not in self._vfiles.keys():
             raise ValueError("This video file doesn't exist in list")

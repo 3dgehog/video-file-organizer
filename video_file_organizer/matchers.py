@@ -11,30 +11,9 @@ from video_file_organizer.config import RuleBookFile
 logger = logging.getLogger('vfo.matachers')
 
 
-class BaseMatcher:
-    def __init__(self):
-        self._observers = set()
-
+class MetadataMatcher:
     def __call__(self, vfile: VideoFile):
-        self._notify('before', vfile)
-        result = self.match_vfile(vfile)
-        self._notify('after', vfile)
-        return result
-
-    def match_vfile(self, vfile: VideoFile):
-        pass
-
-    def attach(self, observer):
-        self._observers.add(observer)
-
-    def _notify(self, when, vfile):
-        for observer in self._observers:
-            observer.update(when, self.__class__.__name__, vfile)
-
-
-class MetadataMatcher(BaseMatcher):
-    def __init__(self):
-        super().__init__()
+        return self.match_vfile(vfile)
 
     def match_vfile(self, vfile: VideoFile):
         """A wrapper for the get_guessit function that uses a VideoFile object
@@ -60,15 +39,17 @@ class MetadataMatcher(BaseMatcher):
         return results
 
 
-class RuleBookMatcher(BaseMatcher):
+class RuleBookMatcher:
     def __init__(self, rulebookfile):
-        super().__init__()
 
         if not isinstance(rulebookfile, RuleBookFile):
             raise TypeError(
                 "output_folder needs to be an instance of RuleBookFile")
 
         self.rulebook = rulebookfile
+
+    def __call__(self, vfile: VideoFile):
+        return self.match_vfile(vfile)
 
     def match_vfile(self, vfile: VideoFile):
         if not hasattr(vfile, 'metadata'):
@@ -129,17 +110,19 @@ class RuleBookMatcher(BaseMatcher):
         return rules
 
 
-class OutputFolderMatcher(BaseMatcher):
+class OutputFolderMatcher:
     """Matcher class to scan vfile based on output_folder"""
 
     def __init__(self, output_folder):
-        super().__init__()
 
         if not isinstance(output_folder, FolderCollection):
             raise TypeError(
                 "output_folder needs to be an instance of OutputFolder")
         self.output_folder = output_folder
         self.entries = self.output_folder.entries
+
+    def __call__(self, vfile: VideoFile):
+        return self.match_vfile(vfile)
 
     def match_vfile(self, vfile: VideoFile):
         if not hasattr(vfile, 'metadata'):
