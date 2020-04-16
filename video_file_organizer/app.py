@@ -6,9 +6,9 @@ import yg.lockfile
 from typing import Union
 
 from video_file_organizer.config import ConfigDirectory
-from video_file_organizer.models import OutputFolder, InputFolder
-from video_file_organizer.matchers import get_vfile_guessit, \
-    OutputFolderMatcher, RuleBookMatcher
+from video_file_organizer.models import Folder, InputFolder
+from video_file_organizer.matchers import OutputFolderMatcher, \
+    RuleBookMatcher, MetadataMatcher
 from video_file_organizer.transferer import Transferer
 from video_file_organizer.rules import rules_before_matching_vfile, \
     rules_before_transfering_vfile
@@ -37,24 +37,25 @@ class App:
                     os.path.join(tempfile.gettempdir(), 'vfolock'),
                     timeout=10):
 
-                self.output_folder = OutputFolder(self.config.series_dirs)
+                self.output_folder = Folder(self.config.series_dirs)
                 self.input_folder = InputFolder(
                     self.config.input_dir,
                     videoextensions=self.config.videoextensions)
 
-                folder_matcher = OutputFolderMatcher(self.output_folder)
+                metadata_matcher = MetadataMatcher()
                 rulebook_matcher = RuleBookMatcher(self.rulebook)
+                folder_matcher = OutputFolderMatcher(self.output_folder)
 
                 with self.input_folder as ifolder:
                     for name, vfile in ifolder.iter_vfiles():
                         # Guessit
-                        metadata = get_vfile_guessit(vfile=vfile)
+                        metadata = metadata_matcher(vfile)
                         if metadata is None:
                             ifolder.remove_vfile(name)
                             continue
                         vfile.edit(metadata=metadata)
                         # Rules from rule_book
-                        rules = rulebook_matcher.get_vfile_rules(vfile)
+                        rules = rulebook_matcher(vfile)
                         if rules is None:
                             ifolder.remove_vfile(name)
                             continue
@@ -63,8 +64,7 @@ class App:
                         metadata = rules_before_matching_vfile(vfile)
                         vfile.edit(metadata=metadata)
                         # Matcher
-                        foldermatch = folder_matcher.get_vfile_match(
-                            vfile=vfile)
+                        foldermatch = folder_matcher(vfile)
                         if foldermatch is None:
                             ifolder.remove_vfile(name)
                             continue

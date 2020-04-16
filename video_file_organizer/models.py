@@ -50,11 +50,6 @@ class Folder:
                 yield name, data
 
 
-class OutputFolder(Folder):
-    def __init__(self, path: Union[str, list], ignore=[]):
-        super().__init__(path, ignore)
-
-
 class InputFolder(Folder):
     def __init__(
             self, path: str, ignore: list = [],
@@ -74,7 +69,6 @@ class InputFolder(Folder):
 
     def __exit__(self, type, value, traceback):
         self._purge()
-        return True
 
     def _purge(self):
         """Removes all dictionary entries from self._vfile where the

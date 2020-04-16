@@ -5,54 +5,72 @@ import shlex
 
 from typing import Union
 
-from video_file_organizer.models import VideoFile, OutputFolder
+from video_file_organizer.models import VideoFile, Folder
 from video_file_organizer.config import RuleBookFile
 
 logger = logging.getLogger('vfo.matachers')
 
 
-def get_vfile_guessit(vfile: VideoFile):
-    """A wrapper for the get_guessit function that uses a VideoFile object
+class BaseMatcher:
+    def __init__(self, vfile: VideoFile):
+        self._observers = set()
 
-    Args:
-        vfile: an instance of VideoFile
-    """
-    if not isinstance(vfile, VideoFile):
-        raise TypeError("vfile needs to be an instance of VideoFile")
+    def __call__(self, vfile: VideoFile):
+        self._notify('before', vfile)
+        result = self.match_vfile(vfile)
+        self._notify('after', vfile)
+        return result
 
-    return get_guessit(vfile.name)
+    def match_vfile(self, vfile: VideoFile):
+        pass
 
+    def attach(self, observer):
+        self._observers.add(observer)
 
-def get_guessit(name: str) -> Union[dict, None]:
-    """Returns the guessit result for the name of the file passed
-
-    Args:
-        name: The filename name
-    """
-    results = dict(guessit.guessit(name))
-
-    if 'title' not in results:
-        logger.warning(f"Unable to find title for: '{name}'")
-        return None
-
-    if 'type' not in results:
-        logger.warning(f"Unable to find video type for: '{name}'")
-        return None
-
-    return results
+    def _notify(self, when, vfile):
+        for observer in self._observers:
+            observer.update(when, self.__class__.__name__, vfile)
 
 
-class RuleBookMatcher:
+class MetadataMatcher(BaseMatcher):
+    def __init__(self):
+        super().__init__('metadata')
+
+    def match_vfile(self, vfile: VideoFile):
+        """A wrapper for the get_guessit function that uses a VideoFile object
+        """
+        return self.get_guessit(vfile.name)
+
+    def get_guessit(self, name: str) -> Union[dict, None]:
+        """Returns the guessit result for the name of the file passed
+
+        Args:
+            name: The filename name
+        """
+        results = dict(guessit.guessit(name))
+
+        if 'title' not in results:
+            logger.warning(f"Unable to find title for: '{name}'")
+            return None
+
+        if 'type' not in results:
+            logger.warning(f"Unable to find video type for: '{name}'")
+            return None
+
+        return results
+
+
+class RuleBookMatcher(BaseMatcher):
     def __init__(self, rulebookfile):
+        super().__init__('rulebook')
+
         if not isinstance(rulebookfile, RuleBookFile):
             raise TypeError(
                 "output_folder needs to be an instance of RuleBookFile")
 
         self.rulebook = rulebookfile
 
-    def get_vfile_rules(self, vfile: VideoFile):
-        if not isinstance(vfile, VideoFile):
-            raise TypeError("vfile needs to be an instance of VideoFile")
+    def match_vfile(self, vfile: VideoFile):
         if not hasattr(vfile, 'metadata'):
             raise AttributeError("Metadata attribute missing")
 
@@ -111,19 +129,19 @@ class RuleBookMatcher:
         return rules
 
 
-class OutputFolderMatcher:
+class OutputFolderMatcher(BaseMatcher):
     """Matcher class to scan vfile based on output_folder"""
 
     def __init__(self, output_folder):
-        if not isinstance(output_folder, OutputFolder):
+        super().__init__('outputfolder')
+
+        if not isinstance(output_folder, Folder):
             raise TypeError(
                 "output_folder needs to be an instance of OutputFolder")
         self.output_folder = output_folder
         self.entries = self.output_folder.entries
 
-    def get_vfile_match(self, vfile: VideoFile):
-        if not isinstance(vfile, VideoFile):
-            raise TypeError("vfile needs to be an instance of VideoFile")
+    def match_vfile(self, vfile: VideoFile):
         if not hasattr(vfile, 'metadata'):
             raise ValueError("vfile needs to have metadata as an attribute")
         name = vfile.name
