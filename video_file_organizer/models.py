@@ -1,14 +1,48 @@
 import os
+import posix
 from typing import Union, Dict
 import logging
 
 logger = logging.getLogger('vfo.models')
 
 
-class Folder:
-    """A representation of a generic folder"""
+class FolderBase:
+    def __iter__(self):
+        for entry in self.entries:
+            yield entry
 
-    def __init__(self, path: Union[str, list], ignore=[]):
+    def __getitem__(self, key):
+        if not self.entries:
+            print('scanning folder')
+            self.entries = self.scan()
+
+        if type(key) is str:
+            for entry in self.entries:
+                if entry.name == key:
+                    return entry
+            raise KeyError(key)
+
+        return self.entries[key]
+
+    def __delitem__(self, key):
+        pass
+
+    def __setitem__(self, key):
+        pass
+
+    def __len__(self):
+        return len(self.entries)
+
+    def list_entry_names(self):
+        data: list = []
+        for entry in self.entries:
+            data.append(entry.name)
+        return data
+
+
+class FolderCollection(FolderBase):
+    def __init__(self, path: Union[str, list], ignore: list = []):
+
         self.path = path
         # Makes sure path is a list
         if type(path) is str:
@@ -17,40 +51,54 @@ class Folder:
         self.ignore = ignore
         self.entries = self.scan(self.path)
 
-    def scan(self, paths: list) -> dict:
+    def scan(self, paths: list):
+        """Returns
+        [<FolderEntry>, <FolderEntry>]
         """
-        Returns a dict with this format
-        {
-            "<name>": {
-                "_entry": <DirEntry>
-                "sub_entries": {
-                    "<name>": {
-                        "_entry" : <DirEntry>
-                    }
-                }
-            }
-        }
-        """
-        data = {}
+        data: list = []
         for path in paths:
             for entry in os.scandir(path):
                 if entry.name in self.ignore:
                     continue
-                sub_entries = {}
-                if entry.is_dir():
-                    for sub_entry in os.scandir(entry.path):
-                        sub_entries[sub_entry.name] = {'_entry': sub_entry}
-                data[entry.name] = {
-                    '_entry': entry, 'sub_entries': sub_entries
-                }
+                data.append(FolderEntry(entry))
         return data
 
-        def iterate_entries(self):
-            for name, data in self.entries.items():
-                yield name, data
+
+class FolderEntry(FolderBase):
+    def __init__(self, dir_entry: posix.DirEntry):
+
+        self._dir_entry = dir_entry
+
+        self.path = self._dir_entry.path
+        self.name = self._dir_entry.name
+        self.is_dir = self._dir_entry.is_dir
+        self.is_file = self._dir_entry.is_file
+        self._entries = None
+
+    @property
+    def entries(self):
+        if not self._entries:
+            self._entries = self.scan()
+        return self._entries
+
+    @entries.setter
+    def entries(self, entries):
+        self._entries = entries
+
+    def scan(self):
+        """Returns
+        [<FolderEntry>, <FolderEntry>]
+        """
+        data: list = []
+        for entry in os.scandir(self.path):
+            data.append(FolderEntry(entry))
+        return data
+
+    def __repr__(self):
+        return f"<FolderEntry '{self.name}'>"
 
 
-class InputFolder(Folder):
+class InputFolder(FolderCollection):
     def __init__(
             self, path: str, ignore: list = [],
             videoextensions: list = []) -> None:
@@ -79,7 +127,7 @@ class InputFolder(Folder):
             self._vfiles.pop(name, None)
             logger.debug(f"Purged vfile {name}")
 
-    def _scan_vfiles(self, entries: dict):
+    def _scan_vfiles(self, entries: list):
         """
         Returns a dict with this format
         {
@@ -87,16 +135,16 @@ class InputFolder(Folder):
         }
         """
         data: dict = {}
-        for fname, fdata in entries.items():
-            if fname.rpartition('.')[-1] in self.videoextensions:
-                self.add_vfile(fname, path=fdata['_entry'].path)
-            if fdata['_entry'].is_dir():
-                for sub_fname, sub_fdata in fdata['sub_entries'].items():
-                    if sub_fname.rpartition('.')[-1] in self.videoextensions:
+        for entry in entries:
+            if entry.name.rpartition('.')[-1] in self.videoextensions:
+                self.add_vfile(entry.name, path=entry.path)
+            if entry.is_dir():
+                for entry2 in entry:
+                    if entry2.name.rpartition('.')[-1] in self.videoextensions:
                         self.add_vfile(
-                            sub_fname,
-                            path=sub_fdata['_entry'].path,
-                            root_path=fdata['_entry'].path)
+                            entry2.name,
+                            path=entry2.path,
+                            root_path=entry.path)
         return data
 
     def add_vfile(self, name, **kwargs):
@@ -136,7 +184,7 @@ class VideoFile:
         self.name: str = ''
         self.metadata: dict = {}
         self.rules: list = []
-        self.foldermatch: dict = {}
+        self.foldermatch: Union[FolderEntry, None] = None
         self.path: str = ''
         self.transfer: dict = {}
 

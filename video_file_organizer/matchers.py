@@ -5,14 +5,14 @@ import shlex
 
 from typing import Union
 
-from video_file_organizer.models import VideoFile, Folder
+from video_file_organizer.models import VideoFile, FolderCollection
 from video_file_organizer.config import RuleBookFile
 
 logger = logging.getLogger('vfo.matachers')
 
 
 class BaseMatcher:
-    def __init__(self, vfile: VideoFile):
+    def __init__(self):
         self._observers = set()
 
     def __call__(self, vfile: VideoFile):
@@ -34,7 +34,7 @@ class BaseMatcher:
 
 class MetadataMatcher(BaseMatcher):
     def __init__(self):
-        super().__init__('metadata')
+        super().__init__()
 
     def match_vfile(self, vfile: VideoFile):
         """A wrapper for the get_guessit function that uses a VideoFile object
@@ -62,7 +62,7 @@ class MetadataMatcher(BaseMatcher):
 
 class RuleBookMatcher(BaseMatcher):
     def __init__(self, rulebookfile):
-        super().__init__('rulebook')
+        super().__init__()
 
         if not isinstance(rulebookfile, RuleBookFile):
             raise TypeError(
@@ -133,9 +133,9 @@ class OutputFolderMatcher(BaseMatcher):
     """Matcher class to scan vfile based on output_folder"""
 
     def __init__(self, output_folder):
-        super().__init__('outputfolder')
+        super().__init__()
 
-        if not isinstance(output_folder, Folder):
+        if not isinstance(output_folder, FolderCollection):
             raise TypeError(
                 "output_folder needs to be an instance of OutputFolder")
         self.output_folder = output_folder
@@ -156,7 +156,7 @@ class OutputFolderMatcher(BaseMatcher):
             title: The title of the file
         """
         index_match = difflib.get_close_matches(
-            title, self.entries.keys(), n=1, cutoff=0.6
+            title, self.output_folder.list_entry_names(), n=1, cutoff=0.6
         )[0]
 
         if not index_match:
@@ -166,8 +166,4 @@ class OutputFolderMatcher(BaseMatcher):
 
         logger.debug(f"Match successful for {name}")
 
-        return {
-            "name": index_match,
-            "_entry": self.entries[index_match]['_entry'],
-            "sub_entries": self.entries[index_match]['sub_entries']
-        }
+        return self.output_folder[index_match]

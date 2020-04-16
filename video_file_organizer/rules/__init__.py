@@ -28,18 +28,18 @@ def rules_before_transfering_vfile(vfile: VideoFile) -> tuple:
 
     name = vfile.name
     metadata = vfile.metadata
-    match = vfile.foldermatch
+    foldermatch = vfile.foldermatch
     rules = vfile.rules
     transfer = vfile.transfer
 
     if "season" in rules:
-        transfer.update(series.rule_season(name, metadata, match))
+        transfer.update(series.rule_season(name, metadata, foldermatch))
 
     if "parent-dir" in rules:
-        transfer.update(series.rule_parent_dir(name, match))
+        transfer.update(series.rule_parent_dir(name, foldermatch))
 
     if "sub-dir" in rules:
-        transfer.update(series.rule_sub_dir(name, match, rules))
+        transfer.update(series.rule_sub_dir(name, foldermatch, rules))
 
     if "episode-only" in rules:
         metadata.update(series.rule_episode_only(name, metadata))

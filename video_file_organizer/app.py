@@ -6,7 +6,7 @@ import yg.lockfile
 from typing import Union
 
 from video_file_organizer.config import ConfigDirectory
-from video_file_organizer.models import Folder, InputFolder
+from video_file_organizer.models import InputFolder, FolderCollection
 from video_file_organizer.matchers import OutputFolderMatcher, \
     RuleBookMatcher, MetadataMatcher
 from video_file_organizer.transferer import Transferer
@@ -37,7 +37,7 @@ class App:
                     os.path.join(tempfile.gettempdir(), 'vfolock'),
                     timeout=10):
 
-                self.output_folder = Folder(self.config.series_dirs)
+                self.output_folder = FolderCollection(self.config.series_dirs)
                 self.input_folder = InputFolder(
                     self.config.input_dir,
                     videoextensions=self.config.videoextensions)
