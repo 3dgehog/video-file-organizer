@@ -6,7 +6,7 @@ import yg.lockfile
 from typing import Union
 
 from video_file_organizer.config import ConfigDirectory
-from video_file_organizer.models import InputFolder, FolderCollection
+from video_file_organizer.models import VideoCollection, FolderCollection
 from video_file_organizer.matchers import OutputFolderMatcher, \
     RuleBookMatcher, MetadataMatcher
 from video_file_organizer.transferer import Transferer
@@ -37,27 +37,27 @@ class App:
                     os.path.join(tempfile.gettempdir(), 'vfolock'),
                     timeout=10):
 
-                self.output_folder = FolderCollection(self.config.series_dirs)
-                self.input_folder = InputFolder(
+                output_folder = FolderCollection(self.config.series_dirs)
+                input_folder = VideoCollection(
                     self.config.input_dir,
                     videoextensions=self.config.videoextensions)
 
                 metadata_matcher = MetadataMatcher()
                 rulebook_matcher = RuleBookMatcher(self.rulebook)
-                folder_matcher = OutputFolderMatcher(self.output_folder)
+                folder_matcher = OutputFolderMatcher(output_folder)
 
-                with self.input_folder as ifolder:
-                    for name, vfile in ifolder.iter_vfiles():
+                with input_folder as ifolder:
+                    for vfile in ifolder:
                         # Guessit
                         metadata = metadata_matcher(vfile)
                         if metadata is None:
-                            ifolder.remove_vfile(name)
+                            vfile.edit(valid=False)
                             continue
                         vfile.edit(metadata=metadata)
                         # Rules from rule_book
                         rules = rulebook_matcher(vfile)
                         if rules is None:
-                            ifolder.remove_vfile(name)
+                            vfile.edit(valid=False)
                             continue
                         vfile.edit(rules=rules)
                         # Apply rules before matcher
@@ -66,19 +66,19 @@ class App:
                         # Matcher
                         foldermatch = folder_matcher(vfile)
                         if foldermatch is None:
-                            ifolder.remove_vfile(name)
+                            vfile.edit(valid=False)
                             continue
                         vfile.edit(foldermatch=foldermatch)
                         # Apply rules before transfering
                         transfer, metadata = rules_before_transfering_vfile(
                             vfile)
                         if transfer is None:
-                            ifolder.remove_vfile(name)
+                            vfile.edit(valid=False)
                             continue
                         vfile.edit(transfer=transfer, metadata=metadata)
                 # Transfer
                 with Transferer() as transferer:
-                    for name, vfile in self.input_folder.iter_vfiles():
+                    for vfile in input_folder:
                         transferer.transfer_vfile(vfile)
 
         except yg.lockfile.FileLockTimeout:

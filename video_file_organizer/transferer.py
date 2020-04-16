@@ -27,9 +27,8 @@ class Transferer:
                 # Getting permission error when its a folder
                 shutil.rmtree(source)
             logger.info(f"Deleted {os.path.basename(source)}")
-        return True
 
-    def transfer_vfile(self, vfile: VideoFile, **kwargs):
+    def transfer_vfile(self, vfile: VideoFile):
         """A wrapper for the transfer function that uses a VideoFile object
 
         Args:
@@ -43,15 +42,13 @@ class Transferer:
         if 'transfer_to' not in vfile.transfer:
             raise KeyError("transfer_to key missing in transfer attribute")
 
-        if hasattr(vfile, 'root_path'):
-            kwargs.update(root_path=getattr(vfile, 'root_path'))
-
         source = vfile.path
         destination = vfile.transfer['transfer_to']
+        root_path = vfile.root_path
 
-        self.transfer(source, destination, **kwargs)
+        self.transfer(source, destination, root_path)
 
-    def transfer(self, source: str, destination: str, **kwargs):
+    def transfer(self, source: str, destination: str, root_path: str):
         """A function that transfers and deletes a source file to a destination
 
         Args:
@@ -59,10 +56,10 @@ class Transferer:
             destination: path to destination
             **kwargs:
         """
-        self._copy(source, destination, **kwargs)
-        self._delete(source, **kwargs)
+        self._copy(source, destination)
+        self._delete(root_path)
 
-    def _copy(self, source: str, destination: str, **kwargs):
+    def _copy(self, source: str, destination: str):
         """A function that copies a source file to a destination
 
         Args:
@@ -73,7 +70,7 @@ class Transferer:
         logger.info(f"Transfering {os.path.basename(source)} to {destination}")
         shutil.copy(source, destination)
 
-    def _delete(self, source: str, **kwargs):
+    def _delete(self, source: str):
         """A function that deletes the source file
 
         Args:
@@ -82,11 +79,4 @@ class Transferer:
                 delete (bool): Delete the file or not
                 root_path (str): Deletes this path instead of source path
         """
-        if 'delete' in kwargs.keys() and not kwargs['delete']:
-            return
-
-        if 'root_path' in kwargs.keys():
-            self.delete_list.append(kwargs['root_path'])
-            return
-
         self.delete_list.append(source)

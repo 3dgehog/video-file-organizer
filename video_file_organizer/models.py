@@ -1,12 +1,13 @@
 import os
 import posix
-from typing import Union, Dict
 import logging
+
+from typing import Union
 
 logger = logging.getLogger('vfo.models')
 
 
-class FolderBase:
+class BaseFolder:
     def __iter__(self):
         for entry in self.entries:
             yield entry
@@ -40,7 +41,7 @@ class FolderBase:
         return data
 
 
-class FolderCollection(FolderBase):
+class FolderCollection(BaseFolder):
     def __init__(self, path: Union[str, list], ignore: list = []):
 
         self.path = path
@@ -64,7 +65,7 @@ class FolderCollection(FolderBase):
         return data
 
 
-class FolderEntry(FolderBase):
+class FolderEntry(BaseFolder):
     def __init__(self, dir_entry: posix.DirEntry):
 
         self._dir_entry = dir_entry
@@ -98,7 +99,7 @@ class FolderEntry(FolderBase):
         return f"<FolderEntry '{self.name}'>"
 
 
-class InputFolder(FolderCollection):
+class VideoCollection(FolderCollection):
     def __init__(
             self, path: str, ignore: list = [],
             videoextensions: list = []) -> None:
@@ -109,7 +110,7 @@ class InputFolder(FolderCollection):
 
         self.videoextensions = videoextensions
 
-        self._vfiles: Dict[str, Union[VideoFile, None]] = {}
+        self._vfiles: list = []
         self._scan_vfiles(self.entries)
 
     def __enter__(self):
@@ -121,23 +122,26 @@ class InputFolder(FolderCollection):
     def _purge(self):
         """Removes all dictionary entries from self._vfile where the
         Videofile is missing"""
-        del_list = [x for x in self._vfiles.items(
-        ) if not isinstance(x[1], VideoFile)]
-        for name in del_list:
-            self._vfiles.pop(name, None)
-            logger.debug(f"Purged vfile {name}")
+        del_list: list = []
+        for vfile in self._vfiles:
+            if not vfile.valid:
+                del_list.append(vfile)
+        for vfile in del_list:
+            self._vfiles.remove(vfile)
+            logger.debug(f"Purged vfile {vfile.name}")
 
     def _scan_vfiles(self, entries: list):
         """
-        Returns a dict with this format
-        {
-            "name": <VideoFile>
-        }
+        Returns a list with this format
+        [<VideoFile>, <Videofile>]
         """
-        data: dict = {}
+        data: dict = []
         for entry in entries:
             if entry.name.rpartition('.')[-1] in self.videoextensions:
-                self.add_vfile(entry.name, path=entry.path)
+                self.add_vfile(
+                    entry.name,
+                    path=entry.path,
+                    root_path=entry.path)
             if entry.is_dir():
                 for entry2 in entry:
                     if entry2.name.rpartition('.')[-1] in self.videoextensions:
@@ -148,29 +152,30 @@ class InputFolder(FolderCollection):
         return data
 
     def add_vfile(self, name, **kwargs):
-        if name in self._vfiles.keys():
-            raise ValueError("This video file already exists in list")
+        # if name in self._vfiles.keys():
+        #     raise ValueError("This video file already exists in list")
         vfile = VideoFile()
         setattr(vfile, 'name', name)
-        for key, value in kwargs.items():
-            setattr(vfile, key, value)
-        self._vfiles[name] = vfile
+        vfile.edit(**kwargs)
+        self._vfiles.append(vfile)
         logger.debug(f"Added vfile {name} with kwargs {kwargs}")
 
     def get_vfile(self, name):
-        if name not in self._vfiles.keys():
-            raise ValueError("This video file doesn't exists in list")
-        return self._vfiles[name]
+        for vfile in self._vfiles:
+            if vfile.name == name:
+                return vfile
+        raise ValueError("This video file doesn't exists in list")
 
-    def remove_vfile(self, name: str):
-        if name not in self._vfiles.keys():
-            raise ValueError("This video file doesn't exist in list")
+    def remove_vfile_by_name(self, name: str):
+        # if name not in self._vfiles.keys():
+        #     raise ValueError("This video file doesn't exist in list")
+
         self._vfiles[name] = None
         logger.debug(f"Removed vfile {name} ")
 
-    def iter_vfiles(self):
-        for name, vfile in self._vfiles.items():
-            yield name, vfile
+    def __iter__(self):
+        for vfile in self._vfiles:
+            yield vfile
 
 
 class VideoFile:
@@ -180,16 +185,18 @@ class VideoFile:
         self.rules: list = []
         self.foldermatch: Union[FolderEntry, None] = None
         self.path: str = ''
+        self.root_path: str = ''
         self.transfer: dict = {}
+        self.valid = True
 
     def edit(self, merge: bool = True, **kwargs):
         for key, value in kwargs.items():
             if not hasattr(self, key):
-                raise AttributeError("Attribute {name} is not valid")
+                raise AttributeError(f"Attribute {key} is not valid")
             if merge:
                 if getattr(self, key) in [list, dict]:
                     orig = getattr(self, key)
                     orig.update(value)
                     value = orig
-        setattr(self, key, value)
+            setattr(self, key, value)
         logger.debug(f"Edited vfile {self.name} with kwargs {kwargs}")
