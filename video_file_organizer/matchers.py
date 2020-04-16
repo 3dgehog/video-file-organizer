@@ -7,20 +7,17 @@ from typing import Union
 
 from video_file_organizer.models import VideoFile, FolderCollection
 from video_file_organizer.config import RuleBookFile
+from video_file_organizer.utils import vfile_options
 
 logger = logging.getLogger('vfo.matachers')
 
 
 class MetadataMatcher:
-    def __call__(self, vfile: VideoFile):
-        return self.match_vfile(vfile)
+    @vfile_options('name')
+    def __call__(self, vfile: VideoFile, **kwargs):
+        return self.get_guessit(kwargs['name'])
 
-    def match_vfile(self, vfile: VideoFile):
-        """A wrapper for the get_guessit function that uses a VideoFile object
-        """
-        return self.get_guessit(vfile.name)
-
-    def get_guessit(self, name: str) -> Union[dict, None]:
+    def get_guessit(self, name: str) -> Union[dict, bool]:
         """Returns the guessit result for the name of the file passed
 
         Args:
@@ -30,13 +27,13 @@ class MetadataMatcher:
 
         if 'title' not in results:
             logger.warning(f"Unable to find title for: '{name}'")
-            return None
+            return False
 
         if 'type' not in results:
             logger.warning(f"Unable to find video type for: '{name}'")
-            return None
+            return False
 
-        return results
+        return {'metadata': results}
 
 
 class RuleBookMatcher:
@@ -48,25 +45,22 @@ class RuleBookMatcher:
 
         self.rulebook = rulebookfile
 
-    def __call__(self, vfile: VideoFile):
-        return self.match_vfile(vfile)
+    @vfile_options('name', 'metadata')
+    def __call__(self, vfile: VideoFile, **kwargs):
 
-    def match_vfile(self, vfile: VideoFile):
-        if not hasattr(vfile, 'metadata'):
-            raise AttributeError("Metadata attribute missing")
-
-        name = vfile.name
-        vtype = vfile.metadata['type']
-        title = vfile.metadata['title']
         alternative_title = None
-        if 'alternative_title' in vfile.metadata:
+        if 'alternative_title' in kwargs['metadata']:
             alternative_title = vfile.metadata['alternative_title']
 
-        return self.get_rules(name, vtype, title, alternative_title)
+        return self.get_rules(
+            kwargs['name'],
+            kwargs['metadata']['type'],
+            kwargs['metadata']['title'],
+            alternative_title)
 
     def get_rules(
             self, name: str, vtype: str, title: str,
-            alternative_title: str = None) -> list:
+            alternative_title: str = None) -> dict:
         VALID_TYPES = {"episode": self._get_series_rules}
 
         rules = []
@@ -78,7 +72,7 @@ class RuleBookMatcher:
             logger.warn(f"Unable to find the rules for: {name}")
             return None
 
-        return rules
+        return {'rules': rules}
 
     def _get_series_rules(
             self, name, title=None, alternative_title=None) -> list:
@@ -121,15 +115,11 @@ class OutputFolderMatcher:
         self.output_folder = output_folder
         self.entries = self.output_folder.entries
 
-    def __call__(self, vfile: VideoFile):
-        return self.match_vfile(vfile)
-
-    def match_vfile(self, vfile: VideoFile):
-        if not hasattr(vfile, 'metadata'):
-            raise ValueError("vfile needs to have metadata as an attribute")
-        name = vfile.name
-        title = vfile.metadata['title']
-        return self.get_match(name, title)
+    @vfile_options('name', 'metadata')
+    def __call__(self, vfile: VideoFile, **kwargs):
+        return self.get_match(
+            kwargs['name'],
+            kwargs['metadata']['title'])
 
     def get_match(self, name: str, title: str) -> Union[dict, None]:
         """Matches the name & title to the output folder specified in __init__
@@ -149,4 +139,4 @@ class OutputFolderMatcher:
 
         logger.debug(f"Match successful for {name}")
 
-        return self.output_folder[index_match]
+        return {'foldermatch': self.output_folder[index_match]}

@@ -13,7 +13,6 @@ from video_file_organizer.transferer import Transferer
 from video_file_organizer.rules import rules_before_matching_vfile, \
     rules_before_transfering_vfile
 
-
 logger = logging.getLogger('vfo.app')
 
 
@@ -46,36 +45,22 @@ class App:
                 rulebook_matcher = RuleBookMatcher(self.rulebook)
                 folder_matcher = OutputFolderMatcher(output_folder)
 
+                operations = [
+                    metadata_matcher,
+                    rulebook_matcher,
+                    rules_before_matching_vfile,
+                    folder_matcher,
+                    rules_before_transfering_vfile,
+                ]
+
                 with input_folder as ifolder:
                     for vfile in ifolder:
-                        # Guessit
-                        metadata = metadata_matcher(vfile)
-                        if metadata is None:
-                            vfile.edit(valid=False)
+                        for operation in operations:
+                            operation(vfile=vfile) or \
+                                vfile.edit(valid=False)
+                        if not vfile.valid:
                             continue
-                        vfile.edit(metadata=metadata)
-                        # Rules from rule_book
-                        rules = rulebook_matcher(vfile)
-                        if rules is None:
-                            vfile.edit(valid=False)
-                            continue
-                        vfile.edit(rules=rules)
-                        # Apply rules before matcher
-                        metadata = rules_before_matching_vfile(vfile)
-                        vfile.edit(metadata=metadata)
-                        # Matcher
-                        foldermatch = folder_matcher(vfile)
-                        if foldermatch is None:
-                            vfile.edit(valid=False)
-                            continue
-                        vfile.edit(foldermatch=foldermatch)
-                        # Apply rules before transfering
-                        transfer, metadata = rules_before_transfering_vfile(
-                            vfile)
-                        if transfer is None:
-                            vfile.edit(valid=False)
-                            continue
-                        vfile.edit(transfer=transfer, metadata=metadata)
+
                 # Transfer
                 with Transferer() as transferer:
                     for vfile in input_folder:

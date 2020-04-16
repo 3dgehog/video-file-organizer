@@ -152,8 +152,6 @@ class VideoCollection(FolderCollection):
         return data
 
     def add_vfile(self, name, **kwargs):
-        # if name in self._vfiles.keys():
-        #     raise ValueError("This video file already exists in list")
         vfile = VideoFile()
         setattr(vfile, 'name', name)
         vfile.edit(**kwargs)
@@ -165,13 +163,6 @@ class VideoCollection(FolderCollection):
             if vfile.name == name:
                 return vfile
         raise ValueError("This video file doesn't exists in list")
-
-    def remove_vfile_by_name(self, name: str):
-        # if name not in self._vfiles.keys():
-        #     raise ValueError("This video file doesn't exist in list")
-
-        self._vfiles[name] = None
-        logger.debug(f"Removed vfile {name} ")
 
     def __iter__(self):
         for vfile in self._vfiles:
@@ -200,3 +191,11 @@ class VideoFile:
                     value = orig
             setattr(self, key, value)
         logger.debug(f"Edited vfile {self.name} with kwargs {kwargs}")
+
+    def get_attr(self, *args):
+        data: dict = {}
+        for arg in args:
+            if not hasattr(self, arg):
+                raise AttributeError(f"Attribute {arg} is not valid")
+            data.update({arg: getattr(self, arg)})
+        return data

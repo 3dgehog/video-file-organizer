@@ -1,36 +1,28 @@
 from video_file_organizer.models import VideoFile
 
 from video_file_organizer.rules import series
+from video_file_organizer.utils import vfile_options
 
 
-def rules_before_matching_vfile(vfile: VideoFile) -> dict:
-    if not isinstance(vfile, VideoFile):
-        raise TypeError("vfile needs to be an instance of VideoFile")
-    if not hasattr(vfile, 'metadata'):
-        raise ValueError("vfile needs to have metadata as an attribute")
-
-    name = vfile.name
-    metadata = vfile.metadata
+@vfile_options('name', 'metadata')
+def rules_before_matching_vfile(vfile: VideoFile, **kwargs) -> dict:
+    name = kwargs['name']
+    metadata = kwargs['metadata']
 
     if "alt-title" in vfile.rules:
         metadata = series.rule_alt_title(name, metadata)
 
-    return metadata
+    return {'metadata': metadata}
 
 
-def rules_before_transfering_vfile(vfile: VideoFile) -> tuple:
-    if not isinstance(vfile, VideoFile):
-        raise TypeError("vfile needs to be an instance of VideoFile")
-    if not hasattr(vfile, 'metadata'):
-        raise ValueError("vfile needs to have metadata as an attribute")
-    if not hasattr(vfile, 'foldermatch'):
-        raise ValueError("vfile needs to have foldermatch as an attribute")
+@vfile_options('name', 'metadata', 'foldermatch', 'rules', 'transfer')
+def rules_before_transfering_vfile(vfile: VideoFile, **kwargs) -> dict:
 
-    name = vfile.name
-    metadata = vfile.metadata
-    foldermatch = vfile.foldermatch
-    rules = vfile.rules
-    transfer = vfile.transfer
+    name = kwargs['name']
+    metadata = kwargs['metadata']
+    foldermatch = kwargs['foldermatch']
+    rules = kwargs['rules']
+    transfer = kwargs['transfer']
 
     if "season" in rules:
         transfer.update(series.rule_season(name, metadata, foldermatch))
@@ -48,4 +40,4 @@ def rules_before_transfering_vfile(vfile: VideoFile) -> tuple:
         transfer.update(series.rule_format_title(
             name, metadata, rules, transfer))
 
-    return transfer, metadata
+    return {'transfer': transfer, 'metadata': metadata}
