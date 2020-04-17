@@ -4,11 +4,12 @@ import logging
 
 
 from video_file_organizer.models import VideoFile
+from video_file_organizer.utils import Observee
 
 logger = logging.getLogger('vfo.transferer')
 
 
-class Transferer:
+class Transferer(Observee):
     def __init__(self):
         pass
 
@@ -41,6 +42,7 @@ class Transferer:
         root_path = vfile.root_path
 
         self.transfer(source, destination, root_path)
+        self.notify(topic='on_transfer', vfile=vfile)
 
     def transfer(self, source: str, destination: str, root_path: str):
         self._copy(source, destination)

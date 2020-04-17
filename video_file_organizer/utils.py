@@ -21,3 +21,22 @@ def vfile_options(*options):
             return False
         return wrapper
     return decorator
+
+
+class Observer:
+    def update(self, *arg, topic: str, **kwargs):
+        pass
+
+
+class Observee:
+    _observers = set()
+
+    def attach(self, observer):
+        self._observers.add(observer)
+
+    def detach(self, observer):
+        self._observers.discard(observer)
+
+    def notify(self, *args, topic: str, **kwargs):
+        for observer in self._observers:
+            observer.update(*args, topic=topic, **kwargs)

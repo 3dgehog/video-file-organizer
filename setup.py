@@ -9,7 +9,7 @@ def readme():
 setup(
     name='Video File Organizer',
     version='2',
-    python_requires='>=3.5',
+    python_requires='>=3.6',
     description="""Organizes the video files in the correct directories""",
     long_description=readme(),
     url='https://github.com/Scheercuzy/video_file_organizer',

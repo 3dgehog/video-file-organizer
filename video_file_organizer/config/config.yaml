@@ -27,3 +27,10 @@ ignore:
 # before_scripts:
 #   - "path/to/script"
 before_scripts:
+
+
+# list of scripts to run on_transfer.
+# Example:
+# on_transfer:
+#   - "path/to/script"
+on_transfer:

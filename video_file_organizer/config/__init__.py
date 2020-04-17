@@ -8,6 +8,10 @@ import os
 import logging
 
 from typing import Union, List
+from jinja2 import Template
+
+from video_file_organizer.utils import Observer
+from video_file_organizer.models import VideoFile
 
 logger = logging.getLogger('vfo.config')
 
@@ -53,7 +57,7 @@ class ConfigDirectory:
         )
 
 
-class ConfigFile:
+class ConfigFile(Observer):
     def __init__(self, path: str, create: bool):
 
         logger.debug("Initializing ConfigFile")
@@ -136,12 +140,30 @@ class ConfigFile:
         # Run scripts
         for script in self._raw_config['before_scripts']:
             logger.debug("Running before script '{}'".format(script))
-            try:
-                subprocess.check_output([script], shell=True)
-            except subprocess.CalledProcessError as e:
-                logger.info(e)
-                sys.exit()
+            self._run_script(script)
             logger.debug("Ran script {}".format(script))
+
+    def update(self, *args, topic: str, **kwargs):
+        if topic == 'on_transfer':
+            self.run_on_transfer_scripts(kwargs['vfile'])
+
+    def run_on_transfer_scripts(self, vfile: VideoFile):
+        if not self._raw_config['on_transfer']:
+            return
+        for script in self._raw_config['on_transfer']:
+            logger.debug(f"Running on_transfer for vfile: '{vfile.name}'")
+            values: dict = {}
+            values.update(vars(vfile))
+            values.update(vars(vfile)['metadata'])
+            rendered_script = Template(script).render(values)
+            self._run_script(rendered_script)
+
+    def _run_script(self, script: str):
+        try:
+            subprocess.run([script], shell=True, check=True)
+        except subprocess.CalledProcessError as e:
+            logger.info(e)
+            sys.exit()
 
 
 class RuleBookFile:

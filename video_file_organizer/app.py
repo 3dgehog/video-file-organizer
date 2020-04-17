@@ -31,6 +31,10 @@ class App:
         self.config = self.configdir.configfile
         self.rulebook = self.configdir.rulebookfile
 
+        self.transferer = Transferer()
+
+        self.transferer.attach(self.config)
+
     def run(self, **kwargs) -> None:
 
         logger.debug("Running app")
@@ -68,7 +72,7 @@ class App:
                             continue
 
                 # Transfer
-                with Transferer() as transferer:
+                with self.transferer as transferer:
                     for vfile in input_folder:
                         transferer.transfer_vfile(vfile)
 
