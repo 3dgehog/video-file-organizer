@@ -21,7 +21,10 @@ RULEBOOK_FILE_TEMPLATE_LOCATION = os.path.join(
 
 class ConfigDirectory:
     def __init__(
-            self, path: Union[str, None] = None, create: bool = False) -> None:
+            self,
+            path: Union[str, None] = None,
+            create: bool = False
+    ):
         # Default path if path not provided
         if not path:
             path = os.path.join(os.environ['HOME'], DEFAULT_DIR)
@@ -51,7 +54,7 @@ class ConfigDirectory:
 
 
 class ConfigFile:
-    def __init__(self, path: str, create: bool) -> None:
+    def __init__(self, path: str, create: bool):
 
         logger.debug("Initializing ConfigFile")
 
@@ -142,7 +145,7 @@ class ConfigFile:
 
 
 class RuleBookFile:
-    def __init__(self, path: str, create: bool) -> None:
+    def __init__(self, path: str, create: bool):
         logger.debug("Initializing RuleBookFile")
 
         self.path = path
@@ -160,7 +163,7 @@ class RuleBookFile:
         self.configparse = self.load_file()
         self.validate_rule_book()
 
-    def load_file(self):
+    def load_file(self) -> configparser.ConfigParser:
         """Returns configparser object for rule_book.ini"""
         config = configparser.ConfigParser(allow_no_value=True)
         config.read(self.path)
@@ -176,7 +179,7 @@ class RuleBookFile:
     def list_of_series(self):
         return self.configparse.options('series')
 
-    def get_series_rule(self, name):
+    def get_series_rule(self, name: str) -> str:
         return self.configparse.get('series', name)
 
     def validate_rule_book(self):

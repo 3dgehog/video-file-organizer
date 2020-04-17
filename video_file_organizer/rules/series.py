@@ -8,25 +8,20 @@ from video_file_organizer.models import FolderEntry
 
 logger = logging.getLogger('vfo.series.rules')
 
-# after match
-
 
 def rule_season(
         name: str,
         metadata: dict,
         foldermatch: FolderEntry,
-        transfer: dict = {}) -> Union[dict, None]:
-    """Sets transfer_to to the correct season folder
-
-    Returns:
-        dict: transfer dictionary with new 'transfer_to' key & value
-    """
+        transfer: dict = {}
+) -> Union[dict, bool]:
+    """Sets transfer_to to the correct season folder"""
     logger.debug(f"Applying rule 'season' to {name}")
 
     if 'season' not in metadata:
         logger.warning("Rule 'season' FAILED: ",
                        f"Undefined season number for file: {name}")
-        return None
+        return False
 
     season = str(metadata['season'])
     for entry in foldermatch:
@@ -47,12 +42,12 @@ def rule_season(
     return transfer
 
 
-def rule_parent_dir(name: str, foldermatch: dict, transfer: dict = {}) -> dict:
-    """Sets 'trasnfer_to to the parent directory
-
-    Returns:
-        dict: transfer dictionary with new 'transfer_to' key & value
-    """
+def rule_parent_dir(
+    name: str,
+    foldermatch: FolderEntry,
+    transfer: dict = {}
+) -> dict:
+    """Sets 'trasnfer_to to the parent directory"""
     logger.debug(f"Applying rule 'parent-dir' to {name}")
     transfer['transfer_to'] = foldermatch.path
 
@@ -62,14 +57,11 @@ def rule_parent_dir(name: str, foldermatch: dict, transfer: dict = {}) -> dict:
 
 def rule_sub_dir(
         name: str,
-        foldermatch: dict,
+        foldermatch: FolderEntry,
         rules: list,
-        transfer: dict = {}) -> dict:
-    """Sets the transfer_to a specified sub directory
-
-    Returns:
-        dict: transfer dictionary with new 'transfer_to' key & value
-    """
+        transfer: dict = {}
+) -> dict:
+    """Sets the transfer_to a specified sub directory"""
     logger.debug(f"Applying rule 'sub-dir' to {name}")
     subdir_name_index = rules.index('sub-dir') + 1
     subdir_name = rules[subdir_name_index]
@@ -78,7 +70,7 @@ def rule_sub_dir(
                        f"Cannot locate sub-dir {subdir_name}: {name}")
         return transfer
 
-    transfer['transfer_to'] = foldermatch[subdir_name].path
+    transfer['transfer_to'] = foldermatch.get_entry_by_name(subdir_name).path
 
     logger.debug(f"Rule 'sub-dir' OK for {name}")
     return transfer
@@ -100,7 +92,11 @@ def rule_episode_only(name: str, metadata: dict) -> dict:
 
 
 def rule_format_title(
-        name: str, metadata: dict, rules: list, transfer: dict) -> dict:
+        name: str,
+        metadata: dict,
+        rules: list,
+        transfer: dict
+) -> dict:
     """Sets transfer_to filename to a specified name for transfer"""
     logger.debug(f"Applying rule 'format-title' to {name}")
     if not metadata.get('container') or not transfer['transfer_to']:

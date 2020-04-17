@@ -12,7 +12,7 @@ class Transferer:
     def __init__(self):
         pass
 
-    def __enter__(self):
+    def __enter__(self):  # HERE: returning self
         self.delete_list = []
         return self
 
@@ -29,12 +29,6 @@ class Transferer:
             logger.info(f"Deleted {os.path.basename(source)}")
 
     def transfer_vfile(self, vfile: VideoFile):
-        """A wrapper for the transfer function that uses a VideoFile object
-
-        Args:
-            vfile: an instance of VideoFile
-            **kwargs:
-        """
         if not isinstance(vfile, VideoFile):
             raise TypeError("vfile needs to be an instance of VideoFile")
         if not hasattr(vfile, 'transfer'):
@@ -49,34 +43,12 @@ class Transferer:
         self.transfer(source, destination, root_path)
 
     def transfer(self, source: str, destination: str, root_path: str):
-        """A function that transfers and deletes a source file to a destination
-
-        Args:
-            source: path to source file
-            destination: path to destination
-            **kwargs:
-        """
         self._copy(source, destination)
         self._delete(root_path)
 
     def _copy(self, source: str, destination: str):
-        """A function that copies a source file to a destination
-
-        Args:
-            source: path to source file
-            destination: path to destination
-            **kwargs:
-        """
         logger.info(f"Transfering {os.path.basename(source)} to {destination}")
         shutil.copy(source, destination)
 
     def _delete(self, source: str):
-        """A function that deletes the source file
-
-        Args:
-            source: path to source file
-            **kwargs:
-                delete (bool): Delete the file or not
-                root_path (str): Deletes this path instead of source path
-        """
         self.delete_list.append(source)

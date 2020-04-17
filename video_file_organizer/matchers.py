@@ -14,15 +14,11 @@ logger = logging.getLogger('vfo.matachers')
 
 class MetadataMatcher:
     @vfile_options('name')
-    def __call__(self, vfile: VideoFile, **kwargs):
+    def __call__(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
         return self.get_guessit(kwargs['name'])
 
     def get_guessit(self, name: str) -> Union[dict, bool]:
-        """Returns the guessit result for the name of the file passed
 
-        Args:
-            name: The filename name
-        """
         results = dict(guessit.guessit(name))
 
         if 'title' not in results:
@@ -37,16 +33,11 @@ class MetadataMatcher:
 
 
 class RuleBookMatcher:
-    def __init__(self, rulebookfile):
-
-        if not isinstance(rulebookfile, RuleBookFile):
-            raise TypeError(
-                "output_folder needs to be an instance of RuleBookFile")
-
+    def __init__(self, rulebookfile: RuleBookFile):
         self.rulebook = rulebookfile
 
     @vfile_options('name', 'metadata')
-    def __call__(self, vfile: VideoFile, **kwargs):
+    def __call__(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
 
         alternative_title = None
         if 'alternative_title' in kwargs['metadata']:
@@ -59,8 +50,13 @@ class RuleBookMatcher:
             alternative_title)
 
     def get_rules(
-            self, name: str, vtype: str, title: str,
-            alternative_title: str = None) -> dict:
+            self,
+            name: str,
+            vtype: str,
+            title: str,
+            alternative_title: str = None
+    ) -> Union[dict, bool]:
+
         VALID_TYPES = {"episode": self._get_series_rules}
 
         rules = []
@@ -70,14 +66,17 @@ class RuleBookMatcher:
 
         if len(rules) == 0:
             logger.warn(f"Unable to find the rules for: {name}")
-            return None
+            return False
 
         return {'rules': rules}
 
     def _get_series_rules(
-            self, name, title=None, alternative_title=None) -> list:
-        """Uses the title from the fse to try to match to its rules type from the
-        rule_book.ini"""
+            self,
+            name,
+            title=None,
+            alternative_title=None
+    ) -> list:
+
         if title is None:
             return []
 
@@ -99,29 +98,23 @@ class RuleBookMatcher:
         rules = []
         if difflib_match:
             rules = shlex.split(
-                self.rulebook.get_series_rule(difflib_match[0]))
+                self.rulebook.get_series_rule(str(difflib_match[0])))
 
         return rules
 
 
 class OutputFolderMatcher:
-    """Matcher class to scan vfile based on output_folder"""
-
-    def __init__(self, output_folder):
-
-        if not isinstance(output_folder, FolderCollection):
-            raise TypeError(
-                "output_folder needs to be an instance of OutputFolder")
+    def __init__(self, output_folder: FolderCollection):
         self.output_folder = output_folder
         self.entries = self.output_folder.entries
 
     @vfile_options('name', 'metadata')
-    def __call__(self, vfile: VideoFile, **kwargs):
+    def __call__(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
         return self.get_match(
             kwargs['name'],
             kwargs['metadata']['title'])
 
-    def get_match(self, name: str, title: str) -> Union[dict, None]:
+    def get_match(self, name: str, title: str) -> Union[dict, bool]:
         """Matches the name & title to the output folder specified in __init__
 
         Args:
@@ -135,8 +128,12 @@ class OutputFolderMatcher:
         if not index_match:
             logger.warn("Match FAILED: " +
                         f"Unable to find a match for {name}")
-            return None
+            return False
 
         logger.debug(f"Match successful for {name}")
 
-        return {'foldermatch': self.output_folder[index_match]}
+        return {
+            'foldermatch': self.output_folder.get_entry_by_name(
+                str(index_match)
+            )
+        }

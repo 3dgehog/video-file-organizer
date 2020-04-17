@@ -18,19 +18,21 @@ logger = logging.getLogger('vfo.app')
 
 class App:
     def setup(
-            self, config_dir: Union[str, None] = None, create: bool = False):
+            self,
+            config_dir: Union[str, None] = None,
+            create: bool = False
+    ) -> None:
 
         logger.debug("Setting up app")
 
         self.configdir = ConfigDirectory(config_dir, create)
-
         self.config = self.configdir.configfile
         self.rulebook = self.configdir.rulebookfile
 
-    def run(self, **kwargs):
-        """This is the main function of the app. This requires the setup
-        function to be run first before it will be able to run properly"""
+    def run(self, **kwargs) -> None:
+
         logger.debug("Running app")
+
         try:
             with yg.lockfile.FileLock(
                     os.path.join(tempfile.gettempdir(), 'vfolock'),
@@ -67,5 +69,5 @@ class App:
                         transferer.transfer_vfile(vfile)
 
         except yg.lockfile.FileLockTimeout:
-            logger.warning("Lockfile FAILED: " +
-                           "The program must already be running")
+            logger.warning(
+                "Lockfile FAILED: The program must already be running")
