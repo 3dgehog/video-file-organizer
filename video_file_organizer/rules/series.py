@@ -13,7 +13,8 @@ def rule_season(
         name: str,
         metadata: dict,
         foldermatch: FolderEntry,
-        transfer: dict = {}
+        transfer: dict = {},
+        **kwargs
 ) -> Union[dict, bool]:
     """Sets transfer_to to the correct season folder"""
     logger.debug(f"Applying rule 'season' to {name}")
@@ -39,27 +40,29 @@ def rule_season(
                     f"Created new Season {season} folder for Series {name}")
 
     logger.debug(f"Rule 'season' OK for {name}")
-    return transfer
+    return {'transfer': transfer}
 
 
 def rule_parent_dir(
     name: str,
     foldermatch: FolderEntry,
-    transfer: dict = {}
+    transfer: dict = {},
+    **kwargs
 ) -> dict:
     """Sets 'trasnfer_to to the parent directory"""
     logger.debug(f"Applying rule 'parent-dir' to {name}")
     transfer['transfer_to'] = foldermatch.path
 
     logger.debug(f"Rule 'parent-dir' OK for {name}")
-    return transfer
+    return {'transfer': transfer}
 
 
 def rule_sub_dir(
         name: str,
         foldermatch: FolderEntry,
         rules: list,
-        transfer: dict = {}
+        transfer: dict = {},
+        **kwargs
 ) -> dict:
     """Sets the transfer_to a specified sub directory"""
     logger.debug(f"Applying rule 'sub-dir' to {name}")
@@ -68,15 +71,15 @@ def rule_sub_dir(
     if subdir_name not in foldermatch.list_entry_names():
         logger.warning("Rule 'sub-dir' FAILED: " +
                        f"Cannot locate sub-dir {subdir_name}: {name}")
-        return transfer
+        return {'transfer': transfer}
 
     transfer['transfer_to'] = foldermatch.get_entry_by_name(subdir_name).path
 
     logger.debug(f"Rule 'sub-dir' OK for {name}")
-    return transfer
+    return {'transfer': transfer}
 
 
-def rule_episode_only(name: str, metadata: dict) -> dict:
+def rule_episode_only(name: str, metadata: dict, **kwargs) -> dict:
     """Removes guessit['season'] and merges it with guessit['episode']"""
     logger.debug(f"Applying rule 'episode-only' to {name}")
     try:
@@ -88,21 +91,22 @@ def rule_episode_only(name: str, metadata: dict) -> dict:
     metadata.copy().pop('season', None)
 
     logger.debug(f"Rule 'episode-only' OK for {name}")
-    return metadata
+    return {'metadata': metadata}
 
 
 def rule_format_title(
         name: str,
         metadata: dict,
         rules: list,
-        transfer: dict
+        transfer: dict,
+        **kwargs
 ) -> dict:
     """Sets transfer_to filename to a specified name for transfer"""
     logger.debug(f"Applying rule 'format-title' to {name}")
     if not metadata.get('container') or not transfer['transfer_to']:
         logger.warning("Rule 'format-title' FAILED: " +
                        f"Missing container or transfer_to value: {name}")
-        return transfer
+        return {'transfer': transfer}
 
     format_index = rules.index('format-title') + 1
     template = jinja2.Template(
@@ -111,20 +115,20 @@ def rule_format_title(
     transfer['transfer_to'] = os.path.join(transfer['transfer_to'], new_name)
 
     logger.debug(f"Rule 'format-title' OK for {name}")
-    return transfer
+    return {'transfer': transfer}
 
 
-def rule_alt_title(name: str, metadata: dict) -> dict:
+def rule_alt_title(name: str, metadata: dict, **kwargs) -> dict:
     """Checks if the fse has an alternative title and merges it with the
     current title"""
     logger.debug(f"Applying rule 'alternative_title' to {name}")
     if 'alternative_title' not in metadata:
         logger.warning("Rule 'alternative_title' FAILED: " +
                        f"Alternative title missing: {name}")
-        return metadata
+        return {'metadata': metadata}
     metadata['title'] = ' '.join([
         metadata['title'], metadata['alternative_title']
     ])
 
     logger.debug(f"Rule 'alternative_title' OK for {name}")
-    return metadata
+    return {'metadata': metadata}

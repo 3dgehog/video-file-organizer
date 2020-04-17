@@ -10,8 +10,7 @@ from video_file_organizer.models import VideoCollection, FolderCollection
 from video_file_organizer.matchers import OutputFolderMatcher, \
     RuleBookMatcher, MetadataMatcher
 from video_file_organizer.transferer import Transferer
-from video_file_organizer.rules import rules_before_matching_vfile, \
-    rules_before_transfering_vfile
+from video_file_organizer.rules import RuleCollection
 
 logger = logging.getLogger('vfo.app')
 
@@ -24,6 +23,7 @@ class App:
     ) -> None:
 
         logger.debug("Setting up app")
+        self.rule_collection = RuleCollection()
 
         self.configdir = ConfigDirectory(config_dir, create)
         self.config = self.configdir.configfile
@@ -43,6 +43,8 @@ class App:
                     self.config.input_dir,
                     videoextensions=self.config.videoextensions)
 
+                rule_collection = self.rule_collection
+
                 metadata_matcher = MetadataMatcher()
                 rulebook_matcher = RuleBookMatcher(self.rulebook)
                 folder_matcher = OutputFolderMatcher(output_folder)
@@ -50,9 +52,9 @@ class App:
                 operations = [
                     metadata_matcher,
                     rulebook_matcher,
-                    rules_before_matching_vfile,
+                    rule_collection.before_foldermatch,
                     folder_matcher,
-                    rules_before_transfering_vfile,
+                    rule_collection.before_transfer,
                 ]
 
                 with input_folder as ifolder:
