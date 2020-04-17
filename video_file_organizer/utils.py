@@ -1,3 +1,5 @@
+from typing import Set
+
 from video_file_organizer.models import VideoFile
 
 
@@ -29,7 +31,7 @@ class Observer:
 
 
 class Observee:
-    _observers = set()
+    _observers: Set[Observer] = set()
 
     def attach(self, observer):
         self._observers.add(observer)

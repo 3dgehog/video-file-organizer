@@ -58,6 +58,9 @@ class ConfigDirectory:
 
 
 class ConfigFile(Observer):
+    VALID_OPTIONS = ['input_dir', 'series_dirs',
+                     'ignore', 'before_scripts', 'on_transfer']
+
     def __init__(self, path: str, create: bool):
 
         logger.debug("Initializing ConfigFile")
@@ -76,7 +79,7 @@ class ConfigFile(Observer):
 
         self._raw_config = self.load_file()
 
-        self.validate_required_fields()
+        self.validate()
         self.run_before_scripts()
 
         self.input_dir = self.get_input_dir()
@@ -123,8 +126,12 @@ class ConfigFile(Observer):
         with open(self.path, 'r') as yml:
             return yaml.load(yml, Loader=yaml.FullLoader)
 
-    def validate_required_fields(self):
+    def validate(self):
         """Validate all required fields"""
+        for option in self._raw_config:
+            if option not in self.VALID_OPTIONS:
+                raise ValueError(f'{option} is not a valid option')
+
         required_fields = ["input_dir", "series_dirs"]
         for field in required_fields:
             if not self._raw_config[field]:
