@@ -28,8 +28,7 @@ class Transferer(Observee):
                 shutil.rmtree(source)
             else:
                 raise TypeError(f'Unknown type for {source}')
-
-        logger.info(f"Deleted {os.path.basename(source)}")
+            logger.info(f"Deleted {os.path.basename(source)}")
 
     def transfer_vfile(self, vfile: VideoFile):
         if not isinstance(vfile, VideoFile):
