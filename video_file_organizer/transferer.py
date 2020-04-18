@@ -22,12 +22,14 @@ class Transferer(Observee):
         self.delete_list = list(set(self.delete_list))
 
         for source in self.delete_list:
-            try:
+            if os.path.isfile(source):
                 os.remove(source)
-            except PermissionError:
-                # Getting permission error when its a folder
+            elif os.path.isdir(source):
                 shutil.rmtree(source)
-            logger.info(f"Deleted {os.path.basename(source)}")
+            else:
+                raise TypeError(f'Unknown type for {source}')
+
+        logger.info(f"Deleted {os.path.basename(source)}")
 
     def transfer_vfile(self, vfile: VideoFile):
         if not isinstance(vfile, VideoFile):
