@@ -78,9 +78,8 @@ def setup_mock():
 
     # Inject rules and configs
     logging.debug("injecting default rules and configs")
-    rule_book_injector.configparse['series'] = SERIES_CONFIGPARSE
-    rule_book_injector.save()
-    config_injector.append({
+    rule_book_injector.update('series', SERIES_CONFIGPARSE)
+    config_injector.update({
         "input_dir": input_folder_path,
         "series_dirs": [series_dir_path, anime_dir_path]
     })

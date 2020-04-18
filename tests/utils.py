@@ -4,7 +4,8 @@ import configparser
 import shutil
 
 from video_file_organizer.app import App
-from video_file_organizer.config import CONFIG_FILE_TEMPLATE_LOCATION
+from video_file_organizer.config import CONFIG_FILE_TEMPLATE_LOCATION, \
+    RULEBOOK_FILE_TEMPLATE_LOCATION
 
 
 def setup_app_with_injectors(config_dir):
@@ -16,16 +17,24 @@ def setup_app_with_injectors(config_dir):
     return app, config_injector, rule_book_injector
 
 
+def empty_folder(path):
+    for root, dirs, files in os.walk(path):
+        for f in files:
+            os.unlink(os.path.join(root, f))
+        for d in dirs:
+            shutil.rmtree(os.path.join(root, d))
+
+
 class ConfigFileInjector:
     """A class that helps inject the configs in the config.yaml"""
 
     def __init__(self, config_dir):
         self.config_dir = config_dir
         self.path = os.path.join(self.config_dir, 'config.yaml')
-        self._copy_config_file_template()
+        self.copy_config_file_template()
         self.configvalue = self._get_configvalue()
 
-    def append(self, data):
+    def update(self, data):
         if data is not None:
             for key, value in data.items():
                 self.configvalue[key] = value
@@ -40,7 +49,7 @@ class ConfigFileInjector:
             configyaml = yaml.load(yml, Loader=yaml.FullLoader)
         return configyaml
 
-    def _copy_config_file_template(self):
+    def copy_config_file_template(self):
         shutil.copyfile(
             CONFIG_FILE_TEMPLATE_LOCATION,
             os.path.join(self.config_dir, 'config.yaml'))
@@ -52,6 +61,7 @@ class RuleBookFileInjector:
     def __init__(self, config_dir):
         self.config_dir = config_dir
         self.path = os.path.join(self.config_dir, 'rule_book.ini')
+        self.copy_config_file_template()
         self.configparse = self._get_configpaser()
 
     def _get_configpaser(self):
@@ -59,6 +69,16 @@ class RuleBookFileInjector:
         configparse.read(self.path)
         return configparse
 
-    def save(self):
+    def update(self, section, data):
+        if section is not None:
+            self.configparse[section] = data
+            self._save()
+
+    def _save(self):
         with open(self.path, 'w') as configfile:
             self.configparse.write(configfile)
+
+    def copy_config_file_template(self):
+        shutil.copyfile(
+            RULEBOOK_FILE_TEMPLATE_LOCATION,
+            os.path.join(self.config_dir, 'rule_book.ini'))

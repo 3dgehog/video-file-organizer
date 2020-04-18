@@ -8,7 +8,7 @@ def vfile_options(*options):
         if not hasattr(VideoFile(), arg):
             raise KeyError(f"VideoFile doesn't have attribute {arg}")
 
-    def decorator(fn):  # HERE: returning self
+    def decorator(fn):
         def wrapper(*args, vfile: VideoFile, **kwargs):
 
             if not isinstance(vfile, VideoFile):

@@ -33,8 +33,7 @@ def rule_season(
     if 'transfer_to' not in transfer:
         path_to_new_season_dir = os.path.join(
             foldermatch.path, f"Season {season}")
-        # os.mkdir(path_to_new_season_dir)
-        print(f"NEW DIRECTORY CREATED {path_to_new_season_dir}")
+        os.mkdir(path_to_new_season_dir)
         transfer['transfer_to'] = path_to_new_season_dir
         logger.info("Rule 'season' " +
                     f"Created new Season {season} folder for Series {name}")

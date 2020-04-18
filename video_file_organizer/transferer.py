@@ -13,7 +13,7 @@ class Transferer(Observee):
     def __init__(self):
         pass
 
-    def __enter__(self):  # HERE: returning self
+    def __enter__(self):
         self.delete_list = []
         return self
 

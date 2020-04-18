@@ -114,10 +114,10 @@ class VideoCollection(FolderCollection):
         self._vfiles: list = []
         self._scan_vfiles(self.entries)
 
-    def __enter__(self):  # HERE: return self
+    def __enter__(self):
         return self
 
-    def __exit__(self, type, value, traceback):  # HERE: Not sure about this
+    def __exit__(self, type, value, traceback):
         self._purge()
 
     def _purge(self):
@@ -150,11 +150,12 @@ class VideoCollection(FolderCollection):
     def add_vfile(self, name: str, **kwargs):
         vfile = VideoFile()
         setattr(vfile, 'name', name)
-        vfile.edit(**kwargs)
+        if kwargs:
+            vfile.edit(**kwargs)
         self._vfiles.append(vfile)
         logger.debug(f"Added vfile {name} with kwargs {kwargs}")
 
-    def get_vfile(self, name: str):  # HERE: Return VideoFile
+    def get_vfile(self, name: str):
         for vfile in self._vfiles:
             if vfile.name == name:
                 return vfile
@@ -166,7 +167,7 @@ class VideoCollection(FolderCollection):
 
 
 class VideoFile:
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.name: str = ''
         self.metadata: dict = {}
         self.rules: list = []
@@ -176,7 +177,12 @@ class VideoFile:
         self.transfer: dict = {}
         self.valid = True
 
-    def edit(self, merge: bool = True, **kwargs):
+        if kwargs:
+            self.edit(**kwargs)
+
+    def edit(self, *args, merge: bool = True, **kwargs):
+        if args:
+            raise ValueError('edit function only takes kwargs')
         for key, value in kwargs.items():
             if not hasattr(self, key):
                 raise AttributeError(f"Attribute {key} is not valid")

@@ -38,17 +38,19 @@ def sample_input_dir():
 def sample_series_dirs():
     """Returns a list with 2 dirs populated with series and animes,
     they are deleted after used"""
+    tmp_dir = tempfile.mkdtemp()
     # Extract Series
-    series_dir_series = tempfile.mkdtemp()
+    os.mkdir(os.path.join(tmp_dir, "series_dir"))
+    series_dir_series = os.path.join(tmp_dir, "series_dir")
     series_zip = os.path.join(ASSETS_DIR, 'series_dir_series.zip')
     with zipfile.ZipFile(series_zip, "r") as zip_ref:
         zip_ref.extractall(series_dir_series)
     # Extract Animes
-    series_dir_anime = tempfile.mkdtemp()
+    os.mkdir(os.path.join(tmp_dir, "anime_dir"))
+    series_dir_anime = os.path.join(tmp_dir, "anime_dir")
     anime_zip = os.path.join(ASSETS_DIR, 'series_dir_anime.zip')
     with zipfile.ZipFile(anime_zip, "r") as zip_ref:
         zip_ref.extractall(series_dir_anime)
 
     yield [series_dir_series, series_dir_anime]
-    shutil.rmtree(series_dir_series)
-    shutil.rmtree(series_dir_anime)
+    shutil.rmtree(tmp_dir)
