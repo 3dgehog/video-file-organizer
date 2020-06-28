@@ -13,10 +13,10 @@ pipenv install
 
 ### Setting up config files
 
-Before automizing the program, the setup config and rule book need to be setup. Run the program once to get empty config files created in `~/.config/video_file_orgainzer`
+Before automizing the program, the setup config and rule book need to be setup. Run the program once using `--create-config` flag to get empty config files created in `~/.config/video_file_orgainzer`
 
 ```bash
-pipenv run vfo
+pipenv run vfo --create-config
 ```
 
 ### Setup systemd service and timer
@@ -86,6 +86,8 @@ ExecStart = /usr/local/bin/pipenv run vfo -c mock/configs
 
 - [x] Send single file name through http to process
   - [] Add warning when file was not found or unsuccessful
-- [] merge video-file-renamer into this project to be able to detect what kind of video file it is (replace rulebook)
-- [] Sort movies as well
+  - [] Add custom path in request
+- [] Pass environment variables
+- [] merge video-file-renamer into this project to be able to detect what kind of video file it is (replace rulebook) [manual mode]
 - [] Stop retrying the same file over and over after failed
+- [] Sort movies as well
