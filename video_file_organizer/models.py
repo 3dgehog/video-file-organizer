@@ -76,7 +76,11 @@ class FolderEntry(BaseFolder):
 
 
 class FolderCollection(BaseFolder):
-    def __init__(self, path: Union[str, list], ignore: list = []):
+    def __init__(
+        self, path: Union[str, list],
+        ignore: list = [],
+        whitelist: Union[None, list] = None
+    ):
 
         self.path = path
         # Makes sure path is a list
@@ -84,6 +88,7 @@ class FolderCollection(BaseFolder):
             self.path = [self.path]
 
         self.ignore = ignore
+        self.whitelist = whitelist
         self._entries = self.scan()
 
     def scan(self) -> list:
@@ -92,6 +97,10 @@ class FolderCollection(BaseFolder):
         for path in self.path:
             for entry in os.scandir(path):
                 if entry.name in self.ignore:
+                    continue
+                if self.whitelist:
+                    if entry.name in self.whitelist:
+                        data.append(FolderEntry(entry))
                     continue
                 data.append(FolderEntry(entry))
         return data
@@ -102,12 +111,13 @@ class VideoCollection(FolderCollection):
             self,
             path: str,
             ignore: list = [],
-            videoextensions: list = []
+            videoextensions: list = [],
+            whitelist: Union[None, list] = None
     ):
         if type(path) is not str:
             raise TypeError("Input Folder can only be a single folder")
 
-        super().__init__(path, ignore)
+        super().__init__(path, ignore, whitelist)
 
         self.videoextensions = videoextensions
 

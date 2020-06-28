@@ -36,6 +36,10 @@ class App:
         self.transferer.attach(self.config)
 
     def run(self, **kwargs) -> None:
+        '''
+        kwargs:
+        whitelist
+        '''
 
         logger.debug("Running app")
 
@@ -47,7 +51,8 @@ class App:
                 output_folder = FolderCollection(self.config.series_dirs)
                 input_folder = VideoCollection(
                     self.config.input_dir,
-                    videoextensions=self.config.videoextensions)
+                    videoextensions=self.config.videoextensions,
+                    whitelist=kwargs.get('whitelist'))
 
                 rule_collection = self.rule_collection
 
