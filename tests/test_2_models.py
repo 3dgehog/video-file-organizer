@@ -33,16 +33,6 @@ def test_video_collection(tmp_dir, sample_input_dir):
     vc.add_vfile('hello')
     assert len([x for x in vc if x.name == 'hello']) > 0
 
-    # Test retrieving vfile that doesn't exist
-    with pytest.raises(ValueError):
-        vc.get_vfile('random')
-
-    # Test retrieving vfile that does exist
-    for vfile in vc:
-        if vfile.name == 'hello':
-            hello_vfile = vfile
-    assert vc.get_vfile('hello') == hello_vfile
-
 
 def test_video_file():
 

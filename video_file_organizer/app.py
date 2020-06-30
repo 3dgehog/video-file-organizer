@@ -82,7 +82,7 @@ class App:
                         transferer.transfer_vfile(vfile)
 
         except yg.lockfile.FileLockTimeout:
-            logger.warning(
+            logger.info(
                 "Lockfile FAILED: The program must already be running")
 
     def build_rule_collection(self, rule_collection: RuleCollection):

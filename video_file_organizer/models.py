@@ -6,7 +6,7 @@ from typing import Union, List
 logger = logging.getLogger('vfo.models')
 
 
-class BaseFolder:
+class EntryListBase:
     _entries: list = []
 
     @property
@@ -53,29 +53,47 @@ class BaseFolder:
         return data
 
 
-class FolderEntry(BaseFolder):
-    def __init__(self, dir_entry: os.DirEntry):
+class Entry(EntryListBase):
+    def __init__(self, is_parent=True, depth_level=0, **kwargs):
 
-        self._dir_entry = dir_entry
+        if 'dir_entry' in kwargs.keys():
+            self.by_dir_entry(kwargs['dir_entry'])
+        self._dir_entry = kwargs.get('dir_entry') or None
 
-        self.path = self._dir_entry.path
-        self.name = self._dir_entry.name
-        self.is_dir = self._dir_entry.is_dir
-        self.is_file = self._dir_entry.is_file
+        self.path = kwargs.get('path') or self.path or None
+        self.name = kwargs.get('name') or self.name or None
+        self.is_dir = kwargs.get('is_dir') or self.is_dir or None
+        self.is_file = kwargs.get('is_file') or self.is_file or None
+        self.is_parent = is_parent
+        self.depth_level = depth_level
+
         self._entries: list = []
 
+    def by_dir_entry(self, dir_entry: os.DirEntry):
+        self.path = dir_entry.path
+        self.name = dir_entry.name
+        self.is_dir = dir_entry.is_dir
+        self.is_file = dir_entry.is_file
+
     def scan(self) -> list:
-        """[<FolderEntry>, <FolderEntry>]"""
+        """[<Entry>, <Entry>]"""
         data: list = []
+
+        if self.is_file():
+            return []
+
         for entry in os.scandir(self.path):
-            data.append(FolderEntry(entry))
+            data.append(Entry(
+                dir_entry=entry,
+                depth_level=self.depth_level+1,
+                is_parent=False))
         return data
 
     def __repr__(self) -> str:
-        return f"<FolderEntry '{self.name}'>"
+        return f"<Entry '{self.name}'>"
 
 
-class FolderCollection(BaseFolder):
+class FolderCollection(EntryListBase):
     def __init__(
         self, path: Union[str, list],
         ignore: list = [],
@@ -92,7 +110,7 @@ class FolderCollection(BaseFolder):
         self._entries = self.scan()
 
     def scan(self) -> list:
-        """[<FolderEntry>, <FolderEntry>]"""
+        """[<Entry>, <Entry>]"""
         data: list = []
         for path in self.path:
             for entry in os.scandir(path):
@@ -100,9 +118,9 @@ class FolderCollection(BaseFolder):
                     continue
                 if self.whitelist:
                     if entry.name in self.whitelist:
-                        data.append(FolderEntry(entry))
+                        data.append(Entry(dir_entry=entry))
                     continue
-                data.append(FolderEntry(entry))
+                data.append(Entry(dir_entry=entry))
         return data
 
 
@@ -165,12 +183,6 @@ class VideoCollection(FolderCollection):
         self._vfiles.append(vfile)
         logger.debug(f"Added vfile {name} with kwargs {kwargs}")
 
-    def get_vfile(self, name: str):
-        for vfile in self._vfiles:
-            if vfile.name == name:
-                return vfile
-        raise ValueError("This video file doesn't exists in list")
-
     def __iter__(self):
         for vfile in self._vfiles:
             yield vfile
@@ -181,7 +193,7 @@ class VideoFile:
         self.name: str = ''
         self.metadata: dict = {}
         self.rules: list = []
-        self.foldermatch: Union[FolderEntry, None] = None
+        self.foldermatch: Union[Entry, None] = None
         self.path: str = ''
         self.root_path: str = ''
         self.transfer: dict = {}

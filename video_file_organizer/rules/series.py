@@ -4,7 +4,7 @@ import logging
 import jinja2
 
 from typing import Union
-from video_file_organizer.models import FolderEntry
+from video_file_organizer.models import Entry
 
 logger = logging.getLogger('vfo.series.rules')
 
@@ -12,7 +12,7 @@ logger = logging.getLogger('vfo.series.rules')
 def rule_season(
         name: str,
         metadata: dict,
-        foldermatch: FolderEntry,
+        foldermatch: Entry,
         transfer: dict = {},
         **kwargs
 ) -> Union[dict, bool]:
@@ -20,8 +20,8 @@ def rule_season(
     logger.debug(f"Applying rule 'season' to {name}")
 
     if 'season' not in metadata:
-        logger.warning("Rule 'season' FAILED: ",
-                       f"Undefined season number for file: {name}")
+        logger.info("Rule 'season' FAILED: ",
+                    f"Undefined season number for file: {name}")
         return False
 
     season = str(metadata['season'])
@@ -44,7 +44,7 @@ def rule_season(
 
 def rule_parent_dir(
     name: str,
-    foldermatch: FolderEntry,
+    foldermatch: Entry,
     transfer: dict = {},
     **kwargs
 ) -> dict:
@@ -58,7 +58,7 @@ def rule_parent_dir(
 
 def rule_sub_dir(
         name: str,
-        foldermatch: FolderEntry,
+        foldermatch: Entry,
         rules: list,
         transfer: dict = {},
         **kwargs
@@ -68,8 +68,8 @@ def rule_sub_dir(
     subdir_name_index = rules.index('sub-dir') + 1
     subdir_name = rules[subdir_name_index]
     if subdir_name not in foldermatch.list_entry_names():
-        logger.warning("Rule 'sub-dir' FAILED: " +
-                       f"Cannot locate sub-dir {subdir_name}: {name}")
+        logger.info("Rule 'sub-dir' FAILED: " +
+                    f"Cannot locate sub-dir {subdir_name}: {name}")
         return {'transfer': transfer}
 
     transfer['transfer_to'] = foldermatch.get_entry_by_name(subdir_name).path
@@ -103,8 +103,8 @@ def rule_format_title(
     """Sets transfer_to filename to a specified name for transfer"""
     logger.debug(f"Applying rule 'format-title' to {name}")
     if not metadata.get('container') or not transfer['transfer_to']:
-        logger.warning("Rule 'format-title' FAILED: " +
-                       f"Missing container or transfer_to value: {name}")
+        logger.info("Rule 'format-title' FAILED: " +
+                    f"Missing container or transfer_to value: {name}")
         return {'transfer': transfer}
 
     format_index = rules.index('format-title') + 1
@@ -122,8 +122,8 @@ def rule_alt_title(name: str, metadata: dict, **kwargs) -> dict:
     current title"""
     logger.debug(f"Applying rule 'alternative_title' to {name}")
     if 'alternative_title' not in metadata:
-        logger.warning("Rule 'alternative_title' FAILED: " +
-                       f"Alternative title missing: {name}")
+        logger.info("Rule 'alternative_title' FAILED: " +
+                    f"Alternative title missing: {name}")
         return {'metadata': metadata}
     metadata['title'] = ' '.join([
         metadata['title'], metadata['alternative_title']

@@ -22,11 +22,11 @@ class MetadataMatcher:
         results = dict(guessit.guessit(name))
 
         if 'title' not in results:
-            logger.warning(f"Unable to find title for: '{name}'")
+            logger.info(f"Unable to find title for: '{name}'")
             return False
 
         if 'type' not in results:
-            logger.warning(f"Unable to find video type for: '{name}'")
+            logger.info(f"Unable to find video type for: '{name}'")
             return False
 
         return {'metadata': results}
@@ -65,7 +65,7 @@ class RuleBookMatcher:
                 rules = func(name, title, alternative_title)
 
         if len(rules) == 0:
-            logger.warn(f"Unable to find the rules for: {name}")
+            logger.info(f"Unable to find the rules for: {name}")
             return False
 
         return {'rules': rules}
@@ -123,10 +123,10 @@ class OutputFolderMatcher:
         """
         index_match = difflib.get_close_matches(
             title, self.output_folder.list_entry_names(), n=1, cutoff=0.6
-        )[0]
+        )
 
         if not index_match:
-            logger.warn("Match FAILED: " +
+            logger.info("Match FAILED: " +
                         f"Unable to find a match for {name}")
             return False
 
@@ -134,6 +134,6 @@ class OutputFolderMatcher:
 
         return {
             'foldermatch': self.output_folder.get_entry_by_name(
-                str(index_match)
+                str(index_match[0])
             )
         }
