@@ -12,7 +12,7 @@ def test_metadatamatcher():
     vfiles = [VideoFile(name=x['name']) for x in metadata_assets]
 
     for vfile in vfiles:
-        metadata_matcher(vfile=vfile)
+        metadata_matcher.by_vfile(vfile=vfile)
         for item in metadata_assets:
             if item['name'] == vfile.name:
                 for key, value in item['metadata'].items():

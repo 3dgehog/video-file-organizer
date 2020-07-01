@@ -61,11 +61,11 @@ class App:
                 folder_matcher = OutputFolderMatcher(output_folder)
 
                 operations = [
-                    metadata_matcher,
-                    rulebook_matcher,
-                    rule_collection.before_foldermatch,
-                    folder_matcher,
-                    rule_collection.before_transfer,
+                    metadata_matcher.by_vfile,
+                    rulebook_matcher.by_vfile,
+                    rule_collection.before_foldermatch_by_vfile,
+                    folder_matcher.by_vfile,
+                    rule_collection.before_transfer_by_vfile,
                 ]
 
                 with input_folder as ifolder:

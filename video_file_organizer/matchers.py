@@ -7,14 +7,14 @@ from typing import Union
 
 from video_file_organizer.models import VideoFile, FolderCollection
 from video_file_organizer.config import RuleBookFile
-from video_file_organizer.utils import vfile_options
+from video_file_organizer.utils import VFileAddons
 
 logger = logging.getLogger('vfo.matachers')
 
 
-class MetadataMatcher:
-    @vfile_options('name')
-    def __call__(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
+class MetadataMatcher(VFileAddons):
+    @VFileAddons.vfile_options('name')
+    def by_vfile(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
         return self.get_guessit(kwargs['name'])
 
     def get_guessit(self, name: str) -> Union[dict, bool]:
@@ -32,12 +32,12 @@ class MetadataMatcher:
         return {'metadata': results}
 
 
-class RuleBookMatcher:
+class RuleBookMatcher(VFileAddons):
     def __init__(self, rulebookfile: RuleBookFile):
         self.rulebook = rulebookfile
 
-    @vfile_options('name', 'metadata')
-    def __call__(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
+    @VFileAddons.vfile_options('name', 'metadata')
+    def by_vfile(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
 
         alternative_title = None
         if 'alternative_title' in kwargs['metadata']:
@@ -103,13 +103,13 @@ class RuleBookMatcher:
         return rules
 
 
-class OutputFolderMatcher:
+class OutputFolderMatcher(VFileAddons):
     def __init__(self, output_folder: FolderCollection):
         self.output_folder = output_folder
         self.entries = self.output_folder.entries
 
-    @vfile_options('name', 'metadata')
-    def __call__(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
+    @VFileAddons.vfile_options('name', 'metadata')
+    def by_vfile(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
         return self.get_match(
             kwargs['name'],
             kwargs['metadata']['title'])

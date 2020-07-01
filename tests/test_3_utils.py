@@ -1,13 +1,13 @@
 import pytest
 
 from video_file_organizer.models import VideoFile
-from video_file_organizer.utils import vfile_options, Observer, Observee
+from video_file_organizer.utils import VFileAddons, Observer, Observee
 
 
 def test_vfile_options():
     # Wrong option
     with pytest.raises(KeyError):
-        vfile_options('hi')
+        VFileAddons.vfile_options('hi')
 
     def f1(*args, vfile: VideoFile, **kwargs):
         # Correctly passing kwargs
@@ -15,16 +15,16 @@ def test_vfile_options():
 
     # Missing vfile
     with pytest.raises(TypeError):
-        vfile_options('name')(f1)('hi')
+        VFileAddons.vfile_options('name')(f1)('hi')
 
     vfile = VideoFile()
     vfile.edit(name='name1')
-    vfile_options('name')(f1)(vfile=vfile)
+    VFileAddons.vfile_options('name')(f1)(vfile=vfile)
 
     def f2(*args, vfile: VideoFile, **kwargs):
         return {'name': 'name2'}
 
-    vfile_options('name')(f2)(vfile=vfile)
+    VFileAddons.vfile_options('name')(f2)(vfile=vfile)
     # Successfully update attribute
     assert vfile.name == 'name2'
 
@@ -32,8 +32,8 @@ def test_vfile_options():
         return False
 
     # Successfully returned bool
-    assert vfile_options('name')(f2)(vfile=vfile) is True
-    assert vfile_options('name')(f3)(vfile=vfile) is False
+    assert VFileAddons.vfile_options('name')(f2)(vfile=vfile) is True
+    assert VFileAddons.vfile_options('name')(f3)(vfile=vfile) is False
 
 
 def test_oberserver():
