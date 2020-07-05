@@ -1,23 +1,10 @@
-import argparse
 import logging
+import os
 
 from video_file_organizer.app import App
 
 
 def main():
-    # Arguments
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-v", "--verbose",
-                        help="Displays debug messages",
-                        action="store_true")
-    parser.add_argument("-c", "--config",
-                        help="Custom config files location",
-                        nargs=1)
-    parser.add_argument("--create-config",
-                        help="Displays debug messages",
-                        action="store_true")
-    args = parser.parse_args()
-
     # Setup Logger
     logger = logging.getLogger('vfo')
     logger.setLevel(logging.DEBUG)
@@ -29,7 +16,7 @@ def main():
     ch.setLevel(logging.WARNING)
 
     # Set log level based on input arguments
-    if args.verbose:
+    if os.environ.get('DEBUG'):
         ch.setLevel(logging.DEBUG)
     else:
         ch.setLevel(logging.INFO)
@@ -45,19 +32,16 @@ def main():
     logger.addHandler(ch)
     logger.addHandler(fh)
 
-    if args.verbose:
+    if os.environ.get('DEBUG'):
         logger.info("Running in verbose mode")
 
     # App Setup
     app = App()
     kwargs: dict = {}
 
-    if args.config:
-        logger.info(f"Running custom configs in {args.config[0]}")
-        kwargs.update(config_dir=args.config[0])
-
-    if args.create_config:
-        kwargs.update(create=True)
+    if os.environ.get('CONFIG_DIR'):
+        logger.info(f"Running custom configs in {os.environ['CONFIG_DIR']}")
+        kwargs.update(config_dir=os.environ['CONFIG_DIR'])
 
     app.setup(**kwargs)
 

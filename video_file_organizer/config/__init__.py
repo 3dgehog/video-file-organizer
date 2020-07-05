@@ -26,8 +26,7 @@ RULEBOOK_FILE_TEMPLATE_LOCATION = os.path.join(
 class ConfigDirectory:
     def __init__(
             self,
-            path: Union[str, None] = None,
-            create: bool = False
+            path: Union[str, None] = None
     ):
         # Default path if path not provided
         if not path:
@@ -37,23 +36,17 @@ class ConfigDirectory:
 
         self.path = path
 
-        # Create folder if create is True
-        if create:
+        # Create if it doesn't exists
+        if not os.path.exists(path):
             os.makedirs(path, exist_ok=True)
             logger.info("Config directory created")
-
-        # Error if folder doesn't exists
-        if not os.path.exists(path):
-            raise FileNotFoundError("Config directory doesn't exist")
 
         # Initiate file handlers
         self.configfile = ConfigFile(
             os.path.join(self.path, 'config.yaml'),
-            create
         )
         self.rulebookfile = RuleBookFile(
             os.path.join(self.path, 'rule_book.ini'),
-            create
         )
 
 
@@ -61,17 +54,14 @@ class ConfigFile(Observer):
     VALID_OPTIONS = ['input_dir', 'series_dirs',
                      'ignore', 'before_scripts', 'on_transfer']
 
-    def __init__(self, path: str, create: bool):
+    def __init__(self, path: str):
 
         logger.debug("Initializing ConfigFile")
 
         self.path = path
 
-        if create:
-            self.create_file_from_template()
-
         if not os.path.exists(path):
-            raise FileNotFoundError("File doesn't exist")
+            self.create_file_from_template()
 
         fileextension = self.path.rpartition('.')[-1]
         if fileextension not in ['yaml', 'yml']:
@@ -174,16 +164,13 @@ class ConfigFile(Observer):
 
 
 class RuleBookFile:
-    def __init__(self, path: str, create: bool):
+    def __init__(self, path: str):
         logger.debug("Initializing RuleBookFile")
 
         self.path = path
 
-        if create:
-            self.create_file_from_template()
-
         if not os.path.exists(path):
-            raise FileNotFoundError("File doesn't exist")
+            self.create_file_from_template()
 
         fileextension = self.path.rpartition('.')[-1]
         if fileextension not in ['ini']:

@@ -143,9 +143,6 @@ def setup_systemd():
 
 if args.mock:
     setup_mock()
-    logging.info(
-        "Run `pipenv run vfo -c mock/configs` \
-to run against mock folder")
 
 
 if args.systemd:

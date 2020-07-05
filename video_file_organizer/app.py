@@ -19,12 +19,11 @@ class App:
     def setup(
             self,
             config_dir: Union[str, None] = None,
-            create: bool = False
     ) -> None:
 
         logger.debug("Setting up app")
 
-        self.configdir = ConfigDirectory(config_dir, create)
+        self.configdir = ConfigDirectory(config_dir)
         self.config = self.configdir.configfile
         self.rulebook = self.configdir.rulebookfile
 
