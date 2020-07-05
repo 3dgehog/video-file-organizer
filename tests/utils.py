@@ -4,8 +4,8 @@ import configparser
 import shutil
 
 from video_file_organizer.app import App
-from video_file_organizer.config import CONFIG_FILE_TEMPLATE_LOCATION, \
-    RULEBOOK_FILE_TEMPLATE_LOCATION
+from video_file_organizer.config import CONFIG_FILE_TEMPLATE, \
+    RULEBOOK_FILE_TEMPLATE
 
 
 def setup_app_with_injectors(config_dir):
@@ -50,9 +50,9 @@ class ConfigFileInjector:
         return configyaml
 
     def copy_config_file_template(self):
-        shutil.copyfile(
-            CONFIG_FILE_TEMPLATE_LOCATION,
-            os.path.join(self.config_dir, 'config.yaml'))
+        config_file = open(os.path.join(self.config_dir, 'config.yaml'), "w")
+        config_file.write(CONFIG_FILE_TEMPLATE)
+        config_file.close()
 
 
 class RuleBookFileInjector:
@@ -79,6 +79,7 @@ class RuleBookFileInjector:
             self.configparse.write(configfile)
 
     def copy_config_file_template(self):
-        shutil.copyfile(
-            RULEBOOK_FILE_TEMPLATE_LOCATION,
-            os.path.join(self.config_dir, 'rule_book.ini'))
+        rulebook_file = open(
+            os.path.join(self.config_dir, 'rule_book.ini'), "w")
+        rulebook_file.write(RULEBOOK_FILE_TEMPLATE)
+        rulebook_file.close()

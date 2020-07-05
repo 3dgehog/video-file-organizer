@@ -10,17 +10,12 @@ from video_file_organizer.config import ConfigFile, RuleBookFile
 
 
 def test_configfile(tmp_dir):
-    # Missing create argument
-    with pytest.raises(TypeError):
-        ConfigFile('tmp_dir')
-
-    # FileNotFoundError because Configfile file doesn't exists
-    with pytest.raises(FileNotFoundError):
-        ConfigFile('tmp_dir', False)
-
     # ValueError because required fields are not entered
     with pytest.raises(ValueError):
-        ConfigFile(os.path.join(tmp_dir, 'config.yaml'), create=True)
+        ConfigFile(os.path.join(tmp_dir, 'config.yaml'))
+
+    # Check if config file was created
+    assert os.path.isfile(os.path.join(tmp_dir, 'config.yaml'))
 
     config_injector = ConfigFileInjector(tmp_dir)
     config_injector.update({
@@ -30,7 +25,7 @@ def test_configfile(tmp_dir):
 
     # FileNotFoundError because the directory doesn't exist
     with pytest.raises(FileNotFoundError):
-        ConfigFile(config_injector.path, False)
+        ConfigFile(config_injector.path)
 
     empty_folder(tmp_dir)
 
@@ -44,7 +39,7 @@ def test_configfile(tmp_dir):
     })
     # CalledProcessError because the script failed
     with pytest.raises(SystemExit):
-        ConfigFile(config_injector.path, False)
+        ConfigFile(config_injector.path)
 
     empty_folder(tmp_dir)
 
@@ -56,7 +51,7 @@ def test_configfile(tmp_dir):
         "input_dir": os.path.join(tmp_dir, "input_dir")
     })
     # Successful ConfigFile exec
-    ConfigFile(config_injector.path, False)
+    ConfigFile(config_injector.path)
 
 
 def test_rulebookfile(tmp_dir):
@@ -64,9 +59,9 @@ def test_rulebookfile(tmp_dir):
     with pytest.raises(TypeError):
         RuleBookFile()
 
-    # File doesn't exists
-    with pytest.raises(FileNotFoundError):
-        RuleBookFile('temp.ini', False)
+    # Check if rulebook file was created
+    RuleBookFile(os.path.join(tmp_dir, 'rule_book.ini'))
+    assert os.path.isfile(os.path.join(tmp_dir, 'rule_book.ini'))
 
     rule_book_injector = RuleBookFileInjector(tmp_dir)
     rule_book_injector.update('series', {
@@ -74,7 +69,7 @@ def test_rulebookfile(tmp_dir):
     })
     # Test invalid rule
     with pytest.raises(KeyError):
-        RuleBookFile(rule_book_injector.path, False)
+        RuleBookFile(rule_book_injector.path)
 
     empty_folder(tmp_dir)
 
@@ -83,11 +78,11 @@ def test_rulebookfile(tmp_dir):
         'That 70s Show': 'sub-dir'
     })
     # Test secondary rule without value
-    RuleBookFile(rule_book_injector.path, False)
+    RuleBookFile(rule_book_injector.path)
 
     empty_folder(tmp_dir)
 
     rule_book_injector = RuleBookFileInjector(tmp_dir)
     rule_book_injector.update('series', SERIES_CONFIGPARSE)
     # Successful RuleBookfile exec
-    RuleBookFile(rule_book_injector.path, False)
+    RuleBookFile(rule_book_injector.path)
