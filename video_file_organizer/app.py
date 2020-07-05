@@ -24,23 +24,18 @@ class App:
 
         logger.debug("Setting up app")
 
-        self.rule_collection = RuleCollection()
-        self.build_rule_collection(self.rule_collection)
-
         self.configdir = ConfigDirectory(config_dir, create)
         self.config = self.configdir.configfile
         self.rulebook = self.configdir.rulebookfile
+
+        self.rule_collection = RuleCollection()
+        self.build_rule_collection(self.rule_collection)
 
         self.transferer = Transferer()
 
         self.transferer.attach(self.config)
 
     def run(self, **kwargs) -> None:
-        '''
-        kwargs:
-        whitelist
-        '''
-
         logger.debug("Running app")
 
         try:

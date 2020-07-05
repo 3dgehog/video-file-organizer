@@ -15,7 +15,7 @@ logger = logging.getLogger('vfo.matachers')
 class MetadataMatcher(VFileAddons):
     @VFileAddons.vfile_options('name')
     def by_vfile(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
-        return self.get_guessit(kwargs['name'])
+        return self.get_guessit(**kwargs)
 
     def get_guessit(self, name: str) -> Union[dict, bool]:
 
@@ -29,6 +29,9 @@ class MetadataMatcher(VFileAddons):
             logger.info(f"Unable to find video type for: '{name}'")
             return False
 
+        if 'alternative_title' not in results:
+            results['alternative_title'] = None
+
         return {'metadata': results}
 
 
@@ -38,31 +41,20 @@ class RuleBookMatcher(VFileAddons):
 
     @VFileAddons.vfile_options('name', 'metadata')
     def by_vfile(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
+        return self.get_rules(**kwargs)
 
-        alternative_title = None
-        if 'alternative_title' in kwargs['metadata']:
-            alternative_title = vfile.metadata['alternative_title']
-
-        return self.get_rules(
-            kwargs['name'],
-            kwargs['metadata']['type'],
-            kwargs['metadata']['title'],
-            alternative_title)
-
-    def get_rules(
-            self,
-            name: str,
-            vtype: str,
-            title: str,
-            alternative_title: str = None
-    ) -> Union[dict, bool]:
+    def get_rules(self, name: str, metadata: dict) -> Union[dict, bool]:
 
         VALID_TYPES = {"episode": self._get_series_rules}
 
         rules = []
         for key, func in VALID_TYPES.items():
-            if vtype == key:
-                rules = func(name, title, alternative_title)
+            if metadata['type'] == key:
+                rules = func(
+                    name,
+                    metadata['title'],
+                    metadata['alternative_title']
+                )
 
         if len(rules) == 0:
             logger.info(f"Unable to find the rules for: {name}")
@@ -110,19 +102,13 @@ class OutputFolderMatcher(VFileAddons):
 
     @VFileAddons.vfile_options('name', 'metadata')
     def by_vfile(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
-        return self.get_match(
-            kwargs['name'],
-            kwargs['metadata']['title'])
+        return self.get_match(**kwargs)
 
-    def get_match(self, name: str, title: str) -> Union[dict, bool]:
-        """Matches the name & title to the output folder specified in __init__
-
-        Args:
-            name: The name of the file
-            title: The title of the file
-        """
+    def get_match(self, name: str, metadata: dict) -> Union[dict, bool]:
         index_match = difflib.get_close_matches(
-            title, self.output_folder.list_entry_names(), n=1, cutoff=0.6
+            metadata['title'],
+            self.output_folder.list_entry_names(),
+            n=1, cutoff=0.6
         )
 
         if not index_match:
