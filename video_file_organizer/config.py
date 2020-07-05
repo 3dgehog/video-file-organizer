@@ -16,23 +16,18 @@ logger = logging.getLogger('vfo.config')
 
 DEFAULT_DIR = '.config/video_file_organizer/'
 
-CONFIG_FILE_TEMPLATE_LOCATION = os.path.join(
-    os.path.dirname(__file__), 'config.yaml')
-RULEBOOK_FILE_TEMPLATE_LOCATION = os.path.join(
-    os.path.dirname(__file__), 'rule_book.ini')
-
 CONFIG_FILE_TEMPLATE = """
 # This is the main config file for video_file_organizer
 
 # The directory it will search for the videos to sort
-# REQUIRED
+# *REQUIRED
 # Example
 # input_dir: "path/to/input/dir"
 input_dir:
 
 # List of directories it will copy the series to
-# REQUIRED
-# Example.
+# *REQUIRED
+# Example
 # output_dirs:
 #   - path/to/dir/1
 series_dirs:
@@ -48,31 +43,34 @@ ignore:
 # list of scripts to run before starting.
 # Especially useful if your folders are located on a network drive that you
 # need to mount first
-# Example:
+# Example
 # before_scripts:
 #   - "path/to/script"
 before_scripts:
 
 
 # list of scripts to run on_transfer.
-# Example:
+# Example
 # on_transfer:
 #   - "path/to/script"
 on_transfer:
 """
 
 RULEBOOK_FILE_TEMPLATE = """
-## series
+# series
 # ---Pick 1 Only---
-# season --> sets the transfer_to to the correct season folder
-# parent-dir --> sets the transfer_to to the parent directory
-# sub-dir "<subdir_name>" --> sets the transfer_to to "<subdir_name>" in
-#   parent directory
-# -----------------
-# episode-only --> Change season 1 episode 23 to episode 123
+# season                     --> sets the transfer_to to the correct season
+#                                folder
+# parent-dir                 --> sets the transfer_to to the parent directory
+# sub-dir "<subdir_name>"    --> sets the transfer_to to "<subdir_name>" in
+#                                parent directory
+# ------------------
+# episode-only               --> Change season 1 episode 23 to episode 123
 # format-title "<new_title>" --> Jinja formatting, variables are: episode,
-#   season, title, ... example: "One_Piece_{{ episode }}"
-# alt-title --> Use the alternative title to search for file video
+#                                season, title, ...
+#                                example: "One_Piece_{{ episode }}"
+# alt-title                  --> Use the alternative title to search for file
+#                                video
 
 [series]
 """
@@ -94,12 +92,9 @@ class ConfigDirectory:
             logger.info("Config directory created")
 
         # Initiate file handlers
-        self.configfile = ConfigFile(
-            os.path.join(self.path, 'config.yaml'),
-        )
+        self.configfile = ConfigFile(os.path.join(self.path, 'config.yaml'))
         self.rulebookfile = RuleBookFile(
-            os.path.join(self.path, 'rule_book.ini'),
-        )
+            os.path.join(self.path, 'rule_book.ini'))
 
 
 class ConfigFile(Observer):
@@ -133,11 +128,10 @@ class ConfigFile(Observer):
         """Returns the input_dir path from the config.yaml"""
         # Checks that the directory exists
         if not os.path.exists(self._raw_config["input_dir"]):
-            raise FileNotFoundError("File {} doesn't exists".format(
-                self._raw_config["input_dir"]))
+            raise FileNotFoundError(
+                f"File {self._raw_config['input_dir']} doesn't exists")
 
-        logger.debug("Got input dir {}".format(
-            self._raw_config["input_dir"]))
+        logger.debug(f"Got input dir {self._raw_config['input_dir']}")
         return self._raw_config["input_dir"]
 
     def get_series_dirs(self) -> list:
@@ -147,10 +141,10 @@ class ConfigFile(Observer):
             # Checks that the directory exists
             if not os.path.exists(dir_list):
                 raise FileNotFoundError(
-                    "Series Directory '{}' doesn't exists".format(dirs))
+                    f"Series Directory '{dirs}' doesn't exists")
             dirs.append(dir_list)
 
-        logger.debug("Got series dirs '{}'".format(dirs))
+        logger.debug(f"Got series dirs '{dirs}'")
         return dirs
 
     def create_file_from_template(self):
@@ -191,9 +185,9 @@ class ConfigFile(Observer):
             return
         # Run scripts
         for script in self._raw_config['before_scripts']:
-            logger.debug("Running before script '{}'".format(script))
+            logger.debug(f"Running before script '{script}'")
             self._run_script(script)
-            logger.debug("Ran script {}".format(script))
+            logger.debug(f"Ran script {script}")
 
     def update(self, *args, topic: str, **kwargs):
         if topic == 'on_transfer':
@@ -296,7 +290,7 @@ class RuleBookFile:
                 # Check wether its a value of a secondary value
                 if rules[rules.index(rule) - 1] not in RULES_WITH_SECONDARY:
                     logger.critical(f"{rules}")
-                    raise KeyError("Invalid series rule: '{}'".format(rule))
+                    raise KeyError(f"Invalid series rule: '{rule}'")
 
         # Check invalid pairs
         for invalid_pair in INVALID_PAIRS:

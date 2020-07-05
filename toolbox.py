@@ -113,7 +113,7 @@ def setup_systemd():
     service_config['Service'] = {
         'User': 'maxence',
         'WorkingDirectory': working_dir_path,
-        'ExecStart': '{} run vfo'.format(pipenv_path)
+        'ExecStart': f'{pipenv_path} run vfo'
     }
     service_config['Install'] = {
         'WantedBy': 'multi-user.target'
