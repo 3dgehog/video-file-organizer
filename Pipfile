@@ -22,6 +22,7 @@ uwsgi = "*"
 tests = "pytest tests"
 type = "mypy video_file_organizer"
 mock = "python toolbox.py --mock"
+webserver = "python video_file_organizer/webserver.py"
 uwsgi = "uwsgi --ini webserver.ini"
 
 [requires]

@@ -1,0 +1,34 @@
+{
+    "configurations": [
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Python: Debug on Mocks",
+            "type": "python",
+            "request": "launch",
+            "preLaunchTask": "create_mock_files",
+            "module": "video_file_organizer",
+            "env": {
+                "CONFIG_DIR": "mock/configs",
+                "DEBUG": "true"
+            }
+        },
+        {
+            "name": "Python: Debug Webserver on Mocks",
+            "type": "python",
+            "request": "launch",
+            "program": "video_file_organizer/webserver.py",
+            "console": "integratedTerminal",
+            "preLaunchTask": "create_mock_files",
+            "env": {
+                "CONFIG_DIR": "mock/configs",
+                "DEBUG": "true"
+            }
+        }
+    ]
+}
