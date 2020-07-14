@@ -30,10 +30,11 @@ class App:
 
         self.rule_collection = RuleCollection()
         self.build_rule_collection(self.rule_collection)
+
         Observee.attach(self.rule_collection)
+        Observee.attach(self.config)
 
         self.transferer = Transferer()
-        self.transferer.attach(self.config)
 
     def run(self, **kwargs) -> None:
         logger.debug("Running app")
