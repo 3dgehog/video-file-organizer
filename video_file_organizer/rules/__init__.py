@@ -1,6 +1,6 @@
 from video_file_organizer.models import VideoFile
 
-from video_file_organizer.utils import VFileAddons
+from video_file_organizer.utils import VFileConsumer, Observer
 
 
 class RuleEntry:
@@ -10,18 +10,27 @@ class RuleEntry:
         self.when = when
 
 
-class RuleCollection(VFileAddons):
+class RuleCollection(VFileConsumer, Observer):
     def __init__(self):
         self._entries: list = []
+
+    def update(self, *arg, topic: str, **kwargs):
+        vfile = kwargs['vfile']
+
+        if topic == 'RuleBookMatcher/after':
+            self.before_foldermatch_by_vfile(vfile=vfile)
+
+        if topic == 'OutputFolderMatcher/after':
+            self.before_transfer_by_vfile(vfile=vfile)
 
     def add_handler(self, rule_entry: RuleEntry):
         self._entries.append(rule_entry)
 
-    @VFileAddons.vfile_options('name', 'metadata', 'rules')
+    @VFileConsumer.vfile_consumer('name', 'metadata', 'rules')
     def before_foldermatch_by_vfile(self, vfile: VideoFile, **kwargs) -> dict:
         return self.run_rules('before_foldermatch', **kwargs)
 
-    @VFileAddons.vfile_options(
+    @VFileConsumer.vfile_consumer(
         'name', 'metadata', 'foldermatch', 'transfer', 'rules')
     def before_transfer_by_vfile(self, vfile: VideoFile, **kwargs) -> dict:
         return self.run_rules('before_transfer', **kwargs)

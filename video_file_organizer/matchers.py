@@ -7,14 +7,14 @@ from typing import Union
 
 from video_file_organizer.models import VideoFile, FolderCollection
 from video_file_organizer.config import RuleBookFile
-from video_file_organizer.utils import VFileAddons
+from video_file_organizer.utils import VFileConsumer
 
 logger = logging.getLogger('vfo.matachers')
 
 
-class MetadataMatcher(VFileAddons):
-    @VFileAddons.vfile_options('name')
-    def by_vfile(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
+class MetadataMatcher(VFileConsumer):
+    @VFileConsumer.vfile_consumer('name')
+    def __call__(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
         return self.get_guessit(**kwargs)
 
     def get_guessit(self, name: str) -> Union[dict, bool]:
@@ -35,12 +35,12 @@ class MetadataMatcher(VFileAddons):
         return {'metadata': results}
 
 
-class RuleBookMatcher(VFileAddons):
+class RuleBookMatcher(VFileConsumer):
     def __init__(self, rulebookfile: RuleBookFile):
         self.rulebook = rulebookfile
 
-    @VFileAddons.vfile_options('name', 'metadata')
-    def by_vfile(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
+    @VFileConsumer.vfile_consumer('name', 'metadata')
+    def __call__(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
         return self.get_rules(**kwargs)
 
     def get_rules(self, name: str, metadata: dict) -> Union[dict, bool]:
@@ -95,13 +95,13 @@ class RuleBookMatcher(VFileAddons):
         return rules
 
 
-class OutputFolderMatcher(VFileAddons):
+class OutputFolderMatcher(VFileConsumer):
     def __init__(self, output_folder: FolderCollection):
         self.output_folder = output_folder
         self.entries = self.output_folder.entries
 
-    @VFileAddons.vfile_options('name', 'metadata')
-    def by_vfile(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
+    @VFileConsumer.vfile_consumer('name', 'metadata')
+    def __call__(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
         return self.get_match(**kwargs)
 
     def get_match(self, name: str, metadata: dict) -> Union[dict, bool]:

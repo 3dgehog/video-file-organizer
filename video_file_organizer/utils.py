@@ -1,33 +1,14 @@
+import abc
+import logging
 from typing import Set
 
 from video_file_organizer.models import VideoFile
 
-
-class VFileAddons:
-    def vfile_options(*options):
-        for arg in options:
-            if not hasattr(VideoFile(), arg):
-                raise KeyError(f"VideoFile doesn't have attribute {arg}")
-
-        def decorator(fn):
-            def wrapper(*args, vfile: VideoFile, **kwargs):
-
-                if not isinstance(vfile, VideoFile):
-                    raise TypeError(
-                        "vfile needs to be an instance of VideoFile")
-
-                data = vfile.get_attr(*options)
-                results = fn(*args, vfile=vfile, **data, **kwargs)
-                if results:
-                    vfile.edit(**results)
-                    return True
-
-                return False
-            return wrapper
-        return decorator
+logger = logging.getLogger('vfo.utils')
 
 
-class Observer:
+class Observer(metaclass=abc.ABCMeta):
+    @abc.abstractmethod
     def update(self, *arg, topic: str, **kwargs):
         pass
 
@@ -35,12 +16,49 @@ class Observer:
 class Observee:
     _observers: Set[Observer] = set()
 
-    def attach(self, observer):
-        self._observers.add(observer)
+    @classmethod
+    def attach(cls, observer):
+        cls._observers.add(observer)
 
-    def detach(self, observer):
-        self._observers.discard(observer)
+    @classmethod
+    def detach(cls, observer):
+        cls._observers.discard(observer)
 
     def notify(self, *args, topic: str, **kwargs):
+        logger.debug(f"********* {topic} *********")
         for observer in self._observers:
             observer.update(*args, topic=topic, **kwargs)
+
+
+class VFileConsumer(Observee):
+    def vfile_consumer(*options):
+        def decorator(fn):
+            def wrapper(*args, vfile: VideoFile, **kwargs):
+                obj = args[0]
+
+                if not isinstance(vfile, VideoFile):
+                    raise TypeError(
+                        "vfile needs to be an instance of VideoFile")
+
+                data = vfile.get_attr(*options)
+
+                obj.notify(
+                    topic=f'{obj.__class__.__name__}/before',
+                    vfile=vfile
+                )
+
+                results = fn(*args, vfile=vfile, **data, **kwargs)
+
+                if not results:
+                    return False
+
+                vfile.update(**results)
+
+                obj.notify(
+                    topic=f'{obj.__class__.__name__}/after',
+                    vfile=vfile
+                )
+
+                return True
+            return wrapper
+        return decorator

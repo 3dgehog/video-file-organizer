@@ -11,6 +11,7 @@ from video_file_organizer.matchers import OutputFolderMatcher, \
     RuleBookMatcher, MetadataMatcher
 from video_file_organizer.transferer import Transferer
 from video_file_organizer.rules import RuleCollection, RuleEntry, series
+from video_file_organizer.utils import Observee
 
 logger = logging.getLogger('vfo.app')
 
@@ -29,9 +30,9 @@ class App:
 
         self.rule_collection = RuleCollection()
         self.build_rule_collection(self.rule_collection)
+        Observee.attach(self.rule_collection)
 
         self.transferer = Transferer()
-
         self.transferer.attach(self.config)
 
     def run(self, **kwargs) -> None:
@@ -48,25 +49,17 @@ class App:
                     videoextensions=self.config.videoextensions,
                     whitelist=kwargs.get('whitelist'))
 
-                rule_collection = self.rule_collection
-
-                metadata_matcher = MetadataMatcher()
-                rulebook_matcher = RuleBookMatcher(self.rulebook)
-                folder_matcher = OutputFolderMatcher(output_folder)
-
                 operations = [
-                    metadata_matcher.by_vfile,
-                    rulebook_matcher.by_vfile,
-                    rule_collection.before_foldermatch_by_vfile,
-                    folder_matcher.by_vfile,
-                    rule_collection.before_transfer_by_vfile,
+                    MetadataMatcher(),
+                    RuleBookMatcher(self.rulebook),
+                    OutputFolderMatcher(output_folder),
                 ]
 
                 with input_folder as ifolder:
                     for vfile in ifolder:
                         for operation in operations:
                             operation(vfile=vfile) or \
-                                vfile.edit(valid=False)
+                                vfile.update(valid=False)
                         if not vfile.valid:
                             continue
 

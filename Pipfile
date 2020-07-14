@@ -24,6 +24,7 @@ type = "mypy video_file_organizer"
 mock = "python toolbox.py --mock"
 webserver = "python video_file_organizer/webserver.py"
 uwsgi = "uwsgi --ini webserver.ini"
+mock_vfo = "env CONFIG_DIR='mock/configs' DEBUG=True python -m video_file_organizer"
 
 [requires]
 python_version = "3.6.9"

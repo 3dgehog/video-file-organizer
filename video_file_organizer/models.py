@@ -179,7 +179,7 @@ class VideoCollection(FolderCollection):
         vfile = VideoFile()
         setattr(vfile, 'name', name)
         if kwargs:
-            vfile.edit(**kwargs)
+            vfile.update(**kwargs)
         self._vfiles.append(vfile)
         logger.debug(f"Added vfile {name} with kwargs {kwargs}")
 
@@ -200,9 +200,9 @@ class VideoFile:
         self.valid = True
 
         if kwargs:
-            self.edit(**kwargs)
+            self.update(**kwargs)
 
-    def edit(self, *args, merge: bool = True, **kwargs):
+    def update(self, *args, merge: bool = True, **kwargs):
         if args:
             raise ValueError('edit function only takes kwargs')
         for key, value in kwargs.items():
