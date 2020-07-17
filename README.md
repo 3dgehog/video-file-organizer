@@ -91,3 +91,7 @@ ExecStart = /usr/local/bin/pipenv run vfo -c mock/configs
 - [] merge video-file-renamer into this project to be able to detect what kind of video file it is (replace rulebook) [manual mode]
 - [] Stop retrying the same file over and over after failed
 - [] Sort movies as well
+
+Store → The data is being collected and stored.
+Process → … is converted, parsed, cleaned and analyzed.
+Consume → … can be queried, visualized, and alerts can be sent out.

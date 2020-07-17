@@ -13,11 +13,11 @@ logger = logging.getLogger('vfo.matachers')
 
 
 class MetadataMatcher(VFileConsumer):
-    @VFileConsumer.vfile_consumer('name')
+    @VFileConsumer.vfile_consumer
     def __call__(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
         return self.get_guessit(**kwargs)
 
-    def get_guessit(self, name: str) -> Union[dict, bool]:
+    def get_guessit(self, name: str, **kwargs) -> Union[dict, bool]:
 
         results = dict(guessit.guessit(name))
 
@@ -39,11 +39,12 @@ class RuleBookMatcher(VFileConsumer):
     def __init__(self, rulebookfile: RuleBookFile):
         self.rulebook = rulebookfile
 
-    @VFileConsumer.vfile_consumer('name', 'metadata')
+    @VFileConsumer.vfile_consumer
     def __call__(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
         return self.get_rules(**kwargs)
 
-    def get_rules(self, name: str, metadata: dict) -> Union[dict, bool]:
+    def get_rules(
+            self, name: str, metadata: dict, **kwargs) -> Union[dict, bool]:
 
         VALID_TYPES = {"episode": self._get_series_rules}
 
@@ -100,11 +101,12 @@ class OutputFolderMatcher(VFileConsumer):
         self.output_folder = output_folder
         self.entries = self.output_folder.entries
 
-    @VFileConsumer.vfile_consumer('name', 'metadata')
+    @VFileConsumer.vfile_consumer
     def __call__(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
         return self.get_match(**kwargs)
 
-    def get_match(self, name: str, metadata: dict) -> Union[dict, bool]:
+    def get_match(
+            self, name: str, metadata: dict, **kwargs) -> Union[dict, bool]:
         index_match = difflib.get_close_matches(
             metadata['title'],
             self.output_folder.list_entry_names(),

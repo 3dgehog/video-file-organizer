@@ -34,8 +34,6 @@ class App:
         Observee.attach(self.rule_collection)
         Observee.attach(self.config)
 
-        self.transferer = Transferer()
-
     def run(self, **kwargs) -> None:
         logger.debug("Running app")
 
@@ -59,13 +57,12 @@ class App:
                 with input_folder as ifolder:
                     for vfile in ifolder:
                         for operation in operations:
-                            operation(vfile=vfile) or \
-                                vfile.update(valid=False)
+                            operation(vfile=vfile)
                         if not vfile.valid:
                             continue
 
                 # Transfer
-                with self.transferer as transferer:
+                with Transferer() as transferer:
                     for vfile in input_folder:
                         transferer.transfer_vfile(vfile)
 

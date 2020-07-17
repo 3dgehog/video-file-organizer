@@ -26,12 +26,11 @@ class RuleCollection(VFileConsumer, Observer):
     def add_handler(self, rule_entry: RuleEntry):
         self._entries.append(rule_entry)
 
-    @VFileConsumer.vfile_consumer('name', 'metadata', 'rules')
+    @VFileConsumer.vfile_consumer
     def before_foldermatch_by_vfile(self, vfile: VideoFile, **kwargs) -> dict:
         return self.run_rules('before_foldermatch', **kwargs)
 
-    @VFileConsumer.vfile_consumer(
-        'name', 'metadata', 'foldermatch', 'transfer', 'rules')
+    @VFileConsumer.vfile_consumer
     def before_transfer_by_vfile(self, vfile: VideoFile, **kwargs) -> dict:
         return self.run_rules('before_transfer', **kwargs)
 

@@ -31,34 +31,32 @@ class Observee:
 
 
 class VFileConsumer(Observee):
-    def vfile_consumer(*options):
-        def decorator(fn):
-            def wrapper(*args, vfile: VideoFile, **kwargs):
-                obj = args[0]
+    def vfile_consumer(fn):
+        def wrapper(*args, vfile: VideoFile, **kwargs):
+            obj = args[0]
 
-                if not isinstance(vfile, VideoFile):
-                    raise TypeError(
-                        "vfile needs to be an instance of VideoFile")
+            if not isinstance(vfile, VideoFile):
+                raise TypeError(
+                    "vfile needs to be an instance of VideoFile")
 
-                data = vfile.get_attr(*options)
+            data = vfile.get_attr()
 
-                obj.notify(
-                    topic=f'{obj.__class__.__name__}/before',
-                    vfile=vfile
-                )
+            obj.notify(
+                topic=f'{obj.__class__.__name__}/before',
+                vfile=vfile
+            )
 
-                results = fn(*args, vfile=vfile, **data, **kwargs)
+            results = fn(*args, vfile=vfile, **data, **kwargs)
 
-                if not results:
-                    return False
-
+            if results:
                 vfile.update(**results)
+            else:
+                vfile.update(valid=False)
 
-                obj.notify(
-                    topic=f'{obj.__class__.__name__}/after',
-                    vfile=vfile
-                )
+            obj.notify(
+                topic=f'{obj.__class__.__name__}/after',
+                vfile=vfile
+            )
 
-                return True
-            return wrapper
-        return decorator
+            return
+        return wrapper

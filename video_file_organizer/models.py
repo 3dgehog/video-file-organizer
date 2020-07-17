@@ -190,6 +190,17 @@ class VideoCollection(FolderCollection):
 
 class VideoFile:
     def __init__(self, **kwargs):
+        self._valid_attr = [
+            'name',
+            'metadata',
+            'rules',
+            'foldermatch',
+            'path',
+            'root_path',
+            'transfer',
+            'valid'
+        ]
+
         self.name: str = ''
         self.metadata: dict = {}
         self.rules: list = []
@@ -204,22 +215,20 @@ class VideoFile:
 
     def update(self, *args, merge: bool = True, **kwargs):
         if args:
-            raise ValueError('edit function only takes kwargs')
+            raise ValueError('Update function only takes kwargs')
         for key, value in kwargs.items():
             if not hasattr(self, key):
-                raise AttributeError(f"Attribute {key} is not valid")
+                raise AttributeError(f"Attribute {key} doesn't exist")
             if merge:
                 if getattr(self, key) in [list, dict]:
                     orig = getattr(self, key)
                     orig.update(value)
                     value = orig
             setattr(self, key, value)
-        logger.debug(f"Edited vfile {self.name} with kwargs {kwargs}")
+        logger.debug(f"Updated vfile {self.name} with kwargs {kwargs}")
 
     def get_attr(self, *args) -> dict:
         data: dict = {}
-        for arg in args:
-            if not hasattr(self, arg):
-                raise AttributeError(f"Attribute {arg} is not valid")
-            data.update({arg: getattr(self, arg)})
+        for attr in self._valid_attr:
+            data.update({attr: getattr(self, attr)})
         return data
