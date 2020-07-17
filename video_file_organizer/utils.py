@@ -24,16 +24,16 @@ class Observee:
     def detach(cls, observer):
         cls._observers.discard(observer)
 
-    def notify(self, *args, topic: str, **kwargs):
+    @classmethod
+    def notify(cls, *args, topic: str, **kwargs):
         logger.debug(f"********* {topic} *********")
-        for observer in self._observers:
+        for observer in cls._observers:
             observer.update(*args, topic=topic, **kwargs)
 
 
-class VFileConsumer(Observee):
+class VFileAddons:
     def vfile_consumer(fn):
-        def wrapper(*args, vfile: VideoFile, **kwargs):
-            obj = args[0]
+        def wrapper(self, vfile: VideoFile, **kwargs):
 
             if not isinstance(vfile, VideoFile):
                 raise TypeError(
@@ -41,20 +41,20 @@ class VFileConsumer(Observee):
 
             data = vfile.get_attr()
 
-            obj.notify(
-                topic=f'{obj.__class__.__name__}/before',
+            Observee.notify(
+                topic=f'{self.__class__.__name__}/before',
                 vfile=vfile
             )
 
-            results = fn(*args, vfile=vfile, **data, **kwargs)
+            results = fn(self, vfile=vfile, **data, **kwargs)
 
             if results:
                 vfile.update(**results)
             else:
                 vfile.update(valid=False)
 
-            obj.notify(
-                topic=f'{obj.__class__.__name__}/after',
+            Observee.notify(
+                topic=f'{self.__class__.__name__}/after',
                 vfile=vfile
             )
 

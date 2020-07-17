@@ -5,6 +5,7 @@ import jinja2
 
 from typing import Union
 from video_file_organizer.models import Entry
+from video_file_organizer.rules.utils import RuleRegistry
 
 logger = logging.getLogger('vfo.series.rules')
 
@@ -13,7 +14,7 @@ def rule_season(
         name: str,
         metadata: dict,
         foldermatch: Entry,
-        transfer: dict = {},
+        transfer: dict,
         **kwargs
 ) -> Union[dict, bool]:
     """Sets transfer_to to the correct season folder"""
@@ -42,10 +43,17 @@ def rule_season(
     return {'transfer': transfer}
 
 
+RuleRegistry.add_rule(
+        'season',
+        rule_season,
+        'OutputFolderMatcher/after'
+)
+
+
 def rule_parent_dir(
     name: str,
     foldermatch: Entry,
-    transfer: dict = {},
+    transfer: dict,
     **kwargs
 ) -> dict:
     """Sets 'trasnfer_to to the parent directory"""
@@ -56,11 +64,18 @@ def rule_parent_dir(
     return {'transfer': transfer}
 
 
+RuleRegistry.add_rule(
+    'parent-dir',
+    rule_parent_dir,
+    'OutputFolderMatcher/after'
+)
+
+
 def rule_sub_dir(
         name: str,
         foldermatch: Entry,
         rules: list,
-        transfer: dict = {},
+        transfer: dict,
         **kwargs
 ) -> dict:
     """Sets the transfer_to a specified sub directory"""
@@ -78,6 +93,13 @@ def rule_sub_dir(
     return {'transfer': transfer}
 
 
+RuleRegistry.add_rule(
+    'sub-dir',
+    rule_sub_dir,
+    'OutputFolderMatcher/after'
+)
+
+
 def rule_episode_only(name: str, metadata: dict, **kwargs) -> dict:
     """Removes guessit['season'] and merges it with guessit['episode']"""
     logger.debug(f"Applying rule 'episode-only' to {name}")
@@ -91,6 +113,13 @@ def rule_episode_only(name: str, metadata: dict, **kwargs) -> dict:
 
     logger.debug(f"Rule 'episode-only' OK for {name}")
     return {'metadata': metadata}
+
+
+RuleRegistry.add_rule(
+    'episode-only',
+    rule_episode_only,
+    'OutputFolderMatcher/after'
+)
 
 
 def rule_format_title(
@@ -117,6 +146,13 @@ def rule_format_title(
     return {'transfer': transfer}
 
 
+RuleRegistry.add_rule(
+    'format-title',
+    rule_format_title,
+    'OutputFolderMatcher/after'
+)
+
+
 def rule_alt_title(name: str, metadata: dict, **kwargs) -> dict:
     """Checks if the fse has an alternative title and merges it with the
     current title"""
@@ -131,3 +167,10 @@ def rule_alt_title(name: str, metadata: dict, **kwargs) -> dict:
 
     logger.debug(f"Rule 'alternative_title' OK for {name}")
     return {'metadata': metadata}
+
+
+RuleRegistry.add_rule(
+    'alt-title',
+    rule_alt_title,
+    'RuleBookMatcher/after'
+)

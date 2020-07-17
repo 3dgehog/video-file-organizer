@@ -7,13 +7,16 @@ from typing import Union
 
 from video_file_organizer.models import VideoFile, FolderCollection
 from video_file_organizer.config import RuleBookFile
-from video_file_organizer.utils import VFileConsumer
+from video_file_organizer.utils import VFileAddons
 
 logger = logging.getLogger('vfo.matachers')
 
 
-class MetadataMatcher(VFileConsumer):
-    @VFileConsumer.vfile_consumer
+class MetadataMatcher:
+    def __init__(self):
+        pass
+
+    @VFileAddons.vfile_consumer
     def __call__(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
         return self.get_guessit(**kwargs)
 
@@ -35,11 +38,11 @@ class MetadataMatcher(VFileConsumer):
         return {'metadata': results}
 
 
-class RuleBookMatcher(VFileConsumer):
+class RuleBookMatcher:
     def __init__(self, rulebookfile: RuleBookFile):
         self.rulebook = rulebookfile
 
-    @VFileConsumer.vfile_consumer
+    @VFileAddons.vfile_consumer
     def __call__(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
         return self.get_rules(**kwargs)
 
@@ -96,12 +99,12 @@ class RuleBookMatcher(VFileConsumer):
         return rules
 
 
-class OutputFolderMatcher(VFileConsumer):
+class OutputFolderMatcher:
     def __init__(self, output_folder: FolderCollection):
         self.output_folder = output_folder
         self.entries = self.output_folder.entries
 
-    @VFileConsumer.vfile_consumer
+    @VFileAddons.vfile_consumer
     def __call__(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
         return self.get_match(**kwargs)
 
