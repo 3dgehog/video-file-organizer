@@ -4,10 +4,11 @@ from video_file_organizer.utils import VFileAddons, Observer
 
 
 class RuleEntry:
-    def __init__(self, name: str, rule_function, topic: str):
+    def __init__(self, name: str, rule_function, topic: str, order: int):
         self.name = name
         self.rule_function = rule_function
         self.topic = topic
+        self.order = order
 
 
 class RuleRegistry(Observer):
@@ -18,12 +19,28 @@ class RuleRegistry(Observer):
             self.run_rules(topic=topic, **kwargs)
 
     @classmethod
-    def add_rule(cls, name, function, topic):
+    def add_rule(cls, name, function, topic, order=10):
+        new_entry = RuleEntry(
+            name=name,
+            rule_function=function,
+            topic=topic,
+            order=order
+        )
+
+        for entry in cls._entries:
+            if entry.order > order:
+                cls._entries.insert(
+                    cls._entries.index(entry)-1,
+                    new_entry
+                )
+                return
+
         cls._entries.append(
             RuleEntry(
                 name=name,
                 rule_function=function,
-                topic=topic
+                topic=topic,
+                order=order
             )
         )
 

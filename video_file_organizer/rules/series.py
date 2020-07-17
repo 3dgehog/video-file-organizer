@@ -46,7 +46,8 @@ def rule_season(
 RuleRegistry.add_rule(
         'season',
         rule_season,
-        'OutputFolderMatcher/after'
+        'OutputFolderMatcher/after',
+        10
 )
 
 
@@ -67,7 +68,8 @@ def rule_parent_dir(
 RuleRegistry.add_rule(
     'parent-dir',
     rule_parent_dir,
-    'OutputFolderMatcher/after'
+    'OutputFolderMatcher/after',
+    10
 )
 
 
@@ -96,7 +98,8 @@ def rule_sub_dir(
 RuleRegistry.add_rule(
     'sub-dir',
     rule_sub_dir,
-    'OutputFolderMatcher/after'
+    'OutputFolderMatcher/after',
+    10
 )
 
 
@@ -118,7 +121,8 @@ def rule_episode_only(name: str, metadata: dict, **kwargs) -> dict:
 RuleRegistry.add_rule(
     'episode-only',
     rule_episode_only,
-    'OutputFolderMatcher/after'
+    'OutputFolderMatcher/after',
+    20
 )
 
 
@@ -149,7 +153,8 @@ def rule_format_title(
 RuleRegistry.add_rule(
     'format-title',
     rule_format_title,
-    'OutputFolderMatcher/after'
+    'OutputFolderMatcher/after',
+    20
 )
 
 
@@ -172,5 +177,6 @@ def rule_alt_title(name: str, metadata: dict, **kwargs) -> dict:
 RuleRegistry.add_rule(
     'alt-title',
     rule_alt_title,
-    'RuleBookMatcher/after'
+    'RuleBookMatcher/after',
+    20
 )
