@@ -45,7 +45,9 @@ VFILE_FINAL_PATHS = [
     "series_dir/Brooklyn 99/Season 5/"
     "Brooklyn.Nine-Nine.S05E13.HDTV.x264-SVA.mkv",
     "series_dir/The Flash/Season 4/"
-    "The.Flash.2014.S04E16.HDTV.x264-SVA.mkv"
+    "The.Flash.2014.S04E16.HDTV.x264-SVA.mkv",
+    "anime_dir/Re Zero kara Hajimeru Isekai Seikatsu/"
+    "[HorribleSubs] Re Zero kara Hajimeru Isekai Seikatsu - 27 [720p].mkv"
 ]
 
 
