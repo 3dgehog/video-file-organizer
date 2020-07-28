@@ -82,16 +82,6 @@ Then edit `vfo.service` and append `-c mock/configs` to the end of ExecStart to 
 ExecStart = /usr/local/bin/pipenv run vfo -c mock/configs
 ```
 
-## Todos
+#### Others
 
-- [x] Send single file name through http to process
-  - [] Add warning when file was not found or unsuccessful
-  - [] Add custom path in request
-- [] Pass environment variables
-- [] merge video-file-renamer into this project to be able to detect what kind of video file it is (replace rulebook) [manual mode]
-- [] Stop retrying the same file over and over after failed
-- [] Sort movies as well
-
-Store → The data is being collected and stored.
-Process → … is converted, parsed, cleaned and analyzed.
-Consume → … can be queried, visualized, and alerts can be sent out.
+[ToDo's](docs/TODO.md)
