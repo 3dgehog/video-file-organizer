@@ -1,11 +1,12 @@
 ### v3 
 
 - [x] Move README TODO to it's own section
-
-README.md TODO's
+- [ ] Add all config options as parameters
+- [ ] Config file should only be create by using a parameter, not automatic
+- [ ] Add all config options as environment variables
 - [ ] Add warning when file was not found or unsuccessful
-- [ ] Add custom path in request
-- [ ] Pass environment variables
-- [ ] merge video-file-renamer into this project to be able to detect what kind of video file it is (replace rulebook) [manual mode]
 - [ ] Stop retrying the same file over and over after failed
 - [ ] Sort movies as well
+- [ ] Add smart detection using internet (automatic mode)
+- [ ] Merge rulebook with config (manual mode)
+- [ ] Add a detect format feature (check the output folder contains and guess -> strict)
