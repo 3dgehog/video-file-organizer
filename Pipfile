@@ -8,13 +8,13 @@ flake8 = "*"
 autopep8 = "*"
 pytest = "*"
 mypy = "*"
+video-file-organizer = {editable = true,path = "."}
 
 [packages]
 pyaml = "*"
 yg-lockfile = "*"
 guessit = "*"
 jinja2 = "*"
-video-file-organizer = {editable = true,path = "."}
 flask = "*"
 uwsgi = "*"
 
