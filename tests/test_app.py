@@ -62,7 +62,9 @@ def test_app(tmp_dir, sample_input_dir, sample_series_dirs):
     rule_book_injector.update('series', SERIES_CONFIGPARSE)
 
     app = App()
-    app.setup(tmp_dir)
+    configfile = os.path.join(tmp_dir, 'config.yaml')
+    rulebookfile = os.path.join(tmp_dir, 'rule_book.ini')
+    app.setup({'config_file': [configfile], 'rule_book_file': [rulebookfile]})
     app.run()
 
     series_folder = os.path.dirname(sample_series_dirs[0])

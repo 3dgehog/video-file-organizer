@@ -76,73 +76,96 @@ RULEBOOK_FILE_TEMPLATE = """
 """
 
 
-class ConfigDirectory:
-    def __init__(self, path: Union[str, None] = None):
-        # Default path if path not provided
+class ConfigBase:
+    custom_path = None
+    default_path = None
+
+    def search_config(self, name: str, required: bool = False) -> list:
+        # Args
+        if self.args:
+            if self.args.get(name):
+                return self.args.get(name)
+        # Environment
+        if os.environ.get(name.upper()):
+            return os.environ.get(name.upper()).split(':')
+        # Customer config file
+        if self.custom_path:
+            file = self.load_file(self.custom_path)
+            if file.get(name):
+                if isinstance(file.get(name), list):
+                    return file.get(name)
+                return [file.get(name)]
+        # Default locations
+        if os.path.exists(self.default_path):
+            file = self.load_file(self.default_path)
+            if file.get(name):
+                if isinstance(file.get(name), list):
+                    return file.get(name)
+                return [file.get(name)]
+
+        if required:
+            raise ValueError(f"Couldn't find config for {name.capitalize()}")
+
+
+class Config(Observer, ConfigBase):
+    default_path = os.path.join(
+        os.environ['HOME'], '.config/video_file_organizer/config.yaml')
+
+    def __init__(self, args):
+        self.args = args
+
+        self.custom_path = self.validate_custom_config_file(
+            self.search_config('config_file')
+        )
+
+        self.input_dir = self.validate_input_dir(
+            self.search_config('input_dir', True)
+        )
+
+        self.series_dirs = self.validate_series_dirs(
+            self.search_config('series_dirs', True)
+        )
+
+        self.ignore = self.search_config('ignore')
+
+        self.on_transfer_scripts = self.search_config('on_transfer')
+
+        self.run_before_scripts(self.search_config('before_scripts'))
+
+        self.videoextensions = ['mkv', 'm4v', 'avi', 'mp4', 'mov']
+
+    def validate_custom_config_file(self, path: Union[List[str], None]) -> str:
         if not path:
-            path = os.path.join(os.environ['HOME'], DEFAULT_DIR)
-            logger.debug('No config dir path given, going to default'
-                         f' path of: {path}')
+            return
 
-        self.path = path
+        if len(path) > 1:
+            raise ValueError('More than 1 config file has been provided')
 
-        # Create if it doesn't exists
-        if not os.path.exists(path):
-            os.makedirs(path, exist_ok=True)
-            logger.info("Config directory created")
+        if not os.path.exists(path[0]):
+            raise FileNotFoundError(f"File {path[0]} doesn't exists")
 
-        # Initiate file handlers
-        self.configfile = ConfigFile(os.path.join(self.path, 'config.yaml'))
-        self.rulebookfile = RuleBookFile(
-            os.path.join(self.path, 'rule_book.ini'))
-
-
-class ConfigFile(Observer):
-    VALID_OPTIONS = ['input_dir', 'series_dirs',
-                     'ignore', 'before_scripts', 'on_transfer']
-
-    def __init__(self, path: str):
-
-        logger.debug("Initializing ConfigFile")
-
-        self.path = path
-
-        if not os.path.exists(path):
-            self.create_file_from_template()
-
-        fileextension = self.path.rpartition('.')[-1]
+        fileextension = path[0].rpartition('.')[-1]
         if fileextension not in ['yaml', 'yml']:
             raise TypeError('File needs to be a .yaml format')
 
-        self._raw_config = self.load_file()
+        logger.debug(f"Got config file {path[0]}")
+        return path[0]
 
-        self.validate()
-        self.run_before_scripts()
+    def validate_input_dir(self, path: List[str]) -> str:
+        if len(path) > 1:
+            raise ValueError('More than 1 input dir has been provided')
 
-        self.input_dir = self.get_input_dir()
-        self.series_dirs = self.get_series_dirs()
-        self.ignore = self._raw_config["ignore"]
-        self.videoextensions = ['mkv', 'm4v', 'avi', 'mp4', 'mov']
+        if not os.path.exists(path[0]):
+            raise FileNotFoundError(f"File {path[0]} doesn't exists")
 
-    def get_input_dir(self) -> str:
-        """Returns the input_dir path from the config.yaml"""
-        # Checks that the directory exists
-        if not os.path.exists(self._raw_config["input_dir"]):
-            raise FileNotFoundError(
-                f"File {self._raw_config['input_dir']} doesn't exists")
+        logger.debug(f"Got input dir {path[0]}")
+        return path[0]
 
-        logger.debug(f"Got input dir {self._raw_config['input_dir']}")
-        return self._raw_config["input_dir"]
-
-    def get_series_dirs(self) -> list:
-        """Returns list of all directories from config.yaml 'series_dirs'"""
-        dirs: List[str] = []
-        for dir_list in self._raw_config["series_dirs"]:
-            # Checks that the directory exists
-            if not os.path.exists(dir_list):
+    def validate_series_dirs(self, dirs: List[str]) -> list:
+        for path in dirs:
+            if not os.path.exists(path):
                 raise FileNotFoundError(
-                    f"Series Directory '{dirs}' doesn't exists")
-            dirs.append(dir_list)
+                    f"Series Directory '{path}' doesn't exists")
 
         logger.debug(f"Got series dirs '{dirs}'")
         return dirs
@@ -157,34 +180,20 @@ class ConfigFile(Observer):
         config_file.write(CONFIG_FILE_TEMPLATE)
         config_file.close()
 
-    def load_file(self) -> dict:
+    def load_file(self, path: str) -> dict:
         """Return config.yaml as dict"""
-        if not os.path.exists(self.path):
+        if not os.path.exists(path):
             raise FileNotFoundError("Config file doesn't exist")
 
-        with open(self.path, 'r') as yml:
+        with open(path, 'r') as yml:
             return yaml.load(yml, Loader=yaml.FullLoader)
 
-    def validate(self):
-        """Validate all required fields"""
-        for option in self._raw_config:
-            if option not in self.VALID_OPTIONS:
-                raise ValueError(f'{option} is not a valid option')
-
-        required_fields = ["input_dir", "series_dirs"]
-        for field in required_fields:
-            if not self._raw_config[field]:
-                raise ValueError(f"Value for '{field}' empty on config.yaml")
-        logger.debug("All required fields are entered")
-
-    def run_before_scripts(self):
-        """Run all before_scripts in config"""
-        # Checks if there are scripts to run
-        if not self._raw_config['before_scripts']:
+    def run_before_scripts(self, scripts: Union[List[str], None]):
+        if not scripts:
             logger.debug("No before scripts to run")
             return
-        # Run scripts
-        for script in self._raw_config['before_scripts']:
+
+        for script in scripts:
             logger.debug(f"Running before script '{script}'")
             self._run_script(script)
             logger.debug(f"Ran script {script}")
@@ -194,9 +203,9 @@ class ConfigFile(Observer):
             self.run_on_transfer_scripts(kwargs['vfile'])
 
     def run_on_transfer_scripts(self, vfile: VideoFile):
-        if not self._raw_config['on_transfer']:
+        if not self.on_transfer_scripts:
             return
-        for script in self._raw_config['on_transfer']:
+        for script in self.on_transfer_scripts:
             logger.debug(f"Running on_transfer for vfile: '{vfile.name}'")
             values: dict = {}
             values.update(vars(vfile))
@@ -212,26 +221,46 @@ class ConfigFile(Observer):
             sys.exit()
 
 
-class RuleBookFile:
-    def __init__(self, path: str):
-        logger.debug("Initializing RuleBookFile")
+class RuleBook(ConfigBase):
+    default_path = os.path.join(
+        os.environ['HOME'], '.config/video_file_organizer/rulebook.ini')
 
-        self.path = path
+    def __init__(self, args):
+        self.args = args
 
-        if not os.path.exists(path):
-            self.create_file_from_template()
+        self.custom_path = self.validate_custom_rule_book_file(
+            self.search_config(
+                'rule_book_file'
+            )
+        )
 
-        fileextension = self.path.rpartition('.')[-1]
+        if self.custom_path:
+            self.configparse = self.load_file(self.custom_path)
+        else:
+            self.configparse = self.load_file(self.default_path)
+        self.validate_rule_book()
+
+    def validate_custom_rule_book_file(self, path: List[str]) -> str:
+        if not path:
+            return
+
+        if len(path) > 1:
+            raise ValueError('More than 1 rule book file has been provided')
+
+        if not os.path.exists(path[0]):
+            raise FileNotFoundError(f"File {path[0]} doesn't exists")
+
+        fileextension = path[0].rpartition('.')[-1]
         if fileextension not in ['ini']:
             raise TypeError('File needs to be a .ini format')
 
-        self.configparse = self.load_file()
-        self.validate_rule_book()
+        logger.debug(f"Got rule book file {path[0]}")
+        return path[0]
 
-    def load_file(self) -> configparser.ConfigParser:
+    def load_file(self, path) -> configparser.ConfigParser:
         """Returns configparser object for rule_book.ini"""
         config = configparser.ConfigParser(allow_no_value=True)
-        config.read(self.path)
+        config.read(path)
         return config
 
     def create_file_from_template(self):

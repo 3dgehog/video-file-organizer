@@ -1,10 +1,24 @@
 import logging
 import os
+import argparse
 
 from video_file_organizer.app import App
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--config-file', action='store', nargs=1, type=str)
+    parser.add_argument('--rule-book-file', action='store', nargs=1, type=str)
+    parser.add_argument('--input-dir', action='store', nargs=1, type=str)
+    parser.add_argument('--series-dirs', action='store', nargs='+', type=str)
+    parser.add_argument('--ignore', action='store', nargs='+')
+    parser.add_argument('--before-scripts', action='store',
+                        nargs='+', type=str)
+    parser.add_argument('--on-transfer-scripts',
+                        action='store', nargs='+', type=str)
+    parser.add_argument('--rules', action='store', nargs=1, type=str)
+    args = parser.parse_args()
+
     # Setup Logger
     logger = logging.getLogger('vfo')
     logger.setLevel(logging.DEBUG)
@@ -37,13 +51,7 @@ def main():
 
     # App Setup
     app = App()
-    kwargs: dict = {}
-
-    if os.environ.get('CONFIG_DIR'):
-        logger.info(f"Running custom configs in {os.environ['CONFIG_DIR']}")
-        kwargs.update(config_dir=os.environ['CONFIG_DIR'])
-
-    app.setup(**kwargs)
+    app.setup(args)
 
     # App run
     app.run()

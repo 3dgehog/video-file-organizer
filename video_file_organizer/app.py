@@ -3,9 +3,7 @@ import logging
 import tempfile
 import yg.lockfile
 
-from typing import Union
-
-from video_file_organizer.config import ConfigDirectory
+from video_file_organizer.config import Config, RuleBook
 from video_file_organizer.models import VideoCollection, FolderCollection
 from video_file_organizer.rules.utils import RuleRegistry
 from video_file_organizer.matchers import OutputFolderMatcher, \
@@ -17,16 +15,12 @@ logger = logging.getLogger('vfo.app')
 
 
 class App:
-    def setup(
-            self,
-            config_dir: Union[str, None] = None,
-    ) -> None:
+    def setup(self, args=None) -> None:
 
         logger.debug("Setting up app")
 
-        self.configdir = ConfigDirectory(config_dir)
-        self.config = self.configdir.configfile
-        self.rulebook = self.configdir.rulebookfile
+        self.config = Config(args)
+        self.rulebook = RuleBook(args)
 
         self.rule_registry = RuleRegistry()
 

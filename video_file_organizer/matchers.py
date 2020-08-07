@@ -6,7 +6,7 @@ import shlex
 from typing import Union
 
 from video_file_organizer.models import VideoFile, FolderCollection
-from video_file_organizer.config import RuleBookFile
+from video_file_organizer.config import RuleBook
 from video_file_organizer.utils import VFileAddons
 
 logger = logging.getLogger('vfo.matachers')
@@ -39,7 +39,7 @@ class MetadataMatcher:
 
 
 class RuleBookMatcher:
-    def __init__(self, rulebookfile: RuleBookFile):
+    def __init__(self, rulebookfile: RuleBook):
         self.rulebook = rulebookfile
 
     @VFileAddons.vfile_consumer
