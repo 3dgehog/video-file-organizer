@@ -5,6 +5,7 @@ import shlex
 import configparser
 import os
 import logging
+import abc
 
 from typing import Union, List
 from jinja2 import Template
@@ -76,35 +77,60 @@ RULEBOOK_FILE_TEMPLATE = """
 """
 
 
-class ConfigBase:
+class ConfigBase(metaclass=abc.ABCMeta):
     custom_path = None
     default_path = None
+    args: List[str]
+
+    @abc.abstractmethod
+    def load_file(self, path: str):
+        pass
 
     def search_config(self, name: str, required: bool = False) -> list:
-        # Args
+        """Searches for config in 4 different places, args, env,
+        a custom location & default location
+
+        Args:
+            name (str): The name of the config
+            required (bool, optional): If this config is required. Defaults to
+                False.
+
+        Raises:
+            ValueError: When the config couldn't be found and required is true
+
+        Returns:
+            list: It returns everything as a list
+        """
+        # args
         if self.args:
             if self.args.get(name):
                 return self.args.get(name)
-        # Environment
+
+        # environment
         if os.environ.get(name.upper()):
             return os.environ.get(name.upper()).split(':')
-        # Customer config file
+
+        # custom config file
         if self.custom_path:
             file = self.load_file(self.custom_path)
             if file.get(name):
                 if isinstance(file.get(name), list):
                     return file.get(name)
                 return [file.get(name)]
+
         # Default locations
-        if os.path.exists(self.default_path):
-            file = self.load_file(self.default_path)
-            if file.get(name):
-                if isinstance(file.get(name), list):
-                    return file.get(name)
-                return [file.get(name)]
+        if self.default_path:
+            if os.path.exists(self.default_path):
+                file = self.load_file(self.default_path)
+                if file.get(name):
+                    if isinstance(file.get(name), list):
+                        return file.get(name)
+                    return [file.get(name)]
 
         if required:
-            raise ValueError(f"Couldn't find config for {name.capitalize()}")
+            raise ValueError(
+                f"Couldn't find required config for {name.capitalize()}")
+        return
 
 
 class Config(Observer, ConfigBase):
