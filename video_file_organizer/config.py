@@ -83,10 +83,11 @@ class ConfigBase(metaclass=abc.ABCMeta):
     args: List[str]
 
     @abc.abstractmethod
-    def load_file(self, path: str):
+    def load_file(self, path: str) -> dict:
         pass
 
-    def search_config(self, name: str, required: bool = False) -> list:
+    def search_config(
+            self, name: str, required: bool = False, **kwargs) -> list:
         """Searches for config in 4 different places, args, env,
         a custom location & default location
 
@@ -94,6 +95,11 @@ class ConfigBase(metaclass=abc.ABCMeta):
             name (str): The name of the config
             required (bool, optional): If this config is required. Defaults to
                 False.
+
+        Keyword Arguments:
+            arg_name (str): Overwrites the default name for arguments
+            env_name (str): Overwrites the default name for env variables
+            file_name (str): Overwrites the default name for files
 
         Raises:
             ValueError: When the config couldn't be found and required is true
@@ -103,29 +109,31 @@ class ConfigBase(metaclass=abc.ABCMeta):
         """
         # args
         if self.args:
-            if self.args.get(name):
-                return self.args.get(name)
+            if self.args.get(kwargs.get('arg_name') or name):
+                return self.args.get(kwargs.get('arg_name') or name)
 
         # environment
-        if os.environ.get(name.upper()):
-            return os.environ.get(name.upper()).split(':')
+        if os.environ.get(kwargs.get('env_name') or name.upper()):
+            return os.environ.get(
+                kwargs.get('env_name') or name.upper()).split(':')
 
-        # custom config file
+        # custom file location
         if self.custom_path:
             file = self.load_file(self.custom_path)
-            if file.get(name):
-                if isinstance(file.get(name), list):
-                    return file.get(name)
-                return [file.get(name)]
+            if file.get(kwargs.get('file_name') or name):
+                if isinstance(file.get(kwargs.get('file_name') or name), list):
+                    return file.get(kwargs.get('file_name') or name)
+                return [file.get(kwargs.get('file_name') or name)]
 
-        # Default locations
+        # default file locations
         if self.default_path:
             if os.path.exists(self.default_path):
                 file = self.load_file(self.default_path)
-                if file.get(name):
-                    if isinstance(file.get(name), list):
-                        return file.get(name)
-                    return [file.get(name)]
+                if file.get(kwargs.get('file_name') or name):
+                    if isinstance(
+                            file.get(kwargs.get('file_name') or name), list):
+                        return file.get(kwargs.get('file_name') or name)
+                    return [file.get(kwargs.get('file_name') or name)]
 
         if required:
             raise ValueError(
@@ -145,11 +153,11 @@ class Config(Observer, ConfigBase):
         )
 
         self.input_dir = self.validate_input_dir(
-            self.search_config('input_dir', True)
+            self.search_config('input_dir', required=True)
         )
 
         self.series_dirs = self.validate_series_dirs(
-            self.search_config('series_dirs', True)
+            self.search_config('series_dirs', required=True)
         )
 
         self.ignore = self.search_config('ignore')
@@ -207,7 +215,6 @@ class Config(Observer, ConfigBase):
         config_file.close()
 
     def load_file(self, path: str) -> dict:
-        """Return config.yaml as dict"""
         if not os.path.exists(path):
             raise FileNotFoundError("Config file doesn't exist")
 
@@ -260,11 +267,14 @@ class RuleBook(ConfigBase):
             )
         )
 
-        if self.custom_path:
-            self.configparse = self.load_file(self.custom_path)
-        else:
-            self.configparse = self.load_file(self.default_path)
-        self.validate_rule_book()
+        self.all_series_rules = self.validate_series_rules(
+            self.search_config(
+                'series_rule',
+                file_name='series'
+            )
+        )
+
+        self.list_of_series_name = self.all_series_rules.keys()
 
     def validate_custom_rule_book_file(self, path: List[str]) -> str:
         if not path:
@@ -283,11 +293,19 @@ class RuleBook(ConfigBase):
         logger.debug(f"Got rule book file {path[0]}")
         return path[0]
 
-    def load_file(self, path) -> configparser.ConfigParser:
-        """Returns configparser object for rule_book.ini"""
+    def validate_series_rules(self, series_rules: list):
+        if len(series_rules) > 1:
+            raise ValueError(
+                'More than 1 set of series rule have been provided')
+
+        for series, rules in series_rules[0].items():
+            self._validate_series_rules_pairs(shlex.split(rules))
+        return series_rules[0]
+
+    def load_file(self, path: str) -> dict:
         config = configparser.ConfigParser(allow_no_value=True)
         config.read(path)
-        return config
+        return config._sections
 
     def create_file_from_template(self):
         """Creates rule_book.ini from template"""
@@ -299,36 +317,10 @@ class RuleBook(ConfigBase):
         rulebook_file.write(RULEBOOK_FILE_TEMPLATE)
         rulebook_file.close()
 
-    def list_of_series(self):
-        return self.configparse.options('series')
+    def get_series_rule_by_name(self, name: str) -> str:
+        return self.all_series_rules.get(name)
 
-    def get_series_rule(self, name: str) -> str:
-        return self.configparse.get('series', name)
-
-    def validate_rule_book(self):
-        """Checks if all the sections are valid and checks all the values of
-        each entries"""
-        # Validate sections
-        RULE_BOOK_SECTIONS = ['series']
-
-        for section in RULE_BOOK_SECTIONS:
-            if not self.configparse.has_section(section):
-                raise ValueError(f"Rule book is missing {section} section")
-
-        for section in self.configparse.sections():
-            if section not in RULE_BOOK_SECTIONS:
-                raise KeyError(f"Section '{section}' is not valid")
-
-        # Validate series rules for all entries
-        if self.configparse.has_section('series'):
-            # Get all the options from series section
-            for option in self.configparse.options('series'):
-                # Get all the values for specific option
-                rules = self.configparse.get('series', option)
-                self._validate_series_rules(shlex.split(rules))
-        logger.debug("Rule book was validated")
-
-    def _validate_series_rules(self, rules: list):
+    def _validate_series_rules_pairs(self, rules: list):
         """Checks if all the rules from a specific entry has all valid options,
         doesn't have invalid pairs and that rules with secondary values are
         valid"""

@@ -4,7 +4,9 @@
 - [x] Add all config options as parameters
 - [x] Add all config options as environment variables
 - [x] Don't give option to create config file
-- [ ] Change rulebook and config to toml format
+- [x] Add all rulebook options as parameters
+- [x] Add all rulebook options as environment variables
+- [ ] Updated systemd setup
 - [ ] Add warning when file was not found or unsuccessful
 - [ ] Stop retrying the same file over and over after failed
 - [ ] Sort movies as well

@@ -79,14 +79,14 @@ class RuleBookMatcher:
         # Get difflib_match from title
         DIFF_CUTOFF = 0.7
         difflib_match = difflib.get_close_matches(
-            title, self.rulebook.list_of_series(),
+            title, self.rulebook.list_of_series_name,
             n=1, cutoff=DIFF_CUTOFF)
 
         # Get difflib_match from alternative_title
         if not difflib_match and alternative_title:
             difflib_match = difflib.get_close_matches(
                 ' '.join([title, alternative_title]),
-                self.rulebook.list_of_series(),
+                self.rulebook.list_of_series_name,
                 n=1, cutoff=DIFF_CUTOFF
             )
 
@@ -94,7 +94,7 @@ class RuleBookMatcher:
         rules = []
         if difflib_match:
             rules = shlex.split(
-                self.rulebook.get_series_rule(str(difflib_match[0])))
+                self.rulebook.get_series_rule_by_name(str(difflib_match[0])))
 
         return rules
 

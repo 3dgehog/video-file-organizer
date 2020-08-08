@@ -7,8 +7,8 @@ from video_file_organizer.app import App
 
 def main():
     parser = argparse.ArgumentParser()
+    # Config Parameters
     parser.add_argument('--config-file', action='store', nargs=1, type=str)
-    parser.add_argument('--rule-book-file', action='store', nargs=1, type=str)
     parser.add_argument('--input-dir', action='store', nargs=1, type=str)
     parser.add_argument('--series-dirs', action='store', nargs='+', type=str)
     parser.add_argument('--ignore', action='store', nargs='+')
@@ -16,7 +16,10 @@ def main():
                         nargs='+', type=str)
     parser.add_argument('--on-transfer-scripts',
                         action='store', nargs='+', type=str)
-    parser.add_argument('--rules', action='store', nargs=1, type=str)
+    # RuleBook Parameters
+    parser.add_argument('--rule-book-file', action='store', nargs=1, type=str)
+    parser.add_argument('--series-rule', action='append', nargs=2, type=str,
+                        metavar=('serie', 'rules'))
     args = parser.parse_args()
 
     # Setup Logger
