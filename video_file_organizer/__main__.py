@@ -1,11 +1,12 @@
 import logging
 import os
 import argparse
+import sys
 
 from video_file_organizer.app import App
 
 
-def main():
+def parse_args(args):
     parser = argparse.ArgumentParser()
     # Config Parameters
     parser.add_argument('--config-file', action='store', nargs=1, type=str)
@@ -18,9 +19,13 @@ def main():
                         action='store', nargs='+', type=str)
     # RuleBook Parameters
     parser.add_argument('--rule-book-file', action='store', nargs=1, type=str)
-    parser.add_argument('--series-rule', action='append', nargs=2, type=str,
+    parser.add_argument('--series-rule', action='append', nargs='+', type=str,
                         metavar=('serie', 'rules'))
-    args = parser.parse_args()
+    return parser.parse_args(args)
+
+
+def main():
+    args = parse_args(sys.argv[1:])
 
     # Setup Logger
     logger = logging.getLogger('vfo')

@@ -8,15 +8,27 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Python: Debug on Mocks",
+            "name": "Python: Debug on Mocks (env)",
             "type": "python",
             "request": "launch",
             "preLaunchTask": "create_mock_files",
             "module": "video_file_organizer",
             "env": {
-                "CONFIG_DIR": "mock/configs",
+                "CONFIG_FILE": "mock/configs/config.yaml",
+                "RULE_BOOK_FILE": "mock/configs/rule_book.ini",
                 "DEBUG": "true"
             }
+        },
+        {
+            "name": "Python: Debug on Mocks (parms)",
+            "type": "python",
+            "request": "launch",
+            "preLaunchTask": "create_mock_files",
+            "module": "video_file_organizer",
+            "env": {
+                "DEBUG": "true"
+            },
+            "args": ["--config-file", "mock/configs/config.yaml", "--series-rule", "One Punch Man", "season"]
         },
         {
             "name": "Python: Debug Webserver on Mocks",

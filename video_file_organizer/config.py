@@ -82,8 +82,14 @@ class ConfigBase(metaclass=abc.ABCMeta):
     default_path = None
     args: List[str]
 
+    def load_args(self, args, **kwargs):
+        return args
+
+    def load_env(self, env, **kwargs):
+        return env.split(':')
+
     @abc.abstractmethod
-    def load_file(self, path: str) -> dict:
+    def load_file(self, path: str, **kwargs) -> dict:
         pass
 
     def search_config(
@@ -109,31 +115,29 @@ class ConfigBase(metaclass=abc.ABCMeta):
         """
         # args
         if self.args:
-            if self.args.get(kwargs.get('arg_name') or name):
-                return self.args.get(kwargs.get('arg_name') or name)
+            args = self.load_args(self.args, name=name, **kwargs)
+            if getattr(args, kwargs.get('arg_name') or name):
+                return getattr(args, kwargs.get('arg_name') or name)
 
         # environment
         if os.environ.get(kwargs.get('env_name') or name.upper()):
-            return os.environ.get(
-                kwargs.get('env_name') or name.upper()).split(':')
+            env = self.load_env(os.environ.get(
+                kwargs.get('env_name') or name.upper(), **kwargs
+            ))
+            return env
 
         # custom file location
         if self.custom_path:
-            file = self.load_file(self.custom_path)
+            file = self.load_file(self.custom_path, name=name, **kwargs)
             if file.get(kwargs.get('file_name') or name):
-                if isinstance(file.get(kwargs.get('file_name') or name), list):
-                    return file.get(kwargs.get('file_name') or name)
-                return [file.get(kwargs.get('file_name') or name)]
+                return file.get(kwargs.get('file_name') or name)
 
         # default file locations
         if self.default_path:
             if os.path.exists(self.default_path):
                 file = self.load_file(self.default_path)
                 if file.get(kwargs.get('file_name') or name):
-                    if isinstance(
-                            file.get(kwargs.get('file_name') or name), list):
-                        return file.get(kwargs.get('file_name') or name)
-                    return [file.get(kwargs.get('file_name') or name)]
+                    return file.get(kwargs.get('file_name') or name)
 
         if required:
             raise ValueError(
@@ -162,7 +166,10 @@ class Config(Observer, ConfigBase):
 
         self.ignore = self.search_config('ignore')
 
-        self.on_transfer_scripts = self.search_config('on_transfer')
+        self.on_transfer_scripts = self.search_config(
+            'on_transfer',
+            arg_name='on_transfer_scripts'
+        )
 
         self.run_before_scripts(self.search_config('before_scripts'))
 
@@ -185,7 +192,10 @@ class Config(Observer, ConfigBase):
         logger.debug(f"Got config file {path[0]}")
         return path[0]
 
-    def validate_input_dir(self, path: List[str]) -> str:
+    def validate_input_dir(self, path: Union[str, list]) -> str:
+        if type(path) != list:
+            path = [path]
+
         if len(path) > 1:
             raise ValueError('More than 1 input dir has been provided')
 
@@ -214,7 +224,7 @@ class Config(Observer, ConfigBase):
         config_file.write(CONFIG_FILE_TEMPLATE)
         config_file.close()
 
-    def load_file(self, path: str) -> dict:
+    def load_file(self, path: str, **kwargs) -> dict:
         if not os.path.exists(path):
             raise FileNotFoundError("Config file doesn't exist")
 
@@ -270,7 +280,8 @@ class RuleBook(ConfigBase):
         self.all_series_rules = self.validate_series_rules(
             self.search_config(
                 'series_rule',
-                file_name='series'
+                file_name='series',
+                required=True
             )
         )
 
@@ -293,17 +304,26 @@ class RuleBook(ConfigBase):
         logger.debug(f"Got rule book file {path[0]}")
         return path[0]
 
-    def validate_series_rules(self, series_rules: list):
-        if len(series_rules) > 1:
-            raise ValueError(
-                'More than 1 set of series rule have been provided')
+    def validate_series_rules(self, series_rules_pairs: Union[dict, list]):
+        series_dict: dict = {}
+        if type(series_rules_pairs) == list:
+            for pair in series_rules_pairs:
+                title = pair[0]
+                rules = pair[1:]
+                series_dict[title] = rules
+        elif type(series_rules_pairs) == dict:
+            for title, rules in series_rules_pairs.items():
+                series_dict[title] = shlex.split(rules)
+        else:
+            raise ValueError('Unknown type was passed')
 
-        for series, rules in series_rules[0].items():
-            self._validate_series_rules_pairs(shlex.split(rules))
-        return series_rules[0]
+        for title, rules in series_dict.items():
+            self._validate_series_rules_pairs(rules)
 
-    def load_file(self, path: str) -> dict:
-        config = configparser.ConfigParser(allow_no_value=True)
+        return series_dict
+
+    def load_file(self, path: str, **kwargs) -> dict:
+        config = configparser.ConfigParser(allow_no_value=True, dict_type=dict)
         config.read(path)
         return config._sections
 

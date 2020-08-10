@@ -1,7 +1,6 @@
 import logging
 import guessit
 import difflib
-import shlex
 
 from typing import Union
 
@@ -93,8 +92,9 @@ class RuleBookMatcher:
         # Get the rules from the rule_book with difflib_match
         rules = []
         if difflib_match:
-            rules = shlex.split(
-                self.rulebook.get_series_rule_by_name(str(difflib_match[0])))
+            rules = self.rulebook.get_series_rule_by_name(
+                str(difflib_match[0])
+            )
 
         return rules
 

@@ -1,9 +1,10 @@
 import os
 
 from .utils import ConfigFileInjector, RuleBookFileInjector
-from .vars import SERIES_CONFIGPARSE
+from .vars import SERIES_CONFIGPARSE, SERIES_PARMS
 
 from video_file_organizer.app import App
+from video_file_organizer.__main__ import parse_args
 
 VFILE_FINAL_PATHS = [
     "anime_dir/One-Punch Man/Season 2/"
@@ -51,7 +52,7 @@ VFILE_FINAL_PATHS = [
 ]
 
 
-def test_app(tmp_dir, sample_input_dir, sample_series_dirs):
+def test_app_with_custom_file(tmp_dir, sample_input_dir, sample_series_dirs):
     config_injector = ConfigFileInjector(tmp_dir)
     config_injector.update({
         "series_dirs": sample_series_dirs,
@@ -61,10 +62,29 @@ def test_app(tmp_dir, sample_input_dir, sample_series_dirs):
     rule_book_injector = RuleBookFileInjector(tmp_dir)
     rule_book_injector.update('series', SERIES_CONFIGPARSE)
 
-    app = App()
     configfile = os.path.join(tmp_dir, 'config.yaml')
     rulebookfile = os.path.join(tmp_dir, 'rule_book.ini')
-    app.setup({'config_file': [configfile], 'rule_book_file': [rulebookfile]})
+    args = parse_args([
+        '--config-file', configfile, '--rule-book-file', rulebookfile
+    ])
+
+    app = App()
+    app.setup(args)
+    app.run()
+
+    series_folder = os.path.dirname(sample_series_dirs[0])
+    for path in VFILE_FINAL_PATHS:
+        assert os.path.exists(os.path.join(series_folder, path))
+
+
+def test_app_with_parameters(sample_input_dir, sample_series_dirs):
+    args = parse_args([
+        '--input-dir', sample_input_dir,
+        '--series-dirs', *sample_series_dirs,
+        *SERIES_PARMS
+    ])
+    app = App()
+    app.setup(args)
     app.run()
 
     series_folder = os.path.dirname(sample_series_dirs[0])
