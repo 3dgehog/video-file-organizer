@@ -51,6 +51,9 @@ class RuleRegistry(Observer):
             if entry.topic == topic:
                 rules_list.append(entry)
 
+        if len(rules_list) == 0:
+            return
+
         for entry in rules_list:
             if entry.name in kwargs['rules']:
                 kwargs.update(entry.rule_function(**kwargs))
