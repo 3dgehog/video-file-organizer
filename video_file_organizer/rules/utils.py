@@ -52,7 +52,7 @@ class RuleRegistry(Observer):
                 rules_list.append(entry)
 
         if len(rules_list) == 0:
-            return
+            return True
 
         for entry in rules_list:
             if entry.name in kwargs['rules']:

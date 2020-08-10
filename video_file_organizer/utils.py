@@ -48,7 +48,9 @@ class VFileAddons:
 
             results = fn(self, vfile=vfile, **data, **kwargs)
 
-            if results:
+            if results and type(results) == bool:
+                pass
+            elif results:
                 vfile.update(**results)
             else:
                 vfile.update(valid=False)
