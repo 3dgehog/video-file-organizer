@@ -1,6 +1,6 @@
 from video_file_organizer.models import VideoFile
 
-from video_file_organizer.utils import VFileAddons, Observer
+from video_file_organizer.utils import vfile_consumer, Observer
 
 
 class RuleEntry:
@@ -46,7 +46,7 @@ class RuleRegistry(Observer):
             )
         )
 
-    @VFileAddons.vfile_consumer
+    @vfile_consumer
     def run_rules(
             self, vfile: VideoFile, topic: str, rules_list: list, **kwargs):
         for entry in rules_list:

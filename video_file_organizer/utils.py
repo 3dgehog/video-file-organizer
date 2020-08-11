@@ -30,36 +30,35 @@ class Observee:
             observer.update(*args, topic=topic, **kwargs)
 
 
-class VFileAddons:
-    def vfile_consumer(fn):
-        def wrapper(self, vfile: VideoFile, **kwargs):
+def vfile_consumer(fn):
+    def wrapper(self, vfile: VideoFile, **kwargs):
 
-            if not isinstance(vfile, VideoFile):
-                raise TypeError(
-                    "vfile needs to be an instance of VideoFile")
+        if not isinstance(vfile, VideoFile):
+            raise TypeError(
+                "vfile needs to be an instance of VideoFile")
 
-            data = vfile.get_attr()
+        data = vfile.get_attr()
 
-            logger.debug(f'>>> {self.__class__.__name__} <<<')
+        logger.debug(f'>>> {self.__class__.__name__} <<<')
 
-            Observee.notify(
-                topic=f'{self.__class__.__name__}/before',
-                vfile=vfile
-            )
+        Observee.notify(
+            topic=f'{self.__class__.__name__}/before',
+            vfile=vfile
+        )
 
-            results = fn(self, vfile=vfile, **data, **kwargs)
+        results = fn(self, vfile=vfile, **data, **kwargs)
 
-            if results and type(results) == bool:
-                pass
-            elif results:
-                vfile.update(**results)
-            else:
-                vfile.update(valid=False)
+        if results and type(results) == bool:
+            pass
+        elif results:
+            vfile.update(**results)
+        else:
+            vfile.update(valid=False)
 
-            Observee.notify(
-                topic=f'{self.__class__.__name__}/after',
-                vfile=vfile
-            )
+        Observee.notify(
+            topic=f'{self.__class__.__name__}/after',
+            vfile=vfile
+        )
 
-            return
-        return wrapper
+        return
+    return wrapper

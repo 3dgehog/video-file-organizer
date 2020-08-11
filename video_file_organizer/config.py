@@ -7,7 +7,7 @@ import os
 import logging
 import abc
 
-from typing import Union, List
+from typing import Union, List, Optional
 from jinja2 import Template
 
 from video_file_organizer.utils import Observer
@@ -78,8 +78,8 @@ RULEBOOK_FILE_TEMPLATE = """
 
 
 class ConfigBase(metaclass=abc.ABCMeta):
-    custom_path = None
-    default_path = None
+    custom_path: Optional[str] = None
+    default_path: Optional[str] = None
     args: List[str]
 
     def load_args(self, args, **kwargs):
@@ -93,7 +93,11 @@ class ConfigBase(metaclass=abc.ABCMeta):
         pass
 
     def search_config(
-            self, name: str, required: bool = False, **kwargs) -> list:
+            self,
+            name: str,
+            required: bool = False,
+            **kwargs
+    ) -> Union[list, None]:
         """Searches for config in 4 different places, args, env,
         a custom location & default location
 
@@ -142,7 +146,7 @@ class ConfigBase(metaclass=abc.ABCMeta):
         if required:
             raise ValueError(
                 f"Couldn't find required config for {name.capitalize()}")
-        return
+        return None
 
 
 class Config(Observer, ConfigBase):
@@ -175,9 +179,10 @@ class Config(Observer, ConfigBase):
 
         self.videoextensions = ['mkv', 'm4v', 'avi', 'mp4', 'mov']
 
-    def validate_custom_config_file(self, path: Union[List[str], None]) -> str:
+    def validate_custom_config_file(
+            self, path: Optional[List[str]]) -> Optional[str]:
         if not path:
-            return
+            return None
 
         if len(path) > 1:
             raise ValueError('More than 1 config file has been provided')
@@ -193,7 +198,7 @@ class Config(Observer, ConfigBase):
         return path[0]
 
     def validate_input_dir(self, path: Union[str, list]) -> str:
-        if type(path) != list:
+        if not isinstance(path, list):
             path = [path]
 
         if len(path) > 1:
@@ -287,9 +292,12 @@ class RuleBook(ConfigBase):
 
         self.list_of_series_name = self.all_series_rules.keys()
 
-    def validate_custom_rule_book_file(self, path: List[str]) -> str:
+    def validate_custom_rule_book_file(
+            self,
+            path: List[str]
+    ) -> Optional[str]:
         if not path:
-            return
+            return None
 
         if len(path) > 1:
             raise ValueError('More than 1 rule book file has been provided')
@@ -304,14 +312,17 @@ class RuleBook(ConfigBase):
         logger.debug(f"Got rule book file {path[0]}")
         return path[0]
 
-    def validate_series_rules(self, series_rules_pairs: Union[dict, list]):
+    def validate_series_rules(
+        self,
+        series_rules_pairs: Union[dict, list]
+    ) -> dict:
         series_dict: dict = {}
-        if type(series_rules_pairs) == list:
+        if isinstance(series_rules_pairs, list):
             for pair in series_rules_pairs:
                 title = pair[0]
                 rules = pair[1:]
                 series_dict[title] = rules
-        elif type(series_rules_pairs) == dict:
+        elif isinstance(series_rules_pairs, dict):
             for title, rules in series_rules_pairs.items():
                 series_dict[title] = shlex.split(rules)
         else:
@@ -325,7 +336,7 @@ class RuleBook(ConfigBase):
     def load_file(self, path: str, **kwargs) -> dict:
         config = configparser.ConfigParser(allow_no_value=True, dict_type=dict)
         config.read(path)
-        return config._sections
+        return {s: dict(config.items(s)) for s in config.sections()}
 
     def create_file_from_template(self):
         """Creates rule_book.ini from template"""
@@ -337,7 +348,7 @@ class RuleBook(ConfigBase):
         rulebook_file.write(RULEBOOK_FILE_TEMPLATE)
         rulebook_file.close()
 
-    def get_series_rule_by_name(self, name: str) -> str:
+    def get_series_rule_by_name(self, name: str) -> list:
         return self.all_series_rules.get(name)
 
     def _validate_series_rules_pairs(self, rules: list):

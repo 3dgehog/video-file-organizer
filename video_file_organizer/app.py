@@ -2,6 +2,7 @@ import os
 import logging
 import tempfile
 import yg.lockfile
+from typing import List, Callable
 
 from video_file_organizer.config import Config, RuleBook
 from video_file_organizer.models import VideoCollection, FolderCollection
@@ -41,12 +42,13 @@ class App:
                     videoextensions=self.config.videoextensions,
                     whitelist=kwargs.get('whitelist'))
 
-                operations = [
+                operations: List[Callable] = [
                     MetadataMatcher(),
                     RuleBookMatcher(self.rulebook),
                     OutputFolderMatcher(output_folder),
                 ]
 
+                # Gathering data
                 with input_folder as ifolder:
                     for vfile in ifolder:
                         for operation in operations:
@@ -54,7 +56,7 @@ class App:
                         if not vfile.valid:
                             continue
 
-                # Transfer
+                # Transfering
                 with Transferer() as transferer:
                     for vfile in input_folder:
                         transferer.transfer_vfile(vfile)
