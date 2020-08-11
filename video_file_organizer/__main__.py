@@ -21,12 +21,12 @@ def parse_args(args):
     parser.add_argument('--rule-book-file', action='store', nargs=1, type=str)
     parser.add_argument('--series-rule', action='append', nargs='+', type=str,
                         metavar=('serie', 'rules'))
+    # Logging Parameters
+    parser.add_argument('-v', '--verbose', action='store_true')
     return parser.parse_args(args)
 
 
-def main():
-    args = parse_args(sys.argv[1:])
-
+def setup_logging(args):
     # Setup Logger
     logger = logging.getLogger('vfo')
     logger.setLevel(logging.DEBUG)
@@ -38,7 +38,7 @@ def main():
     ch.setLevel(logging.WARNING)
 
     # Set log level based on input arguments
-    if os.environ.get('DEBUG'):
+    if os.environ.get('LOG') == "DEBUG" or args.verbose:
         ch.setLevel(logging.DEBUG)
     else:
         ch.setLevel(logging.INFO)
@@ -54,8 +54,14 @@ def main():
     logger.addHandler(ch)
     logger.addHandler(fh)
 
-    if os.environ.get('DEBUG'):
+    if os.environ.get('LOG') == "DEBUG" or args.verbose:
         logger.info("Running in verbose mode")
+
+
+def main():
+    args = parse_args(sys.argv[1:])
+
+    setup_logging(args)
 
     # App Setup
     app = App()

@@ -15,8 +15,10 @@ class RuleRegistry(Observer):
     _entries: list = []
 
     def update(self, *arg, topic: str, **kwargs):
-        if 'RuleRegistry' not in topic:
-            self.run_rules(topic=topic, **kwargs)
+        rules_list = [x for x in self._entries if x.topic == topic]
+        if len(rules_list) < 1:
+            return
+        self.run_rules(topic=topic, rules_list=rules_list, **kwargs)
 
     @classmethod
     def add_rule(cls, name, function, topic, order=10):
@@ -45,15 +47,8 @@ class RuleRegistry(Observer):
         )
 
     @VFileAddons.vfile_consumer
-    def run_rules(self, vfile: VideoFile, topic: str, **kwargs):
-        rules_list: list = []
-        for entry in self._entries:
-            if entry.topic == topic:
-                rules_list.append(entry)
-
-        if len(rules_list) == 0:
-            return True
-
+    def run_rules(
+            self, vfile: VideoFile, topic: str, rules_list: list, **kwargs):
         for entry in rules_list:
             if entry.name in kwargs['rules']:
                 kwargs.update(entry.rule_function(**kwargs))

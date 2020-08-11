@@ -26,7 +26,6 @@ class Observee:
 
     @classmethod
     def notify(cls, *args, topic: str, **kwargs):
-        logger.debug(f"********* {topic} *********")
         for observer in cls._observers:
             observer.update(*args, topic=topic, **kwargs)
 
@@ -40,6 +39,8 @@ class VFileAddons:
                     "vfile needs to be an instance of VideoFile")
 
             data = vfile.get_attr()
+
+            logger.debug(f'>>> {self.__class__.__name__} <<<')
 
             Observee.notify(
                 topic=f'{self.__class__.__name__}/before',

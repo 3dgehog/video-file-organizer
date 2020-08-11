@@ -6,6 +6,7 @@
 - [x] Don't give option to create config file
 - [x] Add all rulebook options as parameters
 - [x] Add all rulebook options as environment variables
+- [x] Update logging on the app & add parameter for verbose
 - [ ] Updated systemd setup
 - [ ] Add warning when file was not found or unsuccessful
 - [ ] Stop retrying the same file over and over after failed
