@@ -53,4 +53,7 @@ class RuleRegistry(Observer):
             if entry.name in kwargs['rules']:
                 kwargs.update(entry.rule_function(**kwargs))
 
+                if kwargs.get('error_msg'):
+                    return kwargs
+
         return kwargs

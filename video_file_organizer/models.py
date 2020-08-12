@@ -198,7 +198,8 @@ class VideoFile:
             'path',
             'root_path',
             'transfer',
-            'valid'
+            'valid',
+            'error_msg'
         ]
 
         self.name: str = ''
@@ -208,7 +209,8 @@ class VideoFile:
         self.path: str = ''
         self.root_path: str = ''
         self.transfer: dict = {}
-        self.valid = True
+        self.valid: bool = True
+        self.error_msg: str = ''
 
         if kwargs:
             self.update(**kwargs)

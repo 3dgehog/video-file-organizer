@@ -3,7 +3,6 @@ import re
 import logging
 import jinja2
 
-from typing import Union
 from video_file_organizer.models import Entry
 
 logger = logging.getLogger('vfo.series.rules')
@@ -15,14 +14,12 @@ def rule_season(
         foldermatch: Entry,
         transfer: dict,
         **kwargs
-) -> Union[dict, bool]:
+) -> dict:
     """Sets transfer_to to the correct season folder"""
     logger.debug(f"Applying rule 'season' to {name}")
 
     if 'season' not in metadata:
-        logger.info("Rule 'season' FAILED: ",
-                    f"Undefined season number for file: {name}")
-        return False
+        return {'error_msg': f"Undefined season number for file: {name}"}
 
     season = str(metadata['season'])
     for entry in foldermatch:
@@ -65,12 +62,12 @@ def rule_sub_dir(
 ) -> dict:
     """Sets the transfer_to a specified sub directory"""
     logger.debug(f"Applying rule 'sub-dir' to {name}")
+
     subdir_name_index = rules.index('sub-dir') + 1
     subdir_name = rules[subdir_name_index]
+
     if subdir_name not in foldermatch.list_entry_names():
-        logger.info("Rule 'sub-dir' FAILED: " +
-                    f"Cannot locate sub-dir {subdir_name}: {name}")
-        return {'transfer': transfer}
+        return {'error_msg': f"Cannot locate sub-dir {subdir_name}: {name}"}
 
     transfer['transfer_to'] = foldermatch.get_entry_by_name(subdir_name).path
 
@@ -102,10 +99,9 @@ def rule_format_title(
 ) -> dict:
     """Sets transfer_to filename to a specified name for transfer"""
     logger.debug(f"Applying rule 'format-title' to {name}")
+
     if not metadata.get('container') or not transfer['transfer_to']:
-        logger.info("Rule 'format-title' FAILED: " +
-                    f"Missing container or transfer_to value: {name}")
-        return {'transfer': transfer}
+        return {'error_msg': f"Missing container or transfer_to value: {name}"}
 
     format_index = rules.index('format-title') + 1
     template = jinja2.Template(
@@ -121,10 +117,10 @@ def rule_alt_title(name: str, metadata: dict, **kwargs) -> dict:
     """Checks if the fse has an alternative title and merges it with the
     current title"""
     logger.debug(f"Applying rule 'alternative_title' to {name}")
+
     if 'alternative_title' not in metadata:
-        logger.info("Rule 'alternative_title' FAILED: " +
-                    f"Alternative title missing: {name}")
-        return {'metadata': metadata}
+        return {'error_msg': f"Alternative title missing: {name}"}
+
     metadata['title'] = ' '.join([
         metadata['title'], metadata['alternative_title']
     ])

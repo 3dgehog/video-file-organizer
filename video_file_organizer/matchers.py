@@ -2,8 +2,6 @@ import logging
 import guessit
 import difflib
 
-from typing import Union
-
 from video_file_organizer.models import VideoFile, FolderCollection
 from video_file_organizer.config import RuleBook
 from video_file_organizer.utils import vfile_consumer
@@ -16,20 +14,18 @@ class MetadataMatcher:
         pass
 
     @vfile_consumer
-    def __call__(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
+    def __call__(self, vfile: VideoFile, **kwargs) -> dict:
         return self.get_guessit(**kwargs)
 
-    def get_guessit(self, name: str, **kwargs) -> Union[dict, bool]:
+    def get_guessit(self, name: str, **kwargs) -> dict:
 
         results = dict(guessit.guessit(name))
 
         if 'title' not in results:
-            logger.info(f"Unable to find title for: '{name}'")
-            return False
+            return {'error_msg': f"Unable to find title for: '{name}'"}
 
         if 'type' not in results:
-            logger.info(f"Unable to find video type for: '{name}'")
-            return False
+            return {'error_msg': f"Unable to find video type for: '{name}'"}
 
         if 'alternative_title' not in results:
             results['alternative_title'] = None
@@ -42,11 +38,11 @@ class RuleBookMatcher:
         self.rulebook = rulebookfile
 
     @vfile_consumer
-    def __call__(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
+    def __call__(self, vfile: VideoFile, **kwargs) -> dict:
         return self.get_rules(**kwargs)
 
     def get_rules(
-            self, name: str, metadata: dict, **kwargs) -> Union[dict, bool]:
+            self, name: str, metadata: dict, **kwargs) -> dict:
 
         VALID_TYPES = {"episode": self._get_series_rules}
 
@@ -60,8 +56,7 @@ class RuleBookMatcher:
                 )
 
         if len(rules) == 0:
-            logger.info(f"Unable to find the rules for: {name}")
-            return False
+            return {'error_msg': f"Unable to find the rules for: {name}"}
 
         return {'rules': rules}
 
@@ -105,11 +100,11 @@ class OutputFolderMatcher:
         self.entries = self.output_folder.entries
 
     @vfile_consumer
-    def __call__(self, vfile: VideoFile, **kwargs) -> Union[dict, bool]:
+    def __call__(self, vfile: VideoFile, **kwargs) -> dict:
         return self.get_match(**kwargs)
 
     def get_match(
-            self, name: str, metadata: dict, **kwargs) -> Union[dict, bool]:
+            self, name: str, metadata: dict, **kwargs) -> dict:
         index_match = difflib.get_close_matches(
             metadata['title'],
             self.output_folder.list_entry_names(),
@@ -117,9 +112,7 @@ class OutputFolderMatcher:
         )
 
         if not index_match:
-            logger.info("Match FAILED: " +
-                        f"Unable to find a match for {name}")
-            return False
+            return {'error_msg': f"Unable to find a match for {name}"}
 
         logger.debug(f"Match successful for {name}")
 

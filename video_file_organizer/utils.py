@@ -39,7 +39,7 @@ def vfile_consumer(fn):
 
         data = vfile.get_attr()
 
-        logger.debug(f'>>> {self.__class__.__name__} <<<')
+        logger.debug(f'***>>> {self.__class__.__name__} <<<***')
 
         Observee.notify(
             topic=f'{self.__class__.__name__}/before',
@@ -48,12 +48,14 @@ def vfile_consumer(fn):
 
         results = fn(self, vfile=vfile, **data, **kwargs)
 
-        if results and type(results) == bool:
-            pass
-        elif results:
-            vfile.update(**results)
-        else:
+        if not isinstance(results, dict):
+            raise ValueError("Expected a dictionary")
+
+        vfile.update(**results)
+        if results.get('error_msg'):
             vfile.update(valid=False)
+            logger.info(f"ERROR_MSG: {results['error_msg']}")
+            return
 
         Observee.notify(
             topic=f'{self.__class__.__name__}/after',

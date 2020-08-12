@@ -52,9 +52,9 @@ class App:
                 with input_folder as ifolder:
                     for vfile in ifolder:
                         for operation in operations:
+                            if not vfile.valid:
+                                break
                             operation(vfile=vfile)
-                        if not vfile.valid:
-                            continue
 
                 # Transfering
                 with Transferer() as transferer:
