@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 def readme():
@@ -39,7 +39,7 @@ setup(
         "zc.lockfile==2.0",
     ],
     dependency_links=[],
-    packages=["video_file_organizer"],
+    packages=find_packages(),
     include_package_data=True,
     entry_points={"console_scripts": ["vfo = video_file_organizer.__main__:main"]},
 )
