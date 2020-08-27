@@ -30,37 +30,42 @@ class Observee:
             observer.update(*args, topic=topic, **kwargs)
 
 
-def vfile_consumer(fn):
-    def wrapper(self, vfile: VideoFile, **kwargs):
+def vfile_consumer(name):
+    def wrapper(fn):
+        def wrapped_function(*args, vfile: VideoFile, **kwargs):
 
-        if not isinstance(vfile, VideoFile):
-            raise TypeError(
-                "vfile needs to be an instance of VideoFile")
+            if not isinstance(vfile, VideoFile):
+                raise TypeError(
+                    "vfile needs to be an instance of VideoFile")
 
-        data = vfile.get_attr()
+            logger.debug(f'***>>> {name} <<<***')
 
-        logger.debug(f'***>>> {self.__class__.__name__} <<<***')
+            Observee.notify(
+                topic=f'{name}/before',
+                vfile=vfile
+            )
 
-        Observee.notify(
-            topic=f'{self.__class__.__name__}/before',
-            vfile=vfile
-        )
+            data = vfile.json
 
-        results = fn(self, vfile=vfile, **data, **kwargs)
+            results = fn(*args, **data, **kwargs)
 
-        if not isinstance(results, dict):
-            raise ValueError("Expected a dictionary")
+            if not isinstance(results, dict):
+                raise ValueError("Expected a dictionary")
 
-        vfile.update(**results)
-        if results.get('error_msg'):
-            vfile.update(valid=False)
-            logger.info(f"ERROR_MSG: {results['error_msg']}")
-            return
+            vfile.update(**results)
+            if results.get('error_msg'):
+                vfile.update(valid=False)
+                logger.info(f"ERROR_MSG: {results['error_msg']}")
+                return
 
-        Observee.notify(
-            topic=f'{self.__class__.__name__}/after',
-            vfile=vfile
-        )
+            Observee.notify(
+                topic=f'{name}/after',
+                vfile=vfile
+            )
 
-        return
+        return wrapped_function
     return wrapper
+
+
+def error_msg(message):
+    return {'error_msg': message}

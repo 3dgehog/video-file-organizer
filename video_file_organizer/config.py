@@ -92,12 +92,8 @@ class ConfigBase(metaclass=abc.ABCMeta):
     def load_file(self, path: str, **kwargs) -> dict:
         pass
 
-    def search_config(
-            self,
-            name: str,
-            required: bool = False,
-            **kwargs
-    ) -> Union[list, None]:
+    def search_config(self, name: str, required: bool = False,
+                      **kwargs) -> Union[list, None]:
         """Searches for config in 4 different places, args, env,
         a custom location & default location
 

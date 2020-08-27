@@ -10,7 +10,7 @@ from video_file_organizer.rules.utils import RuleRegistry
 from video_file_organizer.matchers import OutputFolderMatcher, \
     RuleBookMatcher, MetadataMatcher
 from video_file_organizer.transferer import Transferer
-from video_file_organizer.utils import Observee
+from video_file_organizer.utils import Observee, vfile_consumer
 
 logger = logging.getLogger('vfo.app')
 
@@ -54,7 +54,8 @@ class App:
                         for operation in operations:
                             if not vfile.valid:
                                 break
-                            operation(vfile=vfile)
+                            vfile_consumer(operation.__class__.__name__)(
+                                operation)(vfile=vfile)
 
                 # Transfering
                 with Transferer() as transferer:

@@ -14,3 +14,12 @@
 - [ ] Add smart detection using internet (automatic mode)
 - [ ] Merge rulebook with config (manual mode)
 - [ ] Add a detect format feature (check the output folder contains and guess -> strict)
+
+Remove vfile_consumer, put the operation in the app level
+Observee back to an instance instead of class object
+notify using name, instead of class name
+Vfile attribute to objects, add validation there
+update videocollection structure, don't like how its a list of vfiles -> prefer entries (when it comes to deleting or transfering it makes more sense, either the whole thing goes or nothing)
+Season rule by default maybe
+Add rule per release group (Horriblesubs episode only example)
+Similar config to Flexget (think about)

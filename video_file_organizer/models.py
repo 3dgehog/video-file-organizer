@@ -1,12 +1,13 @@
 import os
 import logging
+import abc
 
 from typing import Union, List
 
 logger = logging.getLogger('vfo.models')
 
 
-class EntryListBase:
+class BaseEntry(metaclass=abc.ABCMeta):
     _entries: list = []
 
     @property
@@ -19,6 +20,7 @@ class EntryListBase:
     def entries(self, entries: list):
         self._entries = entries
 
+    @abc.abstractmethod
     def scan(self) -> list:
         return []
 
@@ -53,7 +55,7 @@ class EntryListBase:
         return data
 
 
-class Entry(EntryListBase):
+class Entry(BaseEntry):
     def __init__(self, is_parent=True, depth_level=0, **kwargs):
 
         if 'dir_entry' in kwargs.keys():
@@ -93,7 +95,7 @@ class Entry(EntryListBase):
         return f"<Entry '{self.name}'>"
 
 
-class FolderCollection(EntryListBase):
+class FolderCollection(BaseEntry):
     def __init__(
         self, path: Union[str, list],
         ignore: list = [],
@@ -190,17 +192,6 @@ class VideoCollection(FolderCollection):
 
 class VideoFile:
     def __init__(self, **kwargs):
-        self._valid_attr = [
-            'name',
-            'metadata',
-            'rules',
-            'foldermatch',
-            'path',
-            'root_path',
-            'transfer',
-            'valid',
-            'error_msg'
-        ]
 
         self.name: str = ''
         self.metadata: dict = {}
@@ -229,8 +220,15 @@ class VideoFile:
             setattr(self, key, value)
         logger.debug(f"Updated vfile {self.name} with kwargs {kwargs}")
 
-    def get_attr(self, *args) -> dict:
-        data: dict = {}
-        for attr in self._valid_attr:
-            data.update({attr: getattr(self, attr)})
-        return data
+    @property
+    def json(self):
+        return {
+            'name': self.name,
+            'metadata': self.metadata,
+            'rules': self.rules,
+            'foldermatch': self.foldermatch,
+            'path': self.path,
+            'root_path': self.root_path,
+            'transfer': self.transfer,
+            'valid': self.valid,
+        }.copy()

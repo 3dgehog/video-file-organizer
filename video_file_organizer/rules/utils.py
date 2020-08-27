@@ -1,6 +1,6 @@
 from video_file_organizer.models import VideoFile
 
-from video_file_organizer.utils import vfile_consumer, Observer
+from video_file_organizer.utils import Observer, vfile_consumer
 
 
 class RuleEntry:
@@ -18,16 +18,12 @@ class RuleRegistry(Observer):
         rules_list = [x for x in self._entries if x.topic == topic]
         if len(rules_list) < 1:
             return
-        self.run_rules(topic=topic, rules_list=rules_list, **kwargs)
+        self._run_rules(topic=topic, rules_list=rules_list, **kwargs)
 
     @classmethod
     def add_rule(cls, name, function, topic, order=10):
-        new_entry = RuleEntry(
-            name=name,
-            rule_function=function,
-            topic=topic,
-            order=order
-        )
+        new_entry = RuleEntry(name=name, rule_function=function,
+                              topic=topic, order=order)
 
         for entry in cls._entries:
             if entry.order > order:
@@ -37,23 +33,15 @@ class RuleRegistry(Observer):
                 )
                 return
 
-        cls._entries.append(
-            RuleEntry(
-                name=name,
-                rule_function=function,
-                topic=topic,
-                order=order
-            )
-        )
+        cls._entries.append(new_entry)
 
-    @vfile_consumer
-    def run_rules(
-            self, vfile: VideoFile, topic: str, rules_list: list, **kwargs):
+    def _run_rules(self, vfile: VideoFile, topic: str, rules_list: list,
+                   **kwargs):
         for entry in rules_list:
-            if entry.name in kwargs['rules']:
-                kwargs.update(entry.rule_function(**kwargs))
+            if entry.name in vfile.rules:
+                vfile_consumer(
+                    f'Rule/{entry.name}'
+                )(entry.rule_function)(vfile=vfile, **kwargs)
 
-                if kwargs.get('error_msg'):
-                    return kwargs
-
-        return kwargs
+                if not vfile.valid:
+                    return
