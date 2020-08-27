@@ -111,7 +111,7 @@ def setup_systemd():
         'After': 'network.target'
     }
     service_config['Service'] = {
-        'User': 'maxence',
+        'User': systemd_user,
         'WorkingDirectory': working_dir_path,
         'ExecStart': f'{pipenv_path} run vfo'
     }
