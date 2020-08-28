@@ -88,7 +88,6 @@ class RuleBookMatcher:
 class OutputFolderMatcher:
     def __init__(self, output_folder: FolderCollection):
         self.output_folder = output_folder
-        self.entries = self.output_folder.entries
 
     def __call__(self, **kwargs) -> dict:
         return self.get_match(**kwargs)

@@ -38,30 +38,25 @@ def vfile_consumer(name):
                 raise TypeError(
                     "vfile needs to be an instance of VideoFile")
 
-            logger.debug(f'***>>> {name} <<<***')
+            logger.debug(f'Vfile consumer {name}')
 
-            Observee.notify(
-                topic=f'{name}/before',
-                vfile=vfile
-            )
+            Observee.notify(topic=f'{name}/before',
+                            vfile=vfile)
 
-            data = vfile.json
-
-            results = fn(*args, **data, **kwargs)
+            results = fn(*args, **vfile.json, **kwargs)
 
             if not isinstance(results, dict):
                 raise ValueError("Expected a dictionary")
 
             vfile.update(**results)
+
             if results.get('error_msg'):
                 vfile.update(valid=False)
                 logger.info(f"ERROR_MSG: {results['error_msg']}")
                 return
 
-            Observee.notify(
-                topic=f'{name}/after',
-                vfile=vfile
-            )
+            Observee.notify(topic=f'{name}/after',
+                            vfile=vfile)
 
         return wrapped_function
     return wrapper

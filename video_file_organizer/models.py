@@ -49,10 +49,7 @@ class BaseEntry(metaclass=abc.ABCMeta):
         raise KeyError(f"Couldn't find an entry with the name '{name}'")
 
     def list_entry_names(self) -> list:
-        data: list = []
-        for entry in self.entries:
-            data.append(entry.name)
-        return data
+        return [entry.name for entry in self.entries]
 
 
 class Entry(BaseEntry):
@@ -69,19 +66,24 @@ class Entry(BaseEntry):
         self.is_parent = is_parent
         self.depth_level = depth_level
 
+        if self.is_dir:
+            self.extension = None
+        else:
+            self.extension = self.name.rpartition('.')[-1]
+
         self._entries: list = []
 
     def by_dir_entry(self, dir_entry: os.DirEntry):
         self.path = dir_entry.path
         self.name = dir_entry.name
-        self.is_dir = dir_entry.is_dir
-        self.is_file = dir_entry.is_file
+        self.is_dir = dir_entry.is_dir()
+        self.is_file = dir_entry.is_file()
 
     def scan(self) -> list:
         """[<Entry>, <Entry>]"""
         data: list = []
 
-        if self.is_file():
+        if self.is_file:
             return []
 
         for entry in os.scandir(self.path):
@@ -109,7 +111,6 @@ class FolderCollection(BaseEntry):
 
         self.ignore = ignore
         self.whitelist = whitelist
-        self._entries = self.scan()
 
     def scan(self) -> list:
         """[<Entry>, <Entry>]"""
@@ -151,10 +152,7 @@ class VideoCollection(FolderCollection):
         self._purge()
 
     def _purge(self):
-        del_list: list = []
-        for vfile in self._vfiles:
-            if not vfile.valid:
-                del_list.append(vfile)
+        del_list = [vfile for vfile in self._vfiles if not vfile.valid]
         for vfile in del_list:
             self._vfiles.remove(vfile)
             logger.debug(f"Purged vfile {vfile.name}")
@@ -163,14 +161,14 @@ class VideoCollection(FolderCollection):
         """[<VideoFile>, <Videofile>]"""
         data: List[VideoFile] = []
         for entry in entries:
-            if entry.name.rpartition('.')[-1] in self.videoextensions:
+            if entry.extension in self.videoextensions:
                 self.add_vfile(
                     entry.name,
                     path=entry.path,
                     root_path=entry.path)
-            if entry.is_dir():
+            if entry.is_dir:
                 for entry2 in entry:
-                    if entry2.name.rpartition('.')[-1] in self.videoextensions:
+                    if entry2.extension in self.videoextensions:
                         self.add_vfile(
                             entry2.name,
                             path=entry2.path,

@@ -23,3 +23,5 @@ update videocollection structure, don't like how its a list of vfiles -> prefer 
 Season rule by default maybe
 Add rule per release group (Horriblesubs episode only example)
 Similar config to Flexget (think about)
+Switch to tasks system instead of using transfer attribute
+Pass Entry's not Vfiles
