@@ -7,7 +7,7 @@ from typing import Union, List
 logger = logging.getLogger('vfo.models')
 
 
-class BaseEntry(metaclass=abc.ABCMeta):
+class EntryList(metaclass=abc.ABCMeta):
     _entries: list = []
 
     @property
@@ -52,7 +52,7 @@ class BaseEntry(metaclass=abc.ABCMeta):
         return [entry.name for entry in self.entries]
 
 
-class Entry(BaseEntry):
+class Entry(EntryList):
     def __init__(self, is_parent=True, depth_level=0, **kwargs):
 
         if 'dir_entry' in kwargs.keys():
@@ -63,15 +63,13 @@ class Entry(BaseEntry):
         self.name = kwargs.get('name') or self.name or None
         self.is_dir = kwargs.get('is_dir') or self.is_dir or None
         self.is_file = kwargs.get('is_file') or self.is_file or None
+
         self.is_parent = is_parent
         self.depth_level = depth_level
 
-        if self.is_dir:
-            self.extension = None
-        else:
-            self.extension = self.name.rpartition('.')[-1]
-
-        self._entries: list = []
+        self.file_extension = None
+        if self.is_file:
+            self.file_extension = self.name.rpartition('.')[-1]
 
     def by_dir_entry(self, dir_entry: os.DirEntry):
         self.path = dir_entry.path
@@ -97,11 +95,11 @@ class Entry(BaseEntry):
         return f"<Entry '{self.name}'>"
 
 
-class FolderCollection(BaseEntry):
+class FolderCollection(EntryList):
     def __init__(
         self, path: Union[str, list],
         ignore: list = [],
-        whitelist: Union[None, list] = None
+        whitelist: list = []
     ):
 
         self.path = path
@@ -161,14 +159,14 @@ class VideoCollection(FolderCollection):
         """[<VideoFile>, <Videofile>]"""
         data: List[VideoFile] = []
         for entry in entries:
-            if entry.extension in self.videoextensions:
+            if entry.file_extension in self.videoextensions:
                 self.add_vfile(
                     entry.name,
                     path=entry.path,
                     root_path=entry.path)
             if entry.is_dir:
                 for entry2 in entry:
-                    if entry2.extension in self.videoextensions:
+                    if entry2.file_extension in self.videoextensions:
                         self.add_vfile(
                             entry2.name,
                             path=entry2.path,
