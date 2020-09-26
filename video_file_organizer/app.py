@@ -6,7 +6,6 @@ from typing import List, Callable
 
 from video_file_organizer.config import Config, RuleBook
 from video_file_organizer.models import VideoCollection, FolderCollection
-from video_file_organizer.rules.utils import RuleRegistry
 from video_file_organizer.matchers import OutputFolderMatcher, \
     RuleBookMatcher, MetadataMatcher
 from video_file_organizer.transferer import Transferer
@@ -23,9 +22,7 @@ class App:
         self.config = Config(args)
         self.rulebook = RuleBook(args)
 
-        self.rule_registry = RuleRegistry()
-
-        Observee.attach(self.rule_registry)
+        Observee.attach(self.rulebook.rulebook_registry)
         Observee.attach(self.config)
 
     def run(self, **kwargs) -> None:

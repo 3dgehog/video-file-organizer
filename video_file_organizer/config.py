@@ -12,6 +12,7 @@ from jinja2 import Template
 
 from video_file_organizer.utils import Observer
 from video_file_organizer.models import VideoFile
+from video_file_organizer.rules.utils import RuleRegistry
 
 logger = logging.getLogger('vfo.config')
 
@@ -287,6 +288,8 @@ class RuleBook(ConfigBase):
         )
 
         self.list_of_series_name = self.all_series_rules.keys()
+
+        self.rulebook_registry = RuleRegistry()
 
     def validate_custom_rule_book_file(
             self,
