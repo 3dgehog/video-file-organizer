@@ -1,7 +1,4 @@
-import os
 import logging
-import tempfile
-import yg.lockfile
 from typing import List, Callable
 
 from video_file_organizer.config import Config, RuleBook
@@ -28,37 +25,28 @@ class App:
     def run(self, **kwargs) -> None:
         logger.debug("Running app")
 
-        try:
-            with yg.lockfile.FileLock(
-                    os.path.join(tempfile.gettempdir(), 'vfolock'),
-                    timeout=10):
+        output_folder = FolderCollection(self.config.series_dirs)
+        input_folder = VideoCollection(
+            self.config.input_dir,
+            videoextensions=self.config.videoextensions,
+            whitelist=kwargs.get('whitelist'))
 
-                output_folder = FolderCollection(self.config.series_dirs)
-                input_folder = VideoCollection(
-                    self.config.input_dir,
-                    videoextensions=self.config.videoextensions,
-                    whitelist=kwargs.get('whitelist'))
+        operations: List[Callable] = [
+            MetadataMatcher(),
+            RuleBookMatcher(self.rulebook),
+            OutputFolderMatcher(output_folder),
+        ]
 
-                operations: List[Callable] = [
-                    MetadataMatcher(),
-                    RuleBookMatcher(self.rulebook),
-                    OutputFolderMatcher(output_folder),
-                ]
+        # Gathering data
+        with input_folder as ifolder:
+            for vfile in ifolder:
+                for operation in operations:
+                    if not vfile.valid:
+                        break
+                    vfile_consumer(operation.__class__.__name__)(
+                        operation)(vfile=vfile)
 
-                # Gathering data
-                with input_folder as ifolder:
-                    for vfile in ifolder:
-                        for operation in operations:
-                            if not vfile.valid:
-                                break
-                            vfile_consumer(operation.__class__.__name__)(
-                                operation)(vfile=vfile)
-
-                # Transfering
-                with Transferer() as transferer:
-                    for vfile in input_folder:
-                        transferer.transfer_vfile(vfile)
-
-        except yg.lockfile.FileLockTimeout:
-            logger.info(
-                "Lockfile FAILED: The program must already be running")
+        # Transfering
+        with Transferer() as transferer:
+            for vfile in input_folder:
+                transferer.transfer_vfile(vfile)
