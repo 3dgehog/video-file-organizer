@@ -99,7 +99,7 @@ class FolderCollection(EntryList):
     def __init__(
         self, path: Union[str, list],
         ignore: list = [],
-        whitelist: list = []
+        whitelist: Union[None, list] = []
     ):
 
         self.path = path
