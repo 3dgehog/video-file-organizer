@@ -216,13 +216,14 @@ class Config(Observer, ConfigBase):
         logger.debug(f"Got series dirs '{dirs}'")
         return dirs
 
-    def create_file_from_template(self):
+    @staticmethod
+    def create_file_from_template():
         """Creates config.yaml from template"""
-        if os.path.exists(self.path):
+        if os.path.exists('config.yaml'):
             logger.info("config.yaml already exists")
             return
 
-        config_file = open(self.path, "w")
+        config_file = open('config.yaml', "w")
         config_file.write(CONFIG_FILE_TEMPLATE)
         config_file.close()
 
@@ -268,7 +269,7 @@ class Config(Observer, ConfigBase):
 
 class RuleBook(ConfigBase):
     default_path = os.path.join(
-        os.environ['HOME'], '.config/video_file_organizer/rulebook.ini')
+        os.environ['HOME'], '.config/video_file_organizer/rule_book.ini')
 
     def __init__(self, args):
         self.args = args
@@ -337,13 +338,14 @@ class RuleBook(ConfigBase):
         config.read(path)
         return {s: dict(config.items(s)) for s in config.sections()}
 
-    def create_file_from_template(self):
+    @staticmethod
+    def create_file_from_template():
         """Creates rule_book.ini from template"""
-        if os.path.exists(self.path):
+        if os.path.exists('rule_book.ini'):
             logger.info("rule_book.ini already exists")
             return
 
-        rulebook_file = open(self.path, "w")
+        rulebook_file = open('rule_book.ini', "w")
         rulebook_file.write(RULEBOOK_FILE_TEMPLATE)
         rulebook_file.close()
 

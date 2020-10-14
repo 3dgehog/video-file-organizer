@@ -23,6 +23,8 @@ def parse_args(args):
                         metavar=('serie', 'rules'))
     # Logging Parameters
     parser.add_argument('-v', '--verbose', action='store_true')
+    # ToolKit
+    parser.add_argument('--create-config', action='store_true')
     return parser.parse_args(args)
 
 
@@ -58,10 +60,19 @@ def setup_logging(args):
         logger.info("Running in verbose mode")
 
 
+def toolkits(args):
+    if args.create_configs:
+        from video_file_organizer.config import Config, RuleBook
+        Config.create_file_from_template()
+        RuleBook.create_file_from_template()
+        sys.exit()
+
+
 def main():
     args = parse_args(sys.argv[1:])
 
     setup_logging(args)
+    toolkits(args)
 
     # App Setup
     app = App()

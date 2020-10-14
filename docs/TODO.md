@@ -1,4 +1,4 @@
-### v3 
+### v3
 
 - [x] Move README TODO to it's own section
 - [x] Add all config options as parameters
@@ -25,3 +25,5 @@ Add rule per release group (Horriblesubs episode only example)
 Similar config to Flexget (think about)
 Switch to tasks system instead of using transfer attribute
 Pass Entry's not Vfiles
+Finished webserver flow
+Dockerfile

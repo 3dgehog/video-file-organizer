@@ -8,10 +8,7 @@ Video_File_Organizer.egg-info
 mock
 ignore
 systemd
-loader.py
-NOTES.md
-TODO
-temp.py
 .env
 .vscode/settings.json
 example.yaml
+temp

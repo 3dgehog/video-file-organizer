@@ -27,7 +27,7 @@ def add_file():
         }
 
     vfo = App()
-    vfo.setup(config_dir='mock/configs/')
+    vfo.setup()
     vfo.run(whitelist=data['filename'])
 
     return data
