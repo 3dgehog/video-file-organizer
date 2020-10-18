@@ -19,6 +19,7 @@ setup(
     install_requires=[
         "babelfish==0.5.5",
         "click==7.1.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'",
+        "filelock==3.0.12",
         "flask==1.1.2",
         "guessit==3.1.1",
         "itsdangerous==1.1.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
@@ -35,6 +36,5 @@ setup(
     dependency_links=[],
     packages=find_packages(),
     include_package_data=True,
-    entry_points={"console_scripts": [
-        "vfo = video_file_organizer.__main__:main"]},
+    entry_points={"console_scripts": ["vfo = video_file_organizer.__main__:main"]},
 )
