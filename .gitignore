@@ -12,3 +12,4 @@ systemd
 .vscode/settings.json
 example.yaml
 temp
+.vfo.lock

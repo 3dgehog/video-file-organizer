@@ -33,5 +33,14 @@ def add_file():
     return data
 
 
+@app.route('/now', methods=['GET'])
+def now():
+    vfo = App()
+    vfo.setup()
+    vfo.run()
+
+    return "Success"
+
+
 if __name__ == "__main__":
     app.run("0.0.0.0", 5050)

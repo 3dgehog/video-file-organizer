@@ -60,7 +60,7 @@ def setup_logging(args):
         logger.info("Running in verbose mode")
 
 
-def toolkits(args):
+def toolkit(args):
     if args.create_configs:
         from video_file_organizer.config import Config, RuleBook
         Config.create_file_from_template()
@@ -72,7 +72,7 @@ def main():
     args = parse_args(sys.argv[1:])
 
     setup_logging(args)
-    toolkits(args)
+    toolkit(args)
 
     # App Setup
     app = App()
