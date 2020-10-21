@@ -2,7 +2,7 @@ import abc
 import logging
 from typing import Set
 
-from video_file_organizer.models import VideoFile
+from video_file_organizer.mapping import VideoFile
 
 logger = logging.getLogger('vfo.utils')
 

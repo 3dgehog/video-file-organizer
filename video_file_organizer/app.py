@@ -4,7 +4,7 @@ from typing import List, Callable
 from filelock import Timeout, FileLock
 
 from video_file_organizer.config import Config, RuleBook
-from video_file_organizer.models import VideoCollection, FolderCollection
+from video_file_organizer.mapping import VideoCollection, FolderCollection
 from video_file_organizer.matchers import OutputFolderMatcher, \
     RuleBookMatcher, MetadataMatcher
 from video_file_organizer.transferer import Transferer

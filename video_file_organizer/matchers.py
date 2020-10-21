@@ -2,7 +2,7 @@ import logging
 import guessit
 import difflib
 
-from video_file_organizer.models import FolderCollection
+from video_file_organizer.mapping import FolderCollection
 from video_file_organizer.config import RuleBook
 from video_file_organizer.utils import error_msg
 

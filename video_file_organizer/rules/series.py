@@ -3,7 +3,7 @@ import re
 import logging
 import jinja2
 
-from video_file_organizer.models import Entry
+from video_file_organizer.mapping import Entry
 from video_file_organizer.utils import error_msg
 
 logger = logging.getLogger('vfo.series.rules')

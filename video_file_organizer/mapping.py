@@ -4,7 +4,7 @@ import abc
 
 from typing import Union, List
 
-logger = logging.getLogger('vfo.models')
+logger = logging.getLogger('vfo.mapping')
 
 
 class EntryList(metaclass=abc.ABCMeta):

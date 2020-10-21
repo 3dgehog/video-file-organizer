@@ -3,7 +3,7 @@ import os
 import logging
 
 
-from video_file_organizer.models import VideoFile
+from video_file_organizer.mapping import VideoFile
 from video_file_organizer.utils import Observee
 
 logger = logging.getLogger('vfo.transferer')
