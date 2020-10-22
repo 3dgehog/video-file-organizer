@@ -76,7 +76,7 @@ def toolkit(args):
             'default': ThreadPoolExecutor(1)
         }
         scheduler = BlockingScheduler(executors=executors)
-        scheduler.add_job(run_app, 'interval', minutes=15)
+        scheduler.add_job(lambda: run_app(args), 'interval', minutes=1)
         scheduler.start()
         sys.exit(0)
 
