@@ -3,6 +3,9 @@ import os
 import argparse
 import sys
 
+from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.executors.pool import ThreadPoolExecutor
+
 from video_file_organizer.app import App
 
 
@@ -25,6 +28,7 @@ def parse_args(args):
     parser.add_argument('-v', '--verbose', action='store_true')
     # ToolKit
     parser.add_argument('--create-config', action='store_true')
+    parser.add_argument('--scheduler', action='store_true')
     return parser.parse_args(args)
 
 
@@ -61,11 +65,20 @@ def setup_logging(args):
 
 
 def toolkit(args):
-    if args.create_configs:
+    if args.create_config:
         from video_file_organizer.config import Config, RuleBook
         Config.create_file_from_template()
         RuleBook.create_file_from_template()
-        sys.exit()
+        sys.exit(0)
+
+    if args.scheduler:
+        executors = {
+            'default': ThreadPoolExecutor(1)
+        }
+        scheduler = BlockingScheduler(executors=executors)
+        scheduler.add_job(run_app, 'interval', minutes=15)
+        scheduler.start()
+        sys.exit(0)
 
 
 def main():
@@ -73,7 +86,10 @@ def main():
 
     setup_logging(args)
     toolkit(args)
+    run_app(args)
 
+
+def run_app(args):
     # App Setup
     app = App()
     app.setup(args)

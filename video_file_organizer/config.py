@@ -80,6 +80,7 @@ RULEBOOK_FILE_TEMPLATE = """
 
 class ConfigBase(metaclass=abc.ABCMeta):
     custom_path: Optional[str] = None
+    default_filename: Optional[str] = None
     default_path: Optional[str] = None
     args: List[str]
 
@@ -140,6 +141,13 @@ class ConfigBase(metaclass=abc.ABCMeta):
                 if file.get(kwargs.get('file_name') or name):
                     return file.get(kwargs.get('file_name') or name)
 
+        # current directory
+        if self.default_filename:
+            if os.path.exists(self.default_filename):
+                file = self.load_file(self.default_filename)
+                if file.get(kwargs.get('file_name') or name):
+                    return file.get(kwargs.get('file_name') or name)
+
         if required:
             raise ValueError(
                 f"Couldn't find required config for {name.capitalize()}")
@@ -147,8 +155,11 @@ class ConfigBase(metaclass=abc.ABCMeta):
 
 
 class Config(Observer, ConfigBase):
+    default_filename = 'config.yaml'
     default_path = os.path.join(
-        os.environ['HOME'], '.config/video_file_organizer/config.yaml')
+        os.environ['HOME'],
+        f'.config/video_file_organizer/{default_filename}'
+    )
 
     def __init__(self, args):
         self.args = args
@@ -268,8 +279,11 @@ class Config(Observer, ConfigBase):
 
 
 class RuleBook(ConfigBase):
+    default_filename = 'rule_book.ini'
     default_path = os.path.join(
-        os.environ['HOME'], '.config/video_file_organizer/rule_book.ini')
+        os.environ['HOME'],
+        f'.config/video_file_organizer/{default_filename}'
+    )
 
     def __init__(self, args):
         self.args = args

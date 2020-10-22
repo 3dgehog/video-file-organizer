@@ -17,13 +17,15 @@ jinja2 = "*"
 flask = "*"
 uwsgi = "*"
 filelock = "*"
+apscheduler = "*"
 
 [scripts]
 tests = "pytest tests"
 type = "mypy video_file_organizer"
 mock = "python toolbox.py --mock"
-webserver = "python video_file_organizer/webserver.py"
+web = "python -m video_file_organizer.webserver"
 _uwsgi = "uwsgi --ini webserver.ini"
+scheduler = "python -m video_file_organizer --scheduler"
 mock_vfo = "env CONFIG_FILE='mock/configs/config.yaml' RULE_BOOK_FILE='mock/configs/rule_book.ini' LOG=DEBUG python -m video_file_organizer"
 setup = "pipenv-setup sync"
 

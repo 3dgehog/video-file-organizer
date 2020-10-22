@@ -7,7 +7,7 @@ from typing import Union, List
 logger = logging.getLogger('vfo.mapping')
 
 
-class EntryList(metaclass=abc.ABCMeta):
+class BaseEntryListObject(metaclass=abc.ABCMeta):
     _entries: list = []
 
     @property
@@ -52,7 +52,7 @@ class EntryList(metaclass=abc.ABCMeta):
         return [entry.name for entry in self.entries]
 
 
-class Entry(EntryList):
+class Entry(BaseEntryListObject):
     def __init__(self, is_parent=True, depth_level=0, **kwargs):
 
         if 'dir_entry' in kwargs.keys():
@@ -95,7 +95,7 @@ class Entry(EntryList):
         return f"<Entry '{self.name}'>"
 
 
-class FolderCollection(EntryList):
+class FolderCollection(BaseEntryListObject):
     def __init__(
         self, path: Union[str, list],
         ignore: list = [],

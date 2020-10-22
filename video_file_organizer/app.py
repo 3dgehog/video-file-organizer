@@ -42,7 +42,6 @@ class App:
                     RuleBookMatcher(self.rulebook),
                     OutputFolderMatcher(output_folder),
                 ]
-
                 # Gathering data
                 with input_folder as ifolder:
                     for vfile in ifolder:
