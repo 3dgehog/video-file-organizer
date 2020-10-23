@@ -188,7 +188,8 @@ class Config(Observer, ConfigBase):
         self.videoextensions = ['mkv', 'm4v', 'avi', 'mp4', 'mov']
 
     def validate_custom_config_file(
-            self, path: Optional[List[str]]) -> Optional[str]:
+            self, path: Optional[List[str]]
+    ) -> Optional[str]:
         if not path:
             return None
 

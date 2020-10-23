@@ -11,6 +11,6 @@ systemd
 .env
 .vscode/settings.json
 example.yaml
-temp
+temp/*
 .vfo.lock
 Pipfile.lock
