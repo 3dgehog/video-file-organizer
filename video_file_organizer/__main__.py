@@ -74,7 +74,7 @@ def toolkit(args):
 
     if args.scheduler:
         scheduler = BlockingScheduler()
-        scheduler.add_job(lambda: run_app(args), 'interval', minutes=15)
+        scheduler.add_job(run_app, 'interval', args=args, seconds=15)
         logger.info("Scheduler Started!")
         scheduler.start()
         sys.exit(0)
