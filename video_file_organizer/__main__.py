@@ -22,6 +22,7 @@ def parse_args(args):
                         nargs='+', type=str)
     parser.add_argument('--on-transfer-scripts',
                         action='store', nargs='+', type=str)
+    parser.add_argument('--schedule', action='store', nargs=1, type=int)
     # RuleBook Parameters
     parser.add_argument('--rule-book-file', action='store', nargs=1, type=str)
     parser.add_argument('--series-rule', action='append', nargs='+', type=str,
@@ -73,9 +74,12 @@ def toolkit(args):
         sys.exit(0)
 
     if args.scheduler:
+        from video_file_organizer.config import Config
         scheduler = BlockingScheduler()
-        scheduler.add_job(run_app, 'interval', minutes=15)
-        logger.info("Scheduler Started!")
+        config = Config(args)
+        scheduler.add_job(run_app, 'interval', minutes=config.schedule)
+        logger.info(
+            f"Scheduler Started! Running every {config.schedule} minutes")
         scheduler.start()
         sys.exit(0)
 

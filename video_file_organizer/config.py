@@ -116,12 +116,14 @@ class ConfigBase(metaclass=abc.ABCMeta):
             list: It returns everything as a list
         """
         # args
+        # returns list but doesn't change to string
         if self.args:
             args = self.load_args(self.args, name=name, **kwargs)
             if getattr(args, kwargs.get('arg_name') or name):
                 return getattr(args, kwargs.get('arg_name') or name)
 
         # environment
+        # returns a list and changes it to strings
         if os.environ.get(kwargs.get('env_name') or name.upper()):
             env = self.load_env(os.environ.get(
                 kwargs.get('env_name') or name.upper(), **kwargs
@@ -183,6 +185,10 @@ class Config(Observer, ConfigBase):
             arg_name='on_transfer_scripts'
         )
 
+        self.schedule = self.validate_schedule(
+            self.search_config('schedule')
+        )
+
         self.run_before_scripts(self.search_config('before_scripts'))
 
         self.videoextensions = ['mkv', 'm4v', 'avi', 'mp4', 'mov']
@@ -227,6 +233,16 @@ class Config(Observer, ConfigBase):
 
         logger.debug(f"Got series dirs '{dirs}'")
         return dirs
+
+    def validate_schedule(self, minutes: int):
+        if isinstance(minutes, list):
+            minutes = minutes[0]
+        if isinstance(minutes, str):
+            minutes = int(minutes)
+        if not isinstance(minutes, int):
+            raise ValueError('Schduler needs to be an integer')
+
+        return minutes
 
     @staticmethod
     def create_file_from_template():
