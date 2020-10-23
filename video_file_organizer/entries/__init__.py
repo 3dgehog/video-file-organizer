@@ -1,7 +1,10 @@
 import os
 import abc
+import logging
 
 from typing import Union
+
+logger = logging.getLogger('vfo.entries')
 
 
 class ListOfEntries(metaclass=abc.ABCMeta):
@@ -49,35 +52,38 @@ class ListOfEntries(metaclass=abc.ABCMeta):
         return [entry.name for entry in self.entries]
 
     def _map_entry_to_entry_type(
-            self, entry: os.DirEntry, video_extensions: list):
+            self, entry: os.DirEntry, videoextensions: list, depth: int):
         # NOTE: Check if its a Directory
         if entry.is_dir():
             return DirectoryEntry(
-                entry.name, entry.path, self.depth + 1, video_extensions)
+                entry.name, entry.path, depth + 1, videoextensions)
         else:
             ext = entry.name.rpartition('.')[-1]
 
             # NOTE: Check if its a Video File
-            if ext in video_extensions:
+            if ext in videoextensions:
                 return VideoFileEntry(
-                    entry.name, entry.path, ext, self.depth + 1)
+                    entry.name, entry.path, ext, depth + 1)
             else:
-                return FileEntry(entry.name, entry.path, ext, self.depth + 1)
+                return FileEntry(entry.name, entry.path, ext, depth + 1)
 
 
 class InputDirectory(ListOfEntries):
     def __init__(
         self,
         path: str,
-        video_extensions: list = [],
+        videoextensions: list = [],
         ignore: list = [],
         whitelist: list = []
     ):
         self.path = path
-        self.video_extensions = video_extensions
+        self.videoextensions = videoextensions
         self.depth = 0
         self.ignore = ignore
         self.whitelist = whitelist
+        self.videofilelist = []
+
+        self._scan_entries_for_vfile(self.entries, 0)
 
     def _scan_entries(self):
         entries: list = []
@@ -88,29 +94,49 @@ class InputDirectory(ListOfEntries):
             if self.whitelist:
                 if entry.name in self.whitelist:
                     entries.append(self._map_entry_to_entry_type(
-                        entry, self.video_extensions))
-                continue
+                        entry, self.videoextensions, self.depth))
+                    # if isinstance(result, VideoFileEntry):
+                    #     self.videofilelist.append(result)
+                    continue
 
             entries.append(self._map_entry_to_entry_type(
-                entry, self.video_extensions))
+                entry, self.videoextensions, self.depth))
         return entries
+
+    def _scan_entries_for_vfile(self, entries, depth, max_depth=2):
+        for entry in entries:
+            if isinstance(entry, VideoFileEntry):
+                self.videofilelist.append(entry)
+            if isinstance(entry, DirectoryEntry):
+                if depth < max_depth:
+                    self._scan_entries_for_vfile(entry.entries, depth+1)
 
     def __repr__(self):
         return f'<{__class__.__name__} {self.path}>'
 
 
 class OutputDirectories(ListOfEntries):
-    def __init__(self, paths: list, video_extensions: list = []):
+    def __init__(self, paths: list, videoextensions: list = []):
         self.paths = paths
-        self.video_extensions = video_extensions
+        self.depth = 0
+        self.videoextensions = videoextensions
 
     def _scan_entries(self):
         entries: list = []
         for path in self.paths:
             for entry in os.scandir(path):
                 entries.append(self._map_entry_to_entry_type(
-                    entry, self.video_extensions))
+                    entry, self.videoextensions, self.depth))
         return entries
+
+    def list_entries_by_name(self) -> list:
+        return [entry.name for entry in self.entries]
+
+    def get_entry_by_name(self, name: str):
+        for entry in self.entries:
+            if entry.name == name:
+                return entry
+        raise KeyError(f"Couldn't find an entry with the name '{name}'")
 
     def __repr__(self):
         return f'<{__class__.__name__} {self.paths}>'
@@ -122,19 +148,28 @@ class DirectoryEntry(ListOfEntries):
         name: str,
         path: str,
         depth: int,
-        video_extensions: list = []
+        videoextensions: list = []
     ):
         self.name = name
         self.path = path
         self.depth = depth
-        self.video_extensions = video_extensions
+        self.videoextensions = videoextensions
 
     def _scan_entries(self):
         entries: list = []
         for entry in os.scandir(self.path):
             entries.append(self._map_entry_to_entry_type(
-                entry, self.video_extensions))
+                entry, self.videoextensions, self.depth))
         return entries
+
+    def list_entries_by_name(self) -> list:
+        return [entry.name for entry in self.entries]
+
+    def get_entry_by_name(self, name: str):
+        for entry in self.entries:
+            if entry.name == name:
+                return entry
+        raise KeyError(f"Couldn't find an entry with the name '{name}'")
 
     def __repr__(self):
         return f'<{__class__.__name__} {self.name}>'
@@ -151,23 +186,29 @@ class FileEntry:
         return f'<{__class__.__name__} {self.name}>'
 
 
-class VideoFileEntry(FileEntry):
+class VideoFileEntry:
     def __init__(self, name: str, path: str, extension: str, depth: int):
-        super().__init__(name, path, extension, depth)
-        self._metadata: dict = {}
-        self.foldermatch: Union[DirectoryEntry, None] = None
+        super().__setattr__('name', name)
+        super().__setattr__('path', path)
+        super().__setattr__('extension', extension)
+        super().__setattr__('depth', depth)
+        super().__setattr__('metadata', {})
+        super().__setattr__('foldermatch', None)
+        super().__setattr__('rules', [])
         # self.root_path: str = ''
-        self.transfer: dict = {}
-        self.valid: bool = True
-        self.error_msg: str = ''
+        super().__setattr__('transfer', {})
+        super().__setattr__('valid', True)
+        super().__setattr__('error_msg', '')
+        logger.debug(f'VIDEOFILE created: {self.name}')
 
-    @property
-    def metadata(self):
-        return self._metadata
+    def error(self, message):
+        self.valid = False
+        self.error_msg = message
+        return False
 
-    @metadata.setter
-    def metadata(self, data: dict):
-        self._metadata = data
+    def __setattr__(self, name, value):
+        logger.debug(f"VIDEOFILE '{self.name}' updated '{name}' to:\n{value}")
+        super().__setattr__(name, value)
 
     def __repr__(self):
         return f'<{__class__.__name__} {self.name}>'

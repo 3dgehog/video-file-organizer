@@ -2,7 +2,7 @@ import abc
 import logging
 from typing import Set
 
-from video_file_organizer.mapping import VideoFile
+from video_file_organizer.entries import VideoFileEntry
 
 logger = logging.getLogger('vfo.utils')
 
@@ -32,35 +32,19 @@ class Observee:
 
 def vfile_consumer(name):
     def wrapper(fn):
-        def wrapped_function(*args, vfile: VideoFile, **kwargs):
+        def wrapped_function(vfile: VideoFileEntry):
 
-            if not isinstance(vfile, VideoFile):
+            if not isinstance(vfile, VideoFileEntry):
                 raise TypeError(
-                    "vfile needs to be an instance of VideoFile")
-
-            logger.debug(f'Vfile consumer {name}')
+                    "vfile needs to be an instance of VideoFileEntry")
 
             Observee.notify(topic=f'{name}/before',
                             vfile=vfile)
 
-            results = fn(*args, **vfile.json, **kwargs)
-
-            if not isinstance(results, dict):
-                raise ValueError("Expected a dictionary")
-
-            vfile.update(**results)
-
-            if results.get('error_msg'):
-                vfile.update(valid=False)
-                logger.info(f"ERROR_MSG: {results['error_msg']}")
-                return
+            fn(vfile)
 
             Observee.notify(topic=f'{name}/after',
                             vfile=vfile)
 
         return wrapped_function
     return wrapper
-
-
-def error_msg(message):
-    return {'error_msg': message}

@@ -3,7 +3,7 @@ import os
 import logging
 
 
-from video_file_organizer.mapping import VideoFile
+from video_file_organizer.entries import VideoFileEntry
 from video_file_organizer.utils import Observee
 
 logger = logging.getLogger('vfo.transferer')
@@ -30,17 +30,19 @@ class Transferer(Observee):
                 raise TypeError(f'Unknown type for {source}')
             logger.info(f"Deleted {os.path.basename(source)}")
 
-    def transfer_vfile(self, vfile: VideoFile):
-        if not isinstance(vfile, VideoFile):
-            raise TypeError("vfile needs to be an instance of VideoFile")
+    def transfer_vfile(self, vfile: VideoFileEntry):
+        if not isinstance(vfile, VideoFileEntry):
+            raise TypeError("vfile needs to be an instance of VideoFileEntry")
         if not hasattr(vfile, 'transfer'):
             raise ValueError("vfile needs to have transfer as an attribute")
-        if 'transfer_to' not in vfile.transfer:
-            raise KeyError("transfer_to key missing in transfer attribute")
 
         source = vfile.path
-        destination = vfile.transfer['transfer_to']
-        root_path = vfile.root_path
+        destination = vfile.transfer
+
+        if vfile.depth < 2:
+            root_path = vfile.path
+        else:
+            root_path = os.path.dirname(vfile.path)
 
         self.transfer(source, destination, root_path)
         self.notify(topic='on_transfer', vfile=vfile)

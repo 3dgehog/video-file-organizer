@@ -4,9 +4,11 @@ import argparse
 import sys
 
 from apscheduler.schedulers.blocking import BlockingScheduler
-from apscheduler.executors.pool import ThreadPoolExecutor
 
 from video_file_organizer.app import App
+
+
+logger = logging.getLogger('vfo')
 
 
 def parse_args(args):
@@ -34,7 +36,6 @@ def parse_args(args):
 
 def setup_logging(args):
     # Setup Logger
-    logger = logging.getLogger('vfo')
     logger.setLevel(logging.DEBUG)
 
     fh = logging.FileHandler('vfo.log')
@@ -72,11 +73,9 @@ def toolkit(args):
         sys.exit(0)
 
     if args.scheduler:
-        executors = {
-            'default': ThreadPoolExecutor(1)
-        }
-        scheduler = BlockingScheduler(executors=executors)
+        scheduler = BlockingScheduler()
         scheduler.add_job(lambda: run_app(args), 'interval', minutes=15)
+        logger.info("Scheduler Started!")
         scheduler.start()
         sys.exit(0)
 

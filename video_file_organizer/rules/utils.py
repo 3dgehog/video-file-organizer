@@ -1,4 +1,4 @@
-from video_file_organizer.mapping import VideoFile
+from video_file_organizer.entries import VideoFileEntry
 
 from video_file_organizer.utils import Observer, vfile_consumer
 
@@ -35,13 +35,12 @@ class RuleRegistry(Observer):
 
         cls._entries.append(new_entry)
 
-    def _run_rules(self, vfile: VideoFile, topic: str, rules_list: list,
+    def _run_rules(self, vfile: VideoFileEntry, topic: str, rules_list: list,
                    **kwargs):
         for entry in rules_list:
             if entry.name in vfile.rules:
                 vfile_consumer(
-                    f'Rule/{entry.name}'
-                )(entry.rule_function)(vfile=vfile, **kwargs)
+                    f'Rule/{entry.name}')(entry.rule_function)(vfile=vfile)
 
                 if not vfile.valid:
                     return

@@ -2,9 +2,10 @@ import logging
 import guessit
 import difflib
 
-from video_file_organizer.mapping import FolderCollection
+from video_file_organizer.entries import OutputDirectories
 from video_file_organizer.config import RuleBook
-from video_file_organizer.utils import error_msg
+
+from video_file_organizer.entries import VideoFileEntry
 
 logger = logging.getLogger('vfo.matachers')
 
@@ -13,47 +14,44 @@ class MetadataMatcher:
     def __init__(self):
         pass
 
-    def __call__(self, **kwargs) -> dict:
-        return self.get_guessit(**kwargs)
+    def __call__(self, vfile: VideoFileEntry):
 
-    def get_guessit(self, name: str, **kwargs) -> dict:
-
-        results = dict(guessit.guessit(name))
+        results = dict(guessit.guessit(vfile.name))
 
         if 'title' not in results:
-            return error_msg(f"Unable to find title for: '{name}'")
+            vfile.error(f"Unable to find title for: '{vfile.name}'")
+            return
 
         if 'type' not in results:
-            return error_msg(f"Unable to find video type for: '{name}'")
+            vfile.error(f"Unable to find video type for: '{vfile.name}'")
+            return
 
-        return {'metadata': results}
+        vfile.metadata = results
+        return
 
 
 class RuleBookMatcher:
     def __init__(self, rulebookfile: RuleBook):
         self.rulebook = rulebookfile
 
-    def __call__(self, **kwargs) -> dict:
-        return self.get_rules(**kwargs)
-
-    def get_rules(
-            self, name: str, metadata: dict, **kwargs) -> dict:
-
+    def __call__(self, vfile: VideoFileEntry):
         VALID_TYPES = {"episode": self._get_series_rules}
 
         rules = []
         for key, func in VALID_TYPES.items():
-            if metadata.get('type') == key:
+            if vfile.metadata.get('type') == key:
                 rules = func(
-                    name,
-                    metadata.get('title'),
-                    metadata.get('alternative_title')
+                    vfile.name,
+                    vfile.metadata.get('title'),
+                    vfile.metadata.get('alternative_title')
                 )
 
         if len(rules) == 0:
-            return error_msg(f"Unable to find the rules for: {name}")
+            vfile.error(f"Unable to find the rules for: {vfile.name}")
+            return
 
-        return {'rules': rules}
+        vfile.rules = rules
+        return
 
     def _get_series_rules(self, name, title=None,
                           alternative_title=None) -> list:
@@ -86,27 +84,23 @@ class RuleBookMatcher:
 
 
 class OutputFolderMatcher:
-    def __init__(self, output_folder: FolderCollection):
+    def __init__(self, output_folder: OutputDirectories):
         self.output_folder = output_folder
 
-    def __call__(self, **kwargs) -> dict:
-        return self.get_match(**kwargs)
-
-    def get_match(
-            self, name: str, metadata: dict, **kwargs) -> dict:
+    def __call__(self, vfile: VideoFileEntry):
         index_match = difflib.get_close_matches(
-            metadata['title'],
-            self.output_folder.list_entry_names(),
+            vfile.metadata['title'],
+            self.output_folder.list_entries_by_name(),
             n=1, cutoff=0.6
         )
 
         if not index_match:
-            return error_msg(f"Unable to find a match for {name}")
+            vfile.error(f"Unable to find a match for {vfile.name}")
+            return
 
-        logger.debug(f"Match successful for {name}")
+        logger.debug(f"Match successful for {vfile.name}")
 
-        return {
-            'foldermatch': self.output_folder.get_entry_by_name(
-                str(index_match[0])
-            )
-        }
+        vfile.foldermatch = self.output_folder.get_entry_by_name(
+            str(index_match[0])
+        )
+        return

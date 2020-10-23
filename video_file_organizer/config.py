@@ -11,7 +11,7 @@ from typing import Union, List, Optional
 from jinja2 import Template
 
 from video_file_organizer.utils import Observer
-from video_file_organizer.mapping import VideoFile
+from video_file_organizer.entries import VideoFileEntry
 from video_file_organizer.rules.utils import RuleRegistry
 
 logger = logging.getLogger('vfo.config')
@@ -260,7 +260,7 @@ class Config(Observer, ConfigBase):
         if topic == 'on_transfer':
             self.run_on_transfer_scripts(kwargs['vfile'])
 
-    def run_on_transfer_scripts(self, vfile: VideoFile):
+    def run_on_transfer_scripts(self, vfile: VideoFileEntry):
         if not self.on_transfer_scripts:
             return
         for script in self.on_transfer_scripts:
