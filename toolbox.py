@@ -81,7 +81,8 @@ def setup_mock():
     rule_book_injector.update('series', SERIES_CONFIGPARSE)
     config_injector.update({
         "input_dir": input_folder_path,
-        "series_dirs": [series_dir_path, anime_dir_path]
+        "series_dirs": [series_dir_path, anime_dir_path],
+        "schedule": 15
     })
 
 

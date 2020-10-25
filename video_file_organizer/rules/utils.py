@@ -1,6 +1,6 @@
 from video_file_organizer.entries import VideoFileEntry
 
-from video_file_organizer.utils import Observer, vfile_consumer
+from video_file_organizer.utils import Observer, Observee
 
 
 class RuleEntry:
@@ -11,7 +11,7 @@ class RuleEntry:
         self.order = order
 
 
-class RuleRegistry(Observer):
+class RuleRegistry(Observer, Observee):
     _entries: list = []
 
     def update(self, *arg, topic: str, **kwargs):
@@ -39,8 +39,9 @@ class RuleRegistry(Observer):
                    **kwargs):
         for entry in rules_list:
             if entry.name in vfile.rules:
-                vfile_consumer(
-                    f'Rule/{entry.name}')(entry.rule_function)(vfile=vfile)
+                self.notify(topic=f'Rule/{entry.name}/before', vfile=vfile)
+                entry.rule_function(vfile=vfile)
+                self.notify(topic=f'Rule/{entry.name}/after', vfile=vfile)
 
                 if not vfile.valid:
                     return

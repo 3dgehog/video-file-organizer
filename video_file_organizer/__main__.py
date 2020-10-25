@@ -75,6 +75,8 @@ def toolkit(args):
 
     if args.scheduler:
         from video_file_organizer.config import Config
+        # logging.basicConfig()
+        # logging.getLogger('apscheduler').setLevel(logging.DEBUG)
         scheduler = BlockingScheduler()
         config = Config(args)
         scheduler.add_job(run_app, 'interval', minutes=config.schedule)

@@ -4,13 +4,13 @@ import difflib
 
 from video_file_organizer.entries import OutputDirectories
 from video_file_organizer.config import RuleBook
-
 from video_file_organizer.entries import VideoFileEntry
+from video_file_organizer.utils import Observee
 
 logger = logging.getLogger('vfo.matachers')
 
 
-class MetadataMatcher:
+class MetadataMatcher(Observee):
     def __init__(self):
         pass
 
@@ -30,7 +30,7 @@ class MetadataMatcher:
         return
 
 
-class RuleBookMatcher:
+class RuleBookMatcher(Observee):
     def __init__(self, rulebookfile: RuleBook):
         self.rulebook = rulebookfile
 
@@ -83,7 +83,7 @@ class RuleBookMatcher:
         return rules
 
 
-class OutputFolderMatcher:
+class OutputFolderMatcher(Observee):
     def __init__(self, output_folder: OutputDirectories):
         self.output_folder = output_folder
 
