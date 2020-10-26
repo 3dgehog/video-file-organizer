@@ -42,8 +42,8 @@ class App:
 
                 # Attach Observee's to Observers
                 for operation in operations:
-                    operation.attach(self.config)
-                    operation.attach(self.rulebook.rulebook_registry)
+                    operation.attach_multiple(
+                        [self.config, self.rulebook.rulebook_registry])
 
                 # Run each operation with vfiles
                 for vfile in input_folder.videofilelist:
@@ -60,8 +60,7 @@ class App:
 
                 # Detach Observee's to Observers
                 for operation in operations:
-                    operation.detach(self.config)
-                    operation.detach(self.rulebook.rulebook_registry)
+                    operation.detach_all()
 
                 # Remove vfile that are not valid
                 invalid_vfile = [vfile for vfile in input_folder.videofilelist
@@ -71,12 +70,11 @@ class App:
 
                 # Run Transfer
                 with Transferer() as transferer:
-                    transferer.attach(self.config)
-                    transferer.attach(self.rulebook.rulebook_registry)
+                    transferer.attach_multiple(
+                        [self.config, self.rulebook.rulebook_registry])
                     for vfile in input_folder.videofilelist:
                         transferer.transfer_vfile(vfile)
-                    transferer.detach(self.config)
-                    transferer.detach(self.rulebook.rulebook_registry)
+                    transferer.detach_all()
 
         except Timeout:
             logger.warning(
