@@ -39,9 +39,16 @@ class RuleRegistry(Observer, Observee):
                    **kwargs):
         for entry in rules_list:
             if entry.name in vfile.rules:
-                self.notify(topic=f'Rule/{entry.name}/before', vfile=vfile)
+
+                self.notify_observers(
+                    topic=f'Rule/{entry.name}/before',
+                    vfile=vfile)
+
                 entry.rule_function(vfile=vfile)
-                self.notify(topic=f'Rule/{entry.name}/after', vfile=vfile)
+
+                self.notify_observers(
+                    topic=f'Rule/{entry.name}/after',
+                    vfile=vfile)
 
                 if not vfile.valid:
                     return

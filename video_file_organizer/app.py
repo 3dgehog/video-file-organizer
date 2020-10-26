@@ -6,7 +6,7 @@ from filelock import Timeout, FileLock
 from video_file_organizer.config import Config, RuleBook
 from video_file_organizer.transferer import Transferer
 from video_file_organizer.entries import InputDirectory, OutputDirectories
-from video_file_organizer.matchers import MetadataMatcher, \
+from video_file_organizer.matchers import GuessItMatcher, \
     RuleBookMatcher, OutputFolderMatcher
 
 logger = logging.getLogger('vfo.app')
@@ -31,50 +31,37 @@ class App:
                     self.config.input_dir,
                     videoextensions=self.config.videoextensions,
                     whitelist=kwargs.get('whitelist'))
-                input_folder.entries
+
                 output_folder = OutputDirectories(self.config.series_dirs)
 
                 operations: List[Callable] = [
-                    MetadataMatcher(),
+                    GuessItMatcher(),
                     RuleBookMatcher(self.rulebook),
-                    OutputFolderMatcher(output_folder)
+                    OutputFolderMatcher(output_folder),
+                    Transferer()
                 ]
 
-                # Attach Observee's to Observers
+                # Attach Observers to operations
                 for operation in operations:
-                    operation.attach_multiple(
+                    operation.register_multiple_observers(
                         [self.config, self.rulebook.rulebook_registry])
 
-                # Run each operation with vfiles
+                # Run operations against Video File Entries
                 for vfile in input_folder.videofilelist:
                     for operation in operations:
                         if not vfile.valid:
                             break
-                        operation.notify(
-                            topic=f'{operation.__class__.__name__}/before',
-                            vfile=vfile)
-                        operation(vfile)
-                        operation.notify(
-                            topic=f'{operation.__class__.__name__}/after',
-                            vfile=vfile)
 
-                # Detach Observee's to Observers
-                for operation in operations:
-                    operation.detach_all()
+                        with operation:
+                            operation.notify_observers(
+                                topic=f'{operation.__class__.__name__}/before',
+                                vfile=vfile)
 
-                # Remove vfile that are not valid
-                invalid_vfile = [vfile for vfile in input_folder.videofilelist
-                                 if not vfile.valid]
-                for vfile in invalid_vfile:
-                    input_folder.videofilelist.remove(vfile)
+                            operation(vfile)
 
-                # Run Transfer
-                with Transferer() as transferer:
-                    transferer.attach_multiple(
-                        [self.config, self.rulebook.rulebook_registry])
-                    for vfile in input_folder.videofilelist:
-                        transferer.transfer_vfile(vfile)
-                    transferer.detach_all()
+                            operation.notify_observers(
+                                topic=f'{operation.__class__.__name__}/after',
+                                vfile=vfile)
 
         except Timeout:
             logger.warning(

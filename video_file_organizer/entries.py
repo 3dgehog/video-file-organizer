@@ -83,7 +83,7 @@ class InputDirectory(ListOfEntries):
         self.whitelist = whitelist
         self.videofilelist = []
 
-        self._scan_entries_for_vfile(self.entries, 0)
+        self._scan_entries_for_vfile(self.entries)
 
     def _scan_entries(self):
         entries: list = []
@@ -91,19 +91,18 @@ class InputDirectory(ListOfEntries):
 
             if entry.name in self.ignore:
                 continue
+
             if self.whitelist:
                 if entry.name in self.whitelist:
                     entries.append(self._map_entry_to_entry_type(
                         entry, self.videoextensions, self.depth))
-                    # if isinstance(result, VideoFileEntry):
-                    #     self.videofilelist.append(result)
                     continue
 
             entries.append(self._map_entry_to_entry_type(
                 entry, self.videoextensions, self.depth))
         return entries
 
-    def _scan_entries_for_vfile(self, entries, depth, max_depth=2):
+    def _scan_entries_for_vfile(self, entries, depth=0, max_depth=2):
         for entry in entries:
             if isinstance(entry, VideoFileEntry):
                 self.videofilelist.append(entry)

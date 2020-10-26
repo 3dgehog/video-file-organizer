@@ -13,27 +13,48 @@ class Observer(metaclass=abc.ABCMeta):
 
 
 class Observee:
-    _observers: Set[Observer] = set()
+    _active_observers: Set[Observer] = set()
 
     def __init__(self):
         pass
 
-    def attach(self, observer):
+    def attach_observer(self, observer):
         if not isinstance(observer, Observer):
             raise TypeError(
                 'To attach to an Observee, you need the subclass of Observer')
-        self._observers.add(observer)
+        self._active_observers.add(observer)
 
-    def attach_multiple(self, observers: list):
+    def attach_multiple_observers(self, observers: list):
         for observer in observers:
-            self.attach(observer)
+            self.attach_observer(observer)
 
-    def detach(self, observer):
-        self._observers.discard(observer)
+    def detach_observer(self, observer):
+        self._active_observers.discard(observer)
 
-    def detach_all(self):
-        self._observers = set()
+    def detach_all_observers(self):
+        self._active_observers = set()
 
-    def notify(self, *args, topic: str, **kwargs):
-        for observer in self._observers:
+    def notify_observers(self, *args, topic: str, **kwargs):
+        for observer in self._active_observers:
             observer.update(*args, topic=topic, **kwargs)
+
+
+class VideoFileOperation(Observee):
+    _registered_observers: Set[Observer] = set()
+
+    def register_observer(self, observer):
+        if not isinstance(observer, Observer):
+            raise TypeError(
+                'To attach to an Observee, you need the subclass of Observer')
+        self._registered_observers.add(observer)
+
+    def register_multiple_observers(self, observers):
+        for observer in observers:
+            self.register_observer(observer)
+
+    def __enter__(self):
+        self.attach_multiple_observers(self._registered_observers)
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        self.detach_all_observers()

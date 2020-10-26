@@ -4,20 +4,22 @@ import logging
 
 
 from video_file_organizer.entries import VideoFileEntry
-from video_file_organizer.utils import Observee
+from video_file_organizer.utils import VideoFileOperation
 
 logger = logging.getLogger('vfo.transferer')
 
 
-class Transferer(Observee):
+class Transferer(VideoFileOperation):
     def __init__(self):
         pass
 
     def __enter__(self):
+        super().__enter__()
         self.delete_list = []
         return self
 
-    def __exit__(self, type, value, traceback):
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        super().__exit__(exc_type, exc_value, exc_traceback)
         # Removes duplicates
         self.delete_list = list(set(self.delete_list))
 
@@ -30,7 +32,7 @@ class Transferer(Observee):
                 raise TypeError(f'Unknown type for {source}')
             logger.info(f"Deleted {os.path.basename(source)}")
 
-    def transfer_vfile(self, vfile: VideoFileEntry):
+    def __call__(self, vfile: VideoFileEntry):
         if not isinstance(vfile, VideoFileEntry):
             raise TypeError("vfile needs to be an instance of VideoFileEntry")
         if not hasattr(vfile, 'transfer'):
@@ -45,7 +47,7 @@ class Transferer(Observee):
             root_path = os.path.dirname(vfile.path)
 
         self.transfer(source, destination, root_path)
-        self.notify(topic='on_transfer', vfile=vfile)
+        self.notify_observers(topic='on_transfer', vfile=vfile)
 
     def transfer(self, source: str, destination: str, root_path: str):
         self._copy(source, destination)
