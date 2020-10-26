@@ -47,7 +47,6 @@ class Transferer(VideoFileOperation):
             root_path = os.path.dirname(vfile.path)
 
         self.transfer(source, destination, root_path)
-        self.notify_observers(topic='on_transfer', vfile=vfile)
 
     def transfer(self, source: str, destination: str, root_path: str):
         self._copy(source, destination)

@@ -273,7 +273,7 @@ class Config(Observer, ConfigBase):
             logger.debug(f"Ran script {script}")
 
     def update(self, *args, topic: str, **kwargs):
-        if topic == 'on_transfer':
+        if topic == 'Transferer/after':
             self.run_on_transfer_scripts(kwargs['vfile'])
 
     def run_on_transfer_scripts(self, vfile: VideoFileEntry):

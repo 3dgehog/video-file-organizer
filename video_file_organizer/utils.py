@@ -35,6 +35,7 @@ class Observee:
         self._active_observers = set()
 
     def notify_observers(self, *args, topic: str, **kwargs):
+        logger.debug(f"NOTIFYING Observers about topic: {topic}")
         for observer in self._active_observers:
             observer.update(*args, topic=topic, **kwargs)
 

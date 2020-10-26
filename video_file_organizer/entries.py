@@ -187,27 +187,40 @@ class FileEntry:
 
 class VideoFileEntry:
     def __init__(self, name: str, path: str, extension: str, depth: int):
-        super().__setattr__('name', name)
-        super().__setattr__('path', path)
-        super().__setattr__('extension', extension)
-        super().__setattr__('depth', depth)
-        super().__setattr__('metadata', {})
-        super().__setattr__('foldermatch', None)
-        super().__setattr__('rules', [])
+        self.name = name
+        self.path = path
+        self.extension = extension
+        self.depth = depth
+        self.metadata = {}
+        self.foldermatch = None
+        self.rules = []
         # self.root_path: str = ''
-        super().__setattr__('transfer', {})
-        super().__setattr__('valid', True)
-        super().__setattr__('error_msg', '')
+        self.transfer = {}
+        self.valid = True
+        self.error_msg = ''
         logger.debug(f'VIDEOFILE created: {self.name}')
 
     def error(self, message):
         self.valid = False
         self.error_msg = message
+        logger.debug(
+            f"VIDEOFILE '{self.name}' has error of:\n{self.error_msg}")
         return False
 
-    def __setattr__(self, name, value):
-        logger.debug(f"VIDEOFILE '{self.name}' updated '{name}' to:\n{value}")
-        super().__setattr__(name, value)
+    def update(self, *args, merge: bool = True, **kwargs):
+        if args:
+            raise ValueError('Update function only takes kwargs')
+        for key, value in kwargs.items():
+            if not hasattr(self, key):
+                raise AttributeError(f"Attribute {key} doesn't exist")
+            if merge:
+                if getattr(self, key) in [list, dict]:
+                    orig = getattr(self, key)
+                    orig.update(value)
+                    value = orig
+            setattr(self, key, value)
+        logger.debug(
+            f"VIDEOFILE '{self.name}' updated with kwargs: \n{kwargs}")
 
     def __repr__(self):
         return f'<{__class__.__name__} {self.name}>'

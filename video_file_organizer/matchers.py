@@ -26,8 +26,7 @@ class GuessItMatcher(VideoFileOperation):
             vfile.error(f"Unable to find video type for: '{vfile.name}'")
             return
 
-        vfile.metadata = results
-        return
+        vfile.update(metadata=results)
 
 
 class RuleBookMatcher(VideoFileOperation):
@@ -50,8 +49,7 @@ class RuleBookMatcher(VideoFileOperation):
             vfile.error(f"Unable to find the rules for: {vfile.name}")
             return
 
-        vfile.rules = rules
-        return
+        vfile.update(rules=rules)
 
     def _get_series_rules(self, name, title=None,
                           alternative_title=None) -> list:
@@ -100,7 +98,8 @@ class OutputFolderMatcher(VideoFileOperation):
 
         logger.debug(f"Match successful for {vfile.name}")
 
-        vfile.foldermatch = self.output_folder.get_entry_by_name(
-            str(index_match[0])
+        vfile.update(
+            foldermatch=self.output_folder.get_entry_by_name(
+                str(index_match[0])
+            )
         )
-        return

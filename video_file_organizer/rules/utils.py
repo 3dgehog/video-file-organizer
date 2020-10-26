@@ -1,6 +1,10 @@
+import logging
+
 from video_file_organizer.entries import VideoFileEntry
 
-from video_file_organizer.utils import Observer, Observee
+from video_file_organizer.utils import Observer, VideoFileOperation
+
+logger = logging.getLogger('vfo.rules.utils')
 
 
 class RuleEntry:
@@ -11,7 +15,7 @@ class RuleEntry:
         self.order = order
 
 
-class RuleRegistry(Observer, Observee):
+class RuleRegistry(Observer, VideoFileOperation):
     _entries: list = []
 
     def update(self, *arg, topic: str, **kwargs):
@@ -39,16 +43,24 @@ class RuleRegistry(Observer, Observee):
                    **kwargs):
         for entry in rules_list:
             if entry.name in vfile.rules:
-
-                self.notify_observers(
-                    topic=f'Rule/{entry.name}/before',
-                    vfile=vfile)
-
-                entry.rule_function(vfile=vfile)
-
-                self.notify_observers(
-                    topic=f'Rule/{entry.name}/after',
-                    vfile=vfile)
-
                 if not vfile.valid:
                     return
+
+                with self:
+                    self.notify_observers(
+                        topic=f'Rule/{entry.name}/before',
+                        vfile=vfile)
+
+                    logger.debug(
+                        f"RULE '{entry.name}' applying to {vfile.name}")
+
+                    entry.rule_function(vfile=vfile)
+
+                    if not vfile.valid:
+                        return
+
+                    logger.debug(f"RULE '{entry.name}' OK for {vfile.name}")
+
+                    self.notify_observers(
+                        topic=f'Rule/{entry.name}/after',
+                        vfile=vfile)
