@@ -18,6 +18,11 @@ parser.add_argument("--mock",
 parser.add_argument("--systemd",
                     help="Creates systemd files",
                     action="store_true")
+parser.add_argument("--empty-copy",
+                    help="",
+                    action='store',
+                    nargs=1,
+                    type=str)
 args = parser.parse_args()
 
 MOCK_FOLDER = os.path.join(
@@ -142,9 +147,48 @@ def setup_systemd():
     logging.info("Files are ready in 'systemd/'")
 
 
+def empty_copy(args):
+    path = args.empty_copy[0]
+
+    if not os.path.exists(path):
+        raise ValueError("The path {} doesn't exists".format(path))
+        # make path absolute paths
+        path = os.path.abspath(path)
+
+    if not os.path.exists('_empty_copy'):
+        os.mkdir('_empty_copy')
+
+    def create_file(line):
+        print("Created file {}".format(os.path.basename(line)))
+        os.system("touch %r" % (line,))
+        # print("%r" % (line,))
+
+    base_dir_len = len(path.split("/"))
+
+    def remove_basedir(dirpath):
+        return "/".join(dirpath.strip("/").split('/')[base_dir_len - 2:])
+
+    os.chdir('_empty_copy')
+
+    for dirpath, dirnames, filenames in os.walk(path):
+        # Remove full path to path_to_copy folder
+        # dirpath = re.sub(args['path_to_copy'] + '/', '', dirpath)
+        dirpath = remove_basedir(dirpath)
+        # create all the dirs from that path
+        print("Created directory {}".format(os.path.basename(dirpath)))
+        os.makedirs(dirpath, exist_ok=True)
+        # make files
+        for filename in filenames:
+            path_to_filename = os.path.join(dirpath, filename)
+            create_file(path_to_filename)
+
+
 if args.mock:
     setup_mock()
 
 
 if args.systemd:
     setup_systemd()
+
+if args.empty_copy:
+    empty_copy(args)

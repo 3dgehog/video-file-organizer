@@ -66,7 +66,7 @@ class App:
                 with transferer:
                     for vfile in input_folder.videofilelist:
                         if not vfile.valid:
-                            break
+                            continue
 
                         transferer.notify_observers(
                             topic=f'{operation.__class__.__name__}/before',
