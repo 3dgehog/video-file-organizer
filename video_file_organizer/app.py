@@ -37,8 +37,7 @@ class App:
                 operations: List[Callable] = [
                     GuessItMatcher(),
                     RuleBookMatcher(self.rulebook),
-                    OutputFolderMatcher(output_folder),
-                    Transferer()
+                    OutputFolderMatcher(output_folder)
                 ]
 
                 # Attach Observers to operations
@@ -46,13 +45,10 @@ class App:
                     operation.register_multiple_observers(
                         [self.config, self.rulebook.rulebook_registry])
 
-                # Run operations against Video File Entries
                 for vfile in input_folder.videofilelist:
                     for operation in operations:
-                        if not vfile.valid:
-                            break
-
                         with operation:
+
                             operation.notify_observers(
                                 topic=f'{operation.__class__.__name__}/before',
                                 vfile=vfile)
@@ -62,6 +58,25 @@ class App:
                             operation.notify_observers(
                                 topic=f'{operation.__class__.__name__}/after',
                                 vfile=vfile)
+
+                transferer = Transferer()
+                transferer.register_multiple_observers(
+                    [self.config, self.rulebook.rulebook_registry])
+
+                with transferer:
+                    for vfile in input_folder.videofilelist:
+                        if not vfile.valid:
+                            break
+
+                        transferer.notify_observers(
+                            topic=f'{operation.__class__.__name__}/before',
+                            vfile=vfile)
+
+                        transferer(vfile)
+
+                        transferer.notify_observers(
+                            topic=f'{operation.__class__.__name__}/after',
+                            vfile=vfile)
 
         except Timeout:
             logger.warning(
