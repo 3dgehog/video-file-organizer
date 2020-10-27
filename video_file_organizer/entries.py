@@ -203,7 +203,7 @@ class VideoFileEntry:
     def error(self, message):
         self.valid = False
         self.error_msg = message
-        logger.debug(
+        logger.info(
             f"VIDEOFILE '{self.name}' has error of:\n{self.error_msg}")
         return False
 
