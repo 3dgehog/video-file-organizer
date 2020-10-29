@@ -15,3 +15,6 @@ temp
 .vfo.lock
 Pipfile.lock
 docker-compose*
+_empty_copy
+*.sqlite
+*.db

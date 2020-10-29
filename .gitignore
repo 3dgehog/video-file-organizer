@@ -16,3 +16,5 @@ temp/*
 Pipfile.lock
 docker-compose*
 _empty_copy
+*.sqlite
+*.db

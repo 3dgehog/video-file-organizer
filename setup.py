@@ -32,6 +32,7 @@ setup(
         "pyyaml==5.3.1",
         "rebulk==2.0.1",
         "six==1.15.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
+        "sqlalchemy==1.3.20",
         "tzlocal==2.1",
         "uwsgi==2.0.19.1",
         "werkzeug==1.0.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'",

@@ -8,6 +8,7 @@ from video_file_organizer.transferer import Transferer
 from video_file_organizer.entries import InputDirectory, OutputDirectories
 from video_file_organizer.matchers import GuessItMatcher, \
     RuleBookMatcher, OutputFolderMatcher
+from video_file_organizer.database import Database
 
 logger = logging.getLogger('vfo.app')
 
@@ -21,6 +22,7 @@ class App:
         self.rulebook = RuleBook(args)
 
         self.lock = FileLock('.vfo.lock', timeout=60)
+        self.database = Database()
 
     def run(self, **kwargs):
         logger.debug("Running app")
@@ -30,7 +32,8 @@ class App:
                 input_folder = InputDirectory(
                     self.config.input_dir,
                     videoextensions=self.config.videoextensions,
-                    whitelist=kwargs.get('whitelist'))
+                    whitelist=kwargs.get('whitelist'),
+                    database=self.database)
 
                 output_folder = OutputDirectories(self.config.series_dirs)
 
