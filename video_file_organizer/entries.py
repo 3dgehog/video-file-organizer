@@ -251,8 +251,8 @@ class VideoFileEntry:
         self.error_msg = message
         if add_to_database:
             self.database.add_hash_name_pair(self.name, self.hash, message)
-        logger.info(
-            f"VIDEOFILE '{self.name}' has error of:\n{self.error_msg}")
+            logger.info(
+                f"VIDEOFILE '{self.name}' has error of:\n{self.error_msg}")
         return False
 
     def update(self, *args, merge: bool = True, **kwargs):
