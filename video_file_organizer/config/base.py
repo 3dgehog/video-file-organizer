@@ -10,20 +10,27 @@ class ConfigBase(metaclass=abc.ABCMeta):
     default_path: Optional[str] = None
     args: List[str]
 
-    def load_args(self, args, **kwargs):
+    def load_args(self, args, **kwargs) -> list:
         return args
 
-    def load_env(self, env, **kwargs):
+    def load_env(self, env, **kwargs) -> list:
         return env.split(':')
 
     @abc.abstractmethod
     def load_file(self, path: str, **kwargs) -> dict:
         pass
 
-    def search_config(self, name: str, required: bool = False,
-                      **kwargs) -> Union[list, None]:
-        """Searches for config in 4 different places, args, env,
-        a custom location & default location
+    def search_config(
+            self,
+            name: str,
+            required: bool = False,
+            in_args: bool = True,
+            in_env: bool = True,
+            in_file: bool = True,
+            **kwargs
+    ) -> Union[list, None]:
+        """Searches for config in 5 different locations: args, env,
+        the current directory, a custom path & the default path
 
         Args:
             name (str): The name of the config
@@ -43,38 +50,44 @@ class ConfigBase(metaclass=abc.ABCMeta):
         """
         # args
         # returns list but doesn't change to string
-        if name in self.args:
-            args = self.load_args(self.args, name=name, **kwargs)
-            if getattr(args, kwargs.get('arg_name') or name):
-                return getattr(args, kwargs.get('arg_name') or name)
+        if in_args:
+            if name in self.args:
+                args = self.load_args(self.args, name=name, **kwargs)
+                if getattr(args, kwargs.get('arg_name') or name):
+                    return getattr(args, kwargs.get('arg_name') or name)
 
         # environment
         # returns a list and changes it to strings
-        if os.environ.get(kwargs.get('env_name') or name.upper()):
-            env = self.load_env(os.environ.get(
-                kwargs.get('env_name') or name.upper(), **kwargs
-            ))
-            return env
-
-        # custom file location
-        if self.custom_path:
-            file = self.load_file(self.custom_path, name=name, **kwargs)
-            if file.get(kwargs.get('file_name') or name):
-                return file.get(kwargs.get('file_name') or name)
-
-        # default file locations
-        if self.default_path:
-            if os.path.exists(self.default_path):
-                file = self.load_file(self.default_path)
-                if file.get(kwargs.get('file_name') or name):
-                    return file.get(kwargs.get('file_name') or name)
+        if in_env:
+            if os.environ.get(kwargs.get('env_name') or name.upper()):
+                return self.load_env(
+                    os.environ.get(
+                        kwargs.get('env_name') or name.upper(), **kwargs
+                    )
+                )
 
         # current directory
-        if self.default_filename:
-            if os.path.exists(self.default_filename):
-                file = self.load_file(self.default_filename)
+        if in_file:
+            if self.default_filename:
+                if os.path.exists(self.default_filename):
+                    file = self.load_file(self.default_filename)
+                    if file.get(kwargs.get('file_name') or name):
+                        return file.get(kwargs.get('file_name') or name)
+
+        # custom file location
+        if in_file:
+            if self.custom_path:
+                file = self.load_file(self.custom_path, name=name, **kwargs)
                 if file.get(kwargs.get('file_name') or name):
                     return file.get(kwargs.get('file_name') or name)
+
+        # default file locations
+        if in_file:
+            if self.default_path:
+                if os.path.exists(self.default_path):
+                    file = self.load_file(self.default_path)
+                    if file.get(kwargs.get('file_name') or name):
+                        return file.get(kwargs.get('file_name') or name)
 
         if required:
             raise ValueError(
