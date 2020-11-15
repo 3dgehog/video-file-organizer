@@ -18,3 +18,4 @@ docker-compose*
 _empty_copy
 *.sqlite
 *.db
+.ropeproject

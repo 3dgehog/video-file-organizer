@@ -241,7 +241,7 @@ class VideoFileEntry:
         return file_hash.hexdigest()
 
     def _validate_videofile(self):
-        if self.database.hash_name_pair_exists(self.name, self.hash):
+        if self.database.unsuccessful_vfile_exists(self.name, self.hash):
             self.error(
                 f'VIDEOFILE exists in database: {self.name}',
                 add_to_database=False)
@@ -250,7 +250,7 @@ class VideoFileEntry:
         self.valid = False
         self.error_msg = message
         if add_to_database:
-            self.database.add_hash_name_pair(self.name, self.hash, message)
+            self.database.add_unsuccessful_vfile(self.name, self.hash, message)
             logger.info(
                 f"VIDEOFILE '{self.name}' has error of:\n{self.error_msg}")
         return False

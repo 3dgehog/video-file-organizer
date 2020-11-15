@@ -9,7 +9,7 @@ Base = declarative_base()
 
 
 class Database:
-    default_filename = 'store.sqlite'
+    default_filename = 'database.sqlite'
 
     def __init__(self, path=default_filename):
         self.path = path
@@ -23,24 +23,31 @@ class Database:
 
         self.session_maker = sessionmaker(bind=self.engine)
 
-    def hash_name_pair_exists(self, name: str, hash: str):
+    def unsuccessful_vfile_exists(self, name: str, hash: str):
         session = self.session_maker()
-        exists = session.query(File).filter_by(
+        exists = session.query(UnsuccessfulFile).filter_by(
             filename=name, hash=hash).first() is not None
         session.close()
         return exists
 
-    def add_hash_name_pair(self, name: str, hash: str, error: str):
-        if not self.hash_name_pair_exists(name, hash):
-            new_file = File(filename=name, hash=hash, error=error)
+    def add_unsuccessful_vfile(self, name: str, hash: str, error: str):
+        if not self.unsuccessful_vfile_exists(name, hash):
+            new_file = UnsuccessfulFile(filename=name, hash=hash, error=error)
             session = self.session_maker()
             session.add(new_file)
             session.commit()
             session.close()
 
+    def add_successful_vfile(self, name: str, hash: str, transfer: str):
+        new_file = SuccessfulFile(filename=name, hash=hash, transfer=transfer)
+        session = self.session_maker()
+        session.add(new_file)
+        session.commit()
+        session.close()
 
-class File(Base):
-    __tablename__ = 'files'
+
+class UnsuccessfulFile(Base):
+    __tablename__ = 'unsuccessful_file'
 
     id = Column(Integer, primary_key=True)
     filename = Column(String)
@@ -48,4 +55,16 @@ class File(Base):
     error = Column(String)
 
     def __repr__(self):
-        return f"<File (name='{self.filename}')>"
+        return f"<UnsuccessfulFile (name='{self.filename}')>"
+
+
+class SuccessfulFile(Base):
+    __tablename__ = 'successful_file'
+
+    id = Column(Integer, primary_key=True)
+    filename = Column(String)
+    hash = Column(String)
+    transfer = Column(String)
+
+    def __repr__(self):
+        return f"<SuccessfulFile (name='{self.filename}')>"

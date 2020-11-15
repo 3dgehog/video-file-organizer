@@ -62,7 +62,7 @@ class App:
                                 topic=f'{operation.__class__.__name__}/after',
                                 vfile=vfile)
 
-                transferer = Transferer()
+                transferer = Transferer(self.database)
                 transferer.register_multiple_observers(
                     [self.config, self.rulebook.rulebook_registry])
 
