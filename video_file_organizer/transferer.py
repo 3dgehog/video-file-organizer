@@ -4,13 +4,13 @@ import logging
 
 
 from video_file_organizer.entries import VideoFileEntry
-from video_file_organizer.utils import VideoFileOperation
+from video_file_organizer.utils import Observee
 from video_file_organizer.database import Database
 
 logger = logging.getLogger('vfo.transferer')
 
 
-class Transferer(VideoFileOperation):
+class Transferer(Observee):
     def __init__(self, database: Database):
         self.database = database
 

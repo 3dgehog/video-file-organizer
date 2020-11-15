@@ -2,7 +2,7 @@ import logging
 
 from video_file_organizer.entries import VideoFileEntry
 
-from video_file_organizer.utils import Observer, VideoFileOperation
+from video_file_organizer.utils import Observer, Observee
 
 logger = logging.getLogger('vfo.rules.utils')
 
@@ -15,7 +15,7 @@ class RuleEntry:
         self.order = order
 
 
-class RuleRegistry(Observer, VideoFileOperation):
+class RuleRegistry(Observer, Observee):
     _entries: list = []
 
     def update(self, *arg, topic: str, **kwargs):
