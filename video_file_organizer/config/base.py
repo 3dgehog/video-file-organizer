@@ -1,5 +1,6 @@
 import abc
 import os
+import shlex
 
 from typing import Optional, List, Union
 
@@ -14,7 +15,7 @@ class ConfigBase(metaclass=abc.ABCMeta):
         return args
 
     def load_env(self, env, **kwargs) -> list:
-        return env.split(':')
+        return shlex.split(env)
 
     @abc.abstractmethod
     def load_file(self, path: str, **kwargs) -> dict:
