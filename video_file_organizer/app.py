@@ -1,14 +1,15 @@
 import logging
 import sys
+import os
+
 from typing import List, Callable
 from filelock import Timeout, FileLock
 
-from video_file_organizer.config import Config, RuleBook
-from video_file_organizer.transferer import Transferer
-from video_file_organizer.entries import InputDirectory, OutputDirectories
-from video_file_organizer.matchers import GuessItMatcher, \
-    RuleBookMatcher, OutputFolderMatcher
-from video_file_organizer.database import Database
+from .config import Config, RuleBook
+from .transferer import Transferer
+from .entries import InputDirectory, OutputDirectories
+from .matchers import GuessItMatcher, RuleBookMatcher, OutputFolderMatcher
+from .database import Database
 
 logger = logging.getLogger('vfo.app')
 
@@ -21,7 +22,10 @@ class App:
         self.config = Config(args)
         self.rulebook = RuleBook(args)
 
-        self.lock = FileLock('.vfo.lock', timeout=60)
+        self.lock = FileLock(
+            os.path.join(self.config.input_dir, '.vfo.lock'),
+            timeout=60)
+
         self.database = Database()
 
     def run(self, **kwargs):
