@@ -151,7 +151,15 @@ class Config(Observer, ConfigBase):
 
     def _run_script(self, script: str):
         try:
-            subprocess.run([script], shell=True, check=True)
+            p = subprocess.Popen(
+                script,
+                shell=True,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                close_fds=False
+            )
+            return p.wait()
         except subprocess.CalledProcessError as e:
             logger.info(e)
             sys.exit()

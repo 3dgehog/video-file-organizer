@@ -76,13 +76,13 @@ class App:
                             continue
 
                         transferer.notify_observers(
-                            topic=f'{operation.__class__.__name__}/before',
+                            topic=f'{transferer.__class__.__name__}/before',
                             vfile=vfile)
 
                         transferer(vfile)
 
                         transferer.notify_observers(
-                            topic=f'{operation.__class__.__name__}/after',
+                            topic=f'{transferer.__class__.__name__}/after',
                             vfile=vfile)
 
         except Timeout:
