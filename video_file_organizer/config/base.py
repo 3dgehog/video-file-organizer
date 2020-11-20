@@ -51,7 +51,7 @@ class ConfigBase(metaclass=abc.ABCMeta):
         """
         # args
         # returns list but doesn't change to string
-        if in_args:
+        if in_args and self.args:
             if name in self.args:
                 args = self.load_args(self.args, name=name, **kwargs)
                 if getattr(args, kwargs.get('arg_name') or name):
