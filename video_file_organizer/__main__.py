@@ -79,7 +79,11 @@ def toolkit(args):
         # logging.getLogger('apscheduler').setLevel(logging.DEBUG)
         scheduler = BlockingScheduler()
         config = Config(args)
-        scheduler.add_job(run_app, 'interval', minutes=config.schedule)
+        scheduler.add_job(
+            run_app,
+            'interval',
+            minutes=config.schedule,
+            args={'args': args})
         logger.info(
             f"Scheduler Started! Running every {config.schedule} minutes")
         scheduler.start()

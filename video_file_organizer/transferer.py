@@ -12,6 +12,7 @@ logger = logging.getLogger('vfo.transferer')
 
 class Transferer(Observee):
     def __init__(self, database: Database):
+        super().__init__()
         self.database = database
 
     def __enter__(self):

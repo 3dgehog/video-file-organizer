@@ -18,6 +18,9 @@ class RuleEntry:
 class RuleRegistry(Observer, Observee):
     _entries: list = []
 
+    def __init__(self):
+        super().__init__()
+
     def update(self, *arg, topic: str, **kwargs):
         rules_list = [x for x in self._entries if x.topic == topic]
         if len(rules_list) < 1:

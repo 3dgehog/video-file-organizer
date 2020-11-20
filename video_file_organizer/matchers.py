@@ -12,7 +12,7 @@ logger = logging.getLogger('vfo.matachers')
 
 class GuessItMatcher(Observee):
     def __init__(self):
-        pass
+        super().__init__()
 
     def __call__(self, vfile: VideoFileEntry):
 
@@ -31,6 +31,7 @@ class GuessItMatcher(Observee):
 
 class RuleBookMatcher(Observee):
     def __init__(self, rulebookfile: RuleBook):
+        super().__init__()
         self.rulebook = rulebookfile
 
     def __call__(self, vfile: VideoFileEntry):
@@ -83,6 +84,7 @@ class RuleBookMatcher(Observee):
 
 class OutputFolderMatcher(Observee):
     def __init__(self, output_folder: OutputDirectories):
+        super().__init__()
         self.output_folder = output_folder
 
     def __call__(self, vfile: VideoFileEntry):

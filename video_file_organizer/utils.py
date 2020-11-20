@@ -13,11 +13,9 @@ class Observer(metaclass=abc.ABCMeta):
 
 
 class Observee:
-    _active_observers: Set[Observer] = set()
-    _registered_observers: Set[Observer] = set()
-
     def __init__(self):
-        pass
+        self._active_observers: Set[Observer] = set()
+        self._registered_observers: Set[Observer] = set()
 
     def attach_observer(self, observer):
         if not isinstance(observer, Observer):
@@ -51,6 +49,7 @@ class Observee:
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         self.detach_all_observers()
+        return
 
     def notify_observers(self, *args, topic: str, **kwargs):
         logger.debug(f"NOTIFYING Observers about topic: {topic}")
