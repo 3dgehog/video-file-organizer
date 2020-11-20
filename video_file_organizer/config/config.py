@@ -147,19 +147,21 @@ class Config(Observer, ConfigBase):
             values.update(vars(vfile))
             values.update(vars(vfile)['metadata'])
             rendered_script = Template(script).render(values)
+            logger.debug(f"{rendered_script}")
             self._run_script(rendered_script)
 
     def _run_script(self, script: str):
         try:
-            p = subprocess.Popen(
+            subprocess.run(
                 script,
                 shell=True,
+                timeout=20,
+                check=True,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                close_fds=False
+                stderr=subprocess.STDOUT
             )
-            return p.wait()
+            return
         except subprocess.CalledProcessError as e:
             logger.info(e)
             sys.exit()
