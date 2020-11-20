@@ -15,12 +15,12 @@ class Transferer(Observee):
         self.database = database
 
     def __enter__(self):
-        super().__enter__()
+        Observee.__enter__(self)
         self.delete_list = []
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
-        super().__exit__(exc_type, exc_value, exc_traceback)
+        Observee.__exit__(self, exc_type, exc_value, exc_traceback)
         # Removes duplicates
         self.delete_list = list(set(self.delete_list))
 
