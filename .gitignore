@@ -19,3 +19,4 @@ _empty_copy
 *.sqlite
 *.db
 .ropeproject
+.DS_Store

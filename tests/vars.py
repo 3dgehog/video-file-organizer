@@ -23,7 +23,15 @@ format-title "One_Piece_{{ episode }}"',
     "The Flash": 'season',
     "Vikings": 'season',
     "That 70s Show": 'season',
-    "Re Zero kara Hajimeru Isekai Seikatsu": 'parent-dir'
+    "Re Zero kara Hajimeru Isekai Seikatsu": 'parent-dir',
+
+    "Akudama Drive": "parent-dir",
+    "Haikyuu!! To the Top 2nd Season": 'sub-dir "Season 5"',
+    "Jujutsu Kaisen": "parent-dir",
+    "Kamisama ni Natta Hi": "parent-dir",
+    "Maoujou de Oyasumi": "parent-dir",
+    "Munou na Nana": "parent-dir",
+    "Shingeki no kyojin": 'sub-dir "Season 4"'
 }
 
 SERIES_PARMS = [
@@ -44,5 +52,13 @@ SERIES_PARMS = [
     "--series-rule", "The Flash", "season",
     "--series-rule", "Vikings", "season",
     "--series-rule", "That 70s Show", "season",
-    "--series-rule", "Re Zero kara Hajimeru Isekai Seikatsu", "parent-dir"
+    "--series-rule", "Re Zero kara Hajimeru Isekai Seikatsu", "parent-dir",
+
+    "--series-rule", "Akudama Drive", "parent-dir",
+    "--series-rule", "Haikyuu!! To the Top 2nd Season", 'sub-dir', "Season 5",
+    "--series-rule", "Jujutsu Kaisen", "parent-dir",
+    "--series-rule", "Kamisama ni Natta Hi", "parent-dir",
+    "--series-rule", "Maoujou de Oyasumi", "parent-dir",
+    "--series-rule", "Munou na Nana", "parent-dir",
+    "--series-rule", "Shingeki no kyojin", 'sub-dir', "Season 4"
 ]
