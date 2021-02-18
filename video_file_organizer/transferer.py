@@ -43,6 +43,10 @@ class Transferer(Observee):
         source = vfile.path
         destination = vfile.transfer
 
+        if destination == {}:
+            logger.info(f"Skipping {vfile.name}, empty destination")
+            return
+
         if vfile.depth < 2:
             root_path = vfile.path
         else:

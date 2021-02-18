@@ -8,7 +8,7 @@ from typing import Union, List, Optional
 from .base import ConfigBase
 from .vars import RULEBOOK_FILE_TEMPLATE
 
-from video_file_organizer.rules.utils import RuleRegistry
+from video_file_organizer.rules import RuleRegistry
 
 logger = logging.getLogger('vfo.config')
 
