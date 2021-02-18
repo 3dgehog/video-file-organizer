@@ -9,7 +9,7 @@ from .config import Config, RuleBook
 from .transferer import Transferer
 from .entries import InputDirectory, OutputDirectories
 from .matchers import GuessItMatcher, RuleBookMatcher, OutputFolderMatcher
-from .database.controller import Database
+from .database.utils import init_db
 
 logger = logging.getLogger('vfo.app')
 
@@ -26,7 +26,7 @@ class App:
             os.path.join(self.config.input_dir, '.vfo.lock'),
             timeout=60)
 
-        self.database = Database()
+        init_db()
 
     def run(self, **kwargs):
         logger.debug("Running app")
@@ -36,8 +36,8 @@ class App:
                 input_folder = InputDirectory(
                     self.config.input_dir,
                     videoextensions=self.config.videoextensions,
-                    whitelist=kwargs.get('whitelist'),
-                    database=self.database)
+                    whitelist=kwargs.get('whitelist')
+                )
 
                 output_folder = OutputDirectories(self.config.series_dirs)
 
@@ -66,7 +66,7 @@ class App:
                                 topic=f'{operation.__class__.__name__}/after',
                                 vfile=vfile)
 
-                transferer = Transferer(self.database)
+                transferer = Transferer()
                 transferer.register_multiple_observers(
                     [self.config, self.rulebook.rulebook_registry])
 

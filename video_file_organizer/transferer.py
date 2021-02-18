@@ -5,15 +5,14 @@ import logging
 
 from video_file_organizer.entries import VideoFileEntry
 from video_file_organizer.utils import Observee
-from video_file_organizer.database.controller import Database
+from video_file_organizer.database.utils import add_successful_vfile
 
 logger = logging.getLogger('vfo.transferer')
 
 
 class Transferer(Observee):
-    def __init__(self, database: Database):
+    def __init__(self):
         super().__init__()
-        self.database = database
 
     def __enter__(self):
         Observee.__enter__(self)
@@ -54,7 +53,7 @@ class Transferer(Observee):
 
         self.transfer(source, destination, root_path)
 
-        self.database.add_successful_vfile(
+        add_successful_vfile(
             vfile.name, vfile.hash, vfile.transfer)
 
     def transfer(self, source: str, destination: str, root_path: str):
