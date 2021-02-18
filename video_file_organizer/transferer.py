@@ -5,7 +5,7 @@ import logging
 
 from video_file_organizer.entries import VideoFileEntry
 from video_file_organizer.utils import Observee
-from video_file_organizer.database import Database
+from video_file_organizer.database.controller import Database
 
 logger = logging.getLogger('vfo.transferer')
 

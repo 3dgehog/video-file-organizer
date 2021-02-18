@@ -4,7 +4,7 @@ import logging
 import hashlib
 
 from typing import Union
-from video_file_organizer.database import Database
+from video_file_organizer.database.controller import Database
 
 logger = logging.getLogger('vfo.entries')
 

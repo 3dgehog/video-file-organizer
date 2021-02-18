@@ -1,16 +1,16 @@
-from flask import Flask, request
+from flask import Blueprint, request
 
 from video_file_organizer.app import App
 
-app = Flask(__name__)
+routes = Blueprint("routes", __name__)
 
 
-@app.route('/', methods=['GET'])
+@routes.route('/', methods=['GET'])
 def index():
     return "Video File Orgainzer Webserver is running correctly"
 
 
-@app.route('/add_file', methods=['POST'])
+@routes.route('/add_file', methods=['POST'])
 def add_file():
 
     data = request.get_json()
@@ -33,14 +33,10 @@ def add_file():
     return data
 
 
-@app.route('/now', methods=['GET'])
+@routes.route('/now', methods=['GET'])
 def now():
     vfo = App()
     vfo.setup()
     vfo.run()
 
     return "Success"
-
-
-if __name__ == "__main__":
-    app.run("0.0.0.0", 5050)

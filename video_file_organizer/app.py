@@ -9,7 +9,7 @@ from .config import Config, RuleBook
 from .transferer import Transferer
 from .entries import InputDirectory, OutputDirectories
 from .matchers import GuessItMatcher, RuleBookMatcher, OutputFolderMatcher
-from .database import Database
+from .database.controller import Database
 
 logger = logging.getLogger('vfo.app')
 
