@@ -28,6 +28,8 @@ class App:
 
         init_db()
 
+        return self
+
     def run(self, **kwargs):
         logger.debug("Running app")
         try:

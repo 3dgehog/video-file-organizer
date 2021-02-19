@@ -1,13 +1,30 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, render_template
+import json
 
-from video_file_organizer.app import App
+from video_file_organizer.__main__ import run_app
+
+from apscheduler.schedulers.background import BackgroundScheduler
+
+scheduler = BackgroundScheduler()
+scheduler.start()
 
 routes = Blueprint("routes", __name__)
 
 
 @routes.route('/', methods=['GET'])
 def index():
-    return "Video File Orgainzer Webserver is running correctly"
+    return render_template('home.html')
+
+
+@routes.route('/toggle_scheduler', methods=['GET'])
+def toggle_scheduler():
+    scheduler.add_job(run_app, trigger='interval', minutes=15, name='vfo')
+    return ("Success", 200)
+
+
+@routes.route('/view_jobs', methods=['GET'])
+def view_jobs():
+    return json.dumps([str(x) for x in scheduler.get_jobs()])
 
 
 @routes.route('/add_file', methods=['POST'])
@@ -26,17 +43,13 @@ def add_file():
             "error": "filename is required"
         }
 
-    vfo = App()
-    vfo.setup()
-    vfo.run(whitelist=data['filename'])
+    run_app(whitelist=data['filename'])
 
     return data
 
 
 @routes.route('/now', methods=['GET'])
 def now():
-    vfo = App()
-    vfo.setup()
-    vfo.run()
+    run_app()
 
     return "Success"

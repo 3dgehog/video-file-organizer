@@ -98,13 +98,9 @@ def main():
     run_app(args)
 
 
-def run_app(args=None):
-    # App Setup
+def run_app(args=None, **kwargs):
     app = App()
-    app.setup(args)
-
-    # App run
-    app.run()
+    app.setup(args).run(**kwargs)
 
 
 if __name__ == "__main__":

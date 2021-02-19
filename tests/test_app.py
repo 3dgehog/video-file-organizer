@@ -111,8 +111,7 @@ def test_app_with_custom_file(tmp_dir, sample_input_dir, sample_series_dirs):
     ])
 
     app = App()
-    app.setup(args)
-    app.run()
+    app.setup(args).run()
 
     series_folder = os.path.dirname(sample_series_dirs[0])
     for path in VFILE_FINAL_PATHS:

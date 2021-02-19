@@ -1,0 +1,5 @@
+http://localhost:5050/view_jobs
+
+###
+
+http://localhost:5050/toggle_scheduler
