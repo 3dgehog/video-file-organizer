@@ -18,10 +18,16 @@
         <a class="navbar-brand">VFO</a>
       </div>
       <div class="navbar-right">
-        <p class="navbar-text" style="font-size: small;color:black">Something about the worker</p>
-        <a class="navbar-link" href="#">
+        {% if worker_info %}
+        <p class="navbar-text" style="font-size: small;color:black">{{ worker_info }}</p>
+        <a class="navbar-link" href="{{ url_for('routes.toggle_scheduler') }}">
+          <span class="navbar-text glyphicon glyphicon-stop" aria-hidden="true" style="color:rgb(187, 28, 28)"></span>
+        </a>
+        {% else %}
+        <a class="navbar-link" href="{{ url_for('routes.toggle_scheduler') }}">
           <span class="navbar-text glyphicon glyphicon-play" aria-hidden="true" style="color:rgb(20, 139, 20)"></span>
         </a>
+        {% endif %}
       </div>
     </div>
   </nav>
