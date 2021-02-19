@@ -26,3 +26,8 @@ def add_successful_vfile(name: str, hash: str, transfer: str):
     db_session.add(new_file)
     db_session.commit()
     db_session.close()
+
+
+def get_unsuccessful_vfiles():
+    response = db_session.query(UnsuccessfulFile).all()
+    return response

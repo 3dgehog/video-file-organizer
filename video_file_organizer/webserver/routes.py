@@ -1,13 +1,20 @@
 from flask import Blueprint, request, render_template, redirect, url_for
 import json
 
-from video_file_organizer.__main__ import run_app
-
 from apscheduler.schedulers.background import BackgroundScheduler
+
+from video_file_organizer.__main__ import run_app
+from video_file_organizer.config.config import Config
+from video_file_organizer.database import utils as db_utils
+
 
 scheduler = BackgroundScheduler()
 scheduler.start()
-scheduler.add_job(run_app, trigger='interval', minutes=15, name='vfo')
+
+config = Config([])
+
+scheduler.add_job(
+    run_app, trigger='interval', minutes=config.schedule, name='vfo')
 
 routes = Blueprint("routes", __name__)
 
@@ -17,7 +24,12 @@ def index():
     worker_info = [str(x) for x in scheduler.get_jobs()]
     if len(worker_info) == 0:
         worker_info = None
-    return render_template('home.html', worker_info=worker_info)
+    unsuccessful_files = db_utils.get_unsuccessful_vfiles()
+    return render_template(
+        'home.html',
+        worker_info=worker_info,
+        unsuccessful_files=unsuccessful_files
+    )
 
 
 @routes.route('/toggle_scheduler', methods=['GET'])
@@ -25,7 +37,8 @@ def toggle_scheduler():
     if len(scheduler.get_jobs()) > 0:
         scheduler.remove_all_jobs()
     else:
-        scheduler.add_job(run_app, trigger='interval', minutes=15, name='vfo')
+        scheduler.add_job(run_app, trigger='interval',
+                          minutes=config.schedule, name='vfo')
     return redirect(url_for('routes.index'))
 
 
