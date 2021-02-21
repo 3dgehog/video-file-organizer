@@ -55,6 +55,10 @@ class App:
                         [self.config, self.rulebook.rulebook_registry])
 
                 for vfile in input_folder.videofilelist:
+
+                    if not vfile.valid:
+                        continue
+
                     for operation in operations:
                         with operation:
 

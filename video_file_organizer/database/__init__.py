@@ -6,7 +6,8 @@ DEFAULT_FILENAME = 'database.sqlite'
 
 engine = create_engine(f'sqlite:///{DEFAULT_FILENAME}')
 
-db_session = scoped_session(sessionmaker(
-    bind=engine, autocommit=False, autoflush=False))
+Session = scoped_session(sessionmaker(
+    bind=engine, autocommit=False, autoflush=False
+))
 
 Base = declarative_base()

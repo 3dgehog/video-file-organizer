@@ -1,4 +1,4 @@
-from . import Base, db_session, engine
+from . import Base, Session, engine
 from .models import UnsuccessfulFile, SuccessfulFile
 
 
@@ -7,27 +7,32 @@ def init_db():
 
 
 def unsuccessful_vfile_exists(name: str, hash: str):
-    exists = db_session.query(UnsuccessfulFile).filter_by(
+    session = Session()
+    exists = session.query(UnsuccessfulFile).filter_by(
         filename=name, hash=hash).first() is not None
-    db_session.close()
+    Session.remove()
     return exists
 
 
 def add_unsuccessful_vfile(name: str, hash: str, error: str):
     if not unsuccessful_vfile_exists(name, hash):
         new_file = UnsuccessfulFile(filename=name, hash=hash, error=error)
-        db_session.add(new_file)
-        db_session.commit()
-        db_session.close()
+        session = Session()
+        session.add(new_file)
+        session.commit()
+        Session.remove()
 
 
 def add_successful_vfile(name: str, hash: str, transfer: str):
     new_file = SuccessfulFile(filename=name, hash=hash, transfer=transfer)
-    db_session.add(new_file)
-    db_session.commit()
-    db_session.close()
+    session = Session()
+    session.add(new_file)
+    session.commit()
+    Session.remove()
 
 
 def get_unsuccessful_vfiles():
-    response = db_session.query(UnsuccessfulFile).all()
+    session = Session()
+    response = session.query(UnsuccessfulFile).all()
+    Session.remove()
     return response

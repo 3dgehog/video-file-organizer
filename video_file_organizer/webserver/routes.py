@@ -3,7 +3,7 @@ import json
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from video_file_organizer.__main__ import run_app
+from video_file_organizer.__main__ import run_app, main
 from video_file_organizer.config.config import Config
 from video_file_organizer.database import utils as db_utils
 
@@ -14,7 +14,7 @@ scheduler.start()
 config = Config([])
 
 scheduler.add_job(
-    run_app, trigger='interval', minutes=config.schedule, name='vfo')
+    main, trigger='interval', minutes=config.schedule, name='vfo')
 
 routes = Blueprint("routes", __name__)
 
@@ -37,7 +37,7 @@ def toggle_scheduler():
     if len(scheduler.get_jobs()) > 0:
         scheduler.remove_all_jobs()
     else:
-        scheduler.add_job(run_app, trigger='interval',
+        scheduler.add_job(main, trigger='interval',
                           minutes=config.schedule, name='vfo')
     return redirect(url_for('routes.index'))
 

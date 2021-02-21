@@ -16,7 +16,7 @@ class GuessItMatcher(Observee):
 
     def __call__(self, vfile: VideoFileEntry):
 
-        results = dict(guessit.guessit(vfile.name))
+        results = self._get_match(vfile.name)
 
         if 'title' not in results:
             vfile.error(f"Unable to find title for: '{vfile.name}'")
@@ -27,6 +27,9 @@ class GuessItMatcher(Observee):
             return
 
         vfile.update(metadata=results)
+
+    def _get_match(self, filename):
+        return dict(guessit.guessit(filename))
 
 
 class RuleBookMatcher(Observee):
@@ -88,11 +91,7 @@ class OutputFolderMatcher(Observee):
         self.output_folder = output_folder
 
     def __call__(self, vfile: VideoFileEntry):
-        index_match = difflib.get_close_matches(
-            vfile.metadata['title'],
-            self.output_folder.list_entries_by_name(),
-            n=1, cutoff=0.6
-        )
+        index_match = self._get_match(vfile.metadata['title'])
 
         if not index_match:
             vfile.error(f"Unable to find a match for {vfile.name}")
@@ -104,4 +103,11 @@ class OutputFolderMatcher(Observee):
             foldermatch=self.output_folder.get_entry_by_name(
                 str(index_match[0])
             )
+        )
+
+    def _get_match(self, title):
+        return difflib.get_close_matches(
+            title,
+            self.output_folder.list_entries_by_name(),
+            n=1, cutoff=0.6
         )

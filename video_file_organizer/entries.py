@@ -11,7 +11,8 @@ logger = logging.getLogger('vfo.entries')
 
 
 class ListOfEntries(metaclass=abc.ABCMeta):
-    _entries: list = []
+    def __init__(self):
+        self._entries: list = []
 
     @property
     def entries(self) -> list:
@@ -84,6 +85,7 @@ class InputDirectory(ListOfEntries):
         ignore: list = [],
         whitelist: list = [],
     ):
+        super().__init__()
         self.path = path
         self.videoextensions = videoextensions
         self.depth = 0
@@ -130,6 +132,7 @@ class InputDirectory(ListOfEntries):
 
 class OutputDirectories(ListOfEntries):
     def __init__(self, paths: list, videoextensions: list = []):
+        super().__init__()
         self.paths = paths
         self.depth = 0
         self.videoextensions = videoextensions
@@ -163,6 +166,7 @@ class DirectoryEntry(ListOfEntries):
         depth: int,
         videoextensions: list
     ):
+        super().__init__()
         self.name = name
         self.path = path
         self.depth = depth
