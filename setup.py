@@ -49,7 +49,7 @@ setup(
         "pyparsing==2.4.7; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'",
         "python-dateutil==2.8.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
         "pytz==2020.1",
-        "pyyaml==5.3.1",
+        "pyyaml==5.4",
         "rebulk==2.0.1",
         "regex==2020.7.14",
         "requests==2.24.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'",
