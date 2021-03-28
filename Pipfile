@@ -10,6 +10,7 @@ pytest = "*"
 mypy = "*"
 pipenv-setup = "*"
 rope = "*"
+video-file-organizer = {editable = true, path = "."}
 
 [packages]
 pyaml = "*"
