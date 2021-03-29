@@ -2,9 +2,9 @@ FROM python:3.6
 
 COPY . /app
 
-WORKDIR /config
+COPY supervisord.conf /etc/supervisord.conf 
 
-RUN apt install redis
+WORKDIR /config
 
 RUN mkdir -p /dirs
 
@@ -12,4 +12,4 @@ RUN pip install /app
 
 EXPOSE 5000
 
-CMD ["/usr/bin/supervisord"]
+CMD ["/usr/local/bin/supervisord"]
