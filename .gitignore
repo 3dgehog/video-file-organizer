@@ -4,7 +4,7 @@ __pycache__
 *.pyc
 *.log
 dir_list_tree.txt
-Video_File_Organizer.egg-info
+video_file_organizer.egg-info
 mock
 ignore
 systemd

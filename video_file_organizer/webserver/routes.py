@@ -1,27 +1,30 @@
 from flask import Blueprint, request, render_template, redirect, url_for
 import json
+import time
+import rpyc
+import sys
 
-from apscheduler.schedulers.background import BackgroundScheduler
-
-from video_file_organizer.__main__ import run_app, main
+from video_file_organizer.__main__ import run_app
 from video_file_organizer.config.config import Config
 from video_file_organizer.database import utils as db_utils
 
-
-scheduler = BackgroundScheduler()
-scheduler.start()
-
+while True:
+    try:
+        conn = rpyc.connect('localhost', 2324)
+        break
+    except ConnectionRefusedError:
+        time.sleep(5)
+    except Exception:
+        print("Unexpected error:", sys.exc_info()[0])
+        raise
 config = Config([])
-
-scheduler.add_job(
-    main, trigger='interval', minutes=config.schedule, name='vfo')
 
 routes = Blueprint("routes", __name__)
 
 
 @routes.route('/', methods=['GET'])
 def index():
-    worker_info = [str(x) for x in scheduler.get_jobs()]
+    worker_info = [str(x) for x in conn.root.get_jobs()]
     if len(worker_info) == 0:
         worker_info = None
     unsuccessful_files = db_utils.get_unsuccessful_vfiles()
@@ -34,17 +37,18 @@ def index():
 
 @routes.route('/toggle_scheduler', methods=['GET'])
 def toggle_scheduler():
-    if len(scheduler.get_jobs()) > 0:
-        scheduler.remove_all_jobs()
+    if len(conn.root.get_jobs()) > 0:
+        conn.root.remove_all_jobs()
     else:
-        scheduler.add_job(main, trigger='interval',
+        conn.root.add_job('video_file_organizer.__main__:run_app',
+                          trigger='interval',
                           minutes=config.schedule, name='vfo')
     return redirect(url_for('routes.index'))
 
 
 @routes.route('/view_jobs', methods=['GET'])
 def view_jobs():
-    return json.dumps([str(x) for x in scheduler.get_jobs()])
+    return json.dumps([str(x) for x in conn.root.get_jobs()])
 
 
 @routes.route('/add_file', methods=['POST'])

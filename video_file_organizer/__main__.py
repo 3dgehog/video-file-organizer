@@ -3,10 +3,12 @@ import os
 import argparse
 import sys
 
-from apscheduler.schedulers.blocking import BlockingScheduler
+# import rpyc
+# from rpyc.utils.server import ThreadedServer
+# from apscheduler.schedulers.blocking import BlockingScheduler
+# from apscheduler.schedulers.background import BackgroundScheduler
 
 from video_file_organizer.app import App
-
 
 logger = logging.getLogger('vfo')
 
@@ -32,6 +34,9 @@ def parse_args(args):
     # ToolKit
     parser.add_argument('--create-config', action='store_true')
     parser.add_argument('--scheduler', action='store_true')
+    parser.add_argument('--rpyc-host', action='store', default='localhost')
+    parser.add_argument('--rpyc-port', action='store', default='2324',
+                        type=int)
     return parser.parse_args(args)
 
 
@@ -52,9 +57,9 @@ def setup_logging(args):
         ch.setLevel(logging.INFO)
 
     file_format = logging.Formatter(
-        '%(asctime)s - %(levelname)s:%(message)s')
+        '%(asctime)s %(levelname)s %(message)s')
     console_format = logging.Formatter(
-        '%(message)s')
+        '%(asctime)s %(levelname)s %(message)s')
 
     ch.setFormatter(console_format)
     fh.setFormatter(file_format)
@@ -74,25 +79,35 @@ def toolkit(args):
         sys.exit(0)
 
     if args.scheduler:
+        from video_file_organizer import rpyc
+        from video_file_organizer.scheduler import scheduler
         from video_file_organizer.config import Config
         # logging.basicConfig()
         # logging.getLogger('apscheduler').setLevel(logging.DEBUG)
-        scheduler = BlockingScheduler()
         config = Config(args)
+
         scheduler.add_job(
             run_app,
             'interval',
             minutes=config.schedule,
-            args={'args': args})
+            args={'args': args},
+            name='vfo')
         logger.info(
-            f"Scheduler Started! Running every {config.schedule} minutes")
+            f"Scheduler Started! Running every {config.schedule} minute(s)")
         scheduler.start()
+
+        try:
+            logger.info("RPYC Server running")
+            rpyc.server.start()
+        except (KeyboardInterrupt, SystemExit):
+            pass
+        finally:
+            scheduler.shutdown()
+
         sys.exit(0)
 
 
 def main():
-    args = parse_args(sys.argv[1:])
-
     setup_logging(args)
     toolkit(args)
     run_app(args)
@@ -102,6 +117,8 @@ def run_app(args=None, **kwargs):
     app = App()
     app.setup(args).run(**kwargs)
 
+
+args = parse_args(sys.argv[1:])
 
 if __name__ == "__main__":
     main()

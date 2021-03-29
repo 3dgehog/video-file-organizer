@@ -87,7 +87,7 @@ def setup_mock():
     config_injector.update({
         "input_dir": input_folder_path,
         "series_dirs": [series_dir_path, anime_dir_path],
-        "schedule": 15
+        "schedule": 1
     })
 
 

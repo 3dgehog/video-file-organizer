@@ -21,15 +21,18 @@ uwsgi = "*"
 filelock = "*"
 apscheduler = "*"
 sqlalchemy = "*"
+supervisor = "*"
+rpyc = "*"
 
 [scripts]
 tests = "pytest tests"
 type = "mypy video_file_organizer"
 mock = "python toolbox.py --mock"
-web = "python -m video_file_organizer.webserver"
-_uwsgi = "uwsgi --ini webserver.ini"
-scheduler = "python -m video_file_organizer --scheduler"
-vfo_on_mock = "env CONFIG_FILE='mock/configs/config.yaml' RULE_BOOK_FILE='mock/configs/rule_book.ini' python -m video_file_organizer"
+_web = "python -m video_file_organizer.webserver"
+_uwsgi = "env CONFIG_FILE='mock/configs/config.yaml' RULE_BOOK_FILE='mock/configs/rule_book.ini' uwsgi --ini webserver.ini"
+_scheduler = "env CONFIG_FILE='mock/configs/config.yaml' RULE_BOOK_FILE='mock/configs/rule_book.ini' python -m video_file_organizer --scheduler"
+_supervisor = "supervisord -c supervisord-dev.conf"
+_vfo_on_mock = "env CONFIG_FILE='mock/configs/config.yaml' RULE_BOOK_FILE='mock/configs/rule_book.ini' python -m video_file_organizer"
 setup = "pipenv-setup sync"
 
 [requires]
