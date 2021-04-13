@@ -1,22 +1,12 @@
-from flask import Blueprint, request, render_template, redirect, url_for
+from flask import Blueprint, render_template, redirect, url_for
 import json
-import time
-import rpyc
-import sys
 
-from video_file_organizer.__main__ import run_app
 from video_file_organizer.config.config import Config
 from video_file_organizer.database import utils as db_utils
+from video_file_organizer.webserver.rpyc_client import RPYCClient
 
-while True:
-    try:
-        conn = rpyc.connect('localhost', 2324)
-        break
-    except ConnectionRefusedError:
-        time.sleep(5)
-    except Exception:
-        print("Unexpected error:", sys.exc_info()[0])
-        raise
+rpyc_client = RPYCClient()
+conn = None
 config = Config([])
 
 routes = Blueprint("routes", __name__)
@@ -24,6 +14,9 @@ routes = Blueprint("routes", __name__)
 
 @routes.route('/', methods=['GET'])
 def index():
+    global conn
+    if not conn:
+        conn = rpyc_client.conn
     worker_info = [str(x) for x in conn.root.get_jobs()]
     if len(worker_info) == 0:
         worker_info = None
@@ -37,10 +30,13 @@ def index():
 
 @routes.route('/toggle_scheduler', methods=['GET'])
 def toggle_scheduler():
+    global conn
+    if not conn:
+        conn = rpyc_client.conn
     if len(conn.root.get_jobs()) > 0:
         conn.root.remove_all_jobs()
     else:
-        conn.root.add_job('video_file_organizer.__main__:run_app',
+        conn.root.add_job('video_file_organizer.manager:manager.start',
                           trigger='interval',
                           minutes=config.schedule, name='vfo')
     return redirect(url_for('routes.index'))
@@ -48,32 +44,7 @@ def toggle_scheduler():
 
 @routes.route('/view_jobs', methods=['GET'])
 def view_jobs():
+    global conn
+    if not conn:
+        conn = rpyc_client.conn
     return json.dumps([str(x) for x in conn.root.get_jobs()])
-
-
-@routes.route('/add_file', methods=['POST'])
-def add_file():
-
-    data = request.get_json()
-
-    if data is None:
-        return {
-            "error": "Make sure your request is in json format or has the \
-                correct header for content type 'application/json'"
-        }
-
-    if 'filename' not in data:
-        return {
-            "error": "filename is required"
-        }
-
-    run_app(whitelist=data['filename'])
-
-    return data
-
-
-@routes.route('/now', methods=['GET'])
-def now():
-    run_app()
-
-    return "Success"

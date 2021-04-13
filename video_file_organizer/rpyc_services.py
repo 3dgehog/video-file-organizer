@@ -3,13 +3,9 @@ import logging
 
 from rpyc.utils.server import ThreadedServer
 
-
-from video_file_organizer.config import Config
 from video_file_organizer.scheduler import scheduler
-from video_file_organizer.__main__ import args
 
-logger = logging.getLogger('vfo.rpyc')
-config = Config(args)
+logger = logging.getLogger('vfo.rpyc srv')
 
 
 class SchedulerService(rpyc.Service):
@@ -49,6 +45,6 @@ class SchedulerService(rpyc.Service):
 protocol_config = {'allow_public_attrs': True}
 
 server = ThreadedServer(
-    SchedulerService, hostname=args.rpyc_host,
-    port=int(args.rpyc_port),
+    SchedulerService, hostname='0.0.0.0',
+    port=2324,
     protocol_config=protocol_config)

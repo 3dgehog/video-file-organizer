@@ -27,3 +27,8 @@ Switch to tasks system instead of using transfer attribute
 Pass Entry's not Vfiles
 Finished webserver flow
 Dockerfile
+
+### v4
+Update plugins to use events to register them
+Move everything onto one config file
+Webserver in thread, not seperated service

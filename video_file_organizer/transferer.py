@@ -7,7 +7,7 @@ from video_file_organizer.entries import VideoFileEntry
 from video_file_organizer.utils import Observee
 from video_file_organizer.database.utils import add_successful_vfile
 
-logger = logging.getLogger('vfo.transferer')
+logger = logging.getLogger('vfo.transfer')
 
 
 class Transferer(Observee):

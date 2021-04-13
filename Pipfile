@@ -21,8 +21,9 @@ uwsgi = "*"
 filelock = "*"
 apscheduler = "*"
 sqlalchemy = "*"
-supervisor = "*"
 rpyc = "*"
+cherrypy = "*"
+cheroot = "*"
 
 [scripts]
 tests = "pytest tests"

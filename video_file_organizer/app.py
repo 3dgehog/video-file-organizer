@@ -14,13 +14,18 @@ from .database.utils import init_db
 logger = logging.getLogger('vfo.app')
 
 
+def run_app(args=None, **kwargs):
+    app = App()
+    app.setup(args).run(**kwargs)
+
+
 class App:
-    def setup(self, args=None) -> None:
+    def setup(self, args=None, config=None, rulebook=None) -> None:
 
         logger.debug("Setting up app")
 
-        self.config = Config(args)
-        self.rulebook = RuleBook(args)
+        self.config = config or Config(args)
+        self.rulebook = rulebook or RuleBook(args)
 
         self.lock = FileLock(
             os.path.join(self.config.input_dir, '.vfo.lock'),

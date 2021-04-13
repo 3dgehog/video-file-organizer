@@ -13,7 +13,7 @@ from .vars import CONFIG_FILE_TEMPLATE
 from video_file_organizer.entries import VideoFileEntry
 from video_file_organizer.utils import Observer
 
-logger = logging.getLogger('vfo.config.config')
+logger = logging.getLogger('vfo.config')
 
 
 class Config(Observer, ConfigBase):

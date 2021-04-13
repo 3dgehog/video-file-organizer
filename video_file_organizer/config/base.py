@@ -14,7 +14,7 @@ class ConfigBase(metaclass=abc.ABCMeta):
         return args
 
     def load_env(self, env, **kwargs) -> list:
-        return [env]
+        return env.split(':')
 
     @abc.abstractmethod
     def load_file(self, path: str, **kwargs) -> dict:
