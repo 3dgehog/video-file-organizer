@@ -23,7 +23,7 @@ setup(
         "black==19.10b0; python_version >= '3.6'",
         "cached-property==1.5.1",
         "cerberus==1.3.2",
-        "certifi==2020.6.20",
+        "certifi==2022.12.7",
         "chardet==3.0.4",
         "click==7.1.2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'",
         "colorama==0.4.3; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'",
